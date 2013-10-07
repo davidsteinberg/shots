@@ -11,6 +11,8 @@ Adding Shots to a Flask app is super simple.
 4. In app.py, instead of calling render_template(...), instantiate a Shot and .render() it
 5. Run your app
 
+Check out [the docs](http://flaskshots.herokuapp.com/docs) for language details.
+
 Here is one of the smallest Shots you can have:
 
 ###index.html
@@ -36,5 +38,12 @@ if __name__ == '__main__':
 	app.run()
 ```
 
-Check out [the docs](http://flaskshots.herokuapp.com/docs) for more details.
+##Look under the hood
 
+To see the template made before render_template() is called on it, run:
+
+```bash
+python shots.py {{ file name relative to templates/ }} [-d]
+```
+
+Passing the -d or --debug flags will let you see the consumption cource of the parser.
