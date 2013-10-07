@@ -1,7 +1,7 @@
 Shots
 =====
 
-Shots is a templating language for Flask (and Python/Jinja in general) that strives for simplicity and speed.
+Shots is a templating language for Flask that strives for simplicity and speed.
 
 Adding Shots to a Flask app is super simple.
 
