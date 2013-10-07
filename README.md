@@ -38,7 +38,7 @@ if __name__ == '__main__':
 	app.run()
 ```
 
-##Look under the hood
+###Look under the hood
 
 To see the template made before render_template is called on it, run:
 
@@ -46,4 +46,4 @@ To see the template made before render_template is called on it, run:
 python shots.py {{ file name relative to templates/ }} [-d]
 ```
 
-Passing the -d or --debug flags will let you see the consumption cource of the parser.
+Passing the -d or --debug flags will let you see the consumption course of the parser.
