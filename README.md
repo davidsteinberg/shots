@@ -11,7 +11,7 @@ Adding Shots to a Flask app is super simple.
 4. In app.py, instead of calling render_template(...), instantiate a Shot and .render() it
 5. Run your app
 
-Here is about the smallest Shot you can have:
+Here is one of the smallest Shots you can have:
 
 ###index.html
 
