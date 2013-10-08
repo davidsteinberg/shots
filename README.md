@@ -18,8 +18,8 @@ Here is one of the smallest Shots you can have:
 ###index.html
 
 ```html
-head : title : 'My First Shot'
-body : 'This is my first Shot'
+head : title : 'A Little Shot'
+body : 'This is a little Shot'
 ```
 
 ###app.py
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 To see the template made before render_template is called on it, run:
 
 ```bash
-python shots.py {{ file name relative to templates/ }} [-d]
+python shots.py {{ filename relative to templates/ }} [-d]
 ```
 
 Passing the -d or --debug flags will let you see the consumption course of the parser.
