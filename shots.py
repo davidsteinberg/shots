@@ -52,14 +52,19 @@ class ElementAttribute:
 		return result
 
 class TextNode:
-	def __init__(self, text):
+	def __init__(self, text, depth=0):
 		self.text = text
+		self.depth = depth
 	
 	def __str__(self):
-		return self.text
+		result = ""
+		for d in range(self.depth):
+			result += "\t"
+		result += self.text
+		return result
 
 class PageElement:
-	def __init__(self, tag=None, parent=None, id=None, selfClosing=False):
+	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=False):
 		self.id = id
 		self.tag = tag
 		self.classes = []
@@ -67,6 +72,9 @@ class PageElement:
 		self.parent = parent
 		self.children = []
 		self.selfClosing = selfClosing
+		
+		self.depth = depth
+		self.multiline = multiline
 		
 		self.makingAnID = False
 		self.lookingForAttributes = False
@@ -80,8 +88,13 @@ class PageElement:
 		self.willBeMakingLiteralTextBlock = False
 		self.makingSrcOrHref = False
 
+		self.finished = False
+
 	def __str__(self):
-		result = "<" + self.tag
+		result = ""
+		for d in range(self.depth):
+			result += "\t"
+		result += "<" + self.tag
 		if self.id:
 			result += " id=\"" + self.id + "\""
 		if len(self.classes) > 0:
@@ -91,15 +104,17 @@ class PageElement:
 				result += " " + str(a)
 		result += ">"
 		if not self.selfClosing:
-			if len(self.children) > 0:
+			if self.multiline:
 				for c in self.children:
-					if isinstance(c,TextNode):
-						result += str(c)
-					else:
-						result += "\n"
-						result += str(c)
+					result += "\n"
+					result += str(c)
+				result += "\n"
+				for d in range(self.depth):
+					result += "\t"
+			else:
+				for c in self.children:
+					result += str(c)
 			result += "</" + self.tag + ">"
-		result += "\n"
 		return result
 
 #-------------------------
@@ -111,13 +126,17 @@ class Shot:
 		self.fileName = fileName
 		self.currentPosInCode = 0
 
+		self.currentLineNum = 0
+		self.currentCharNum = 0
+		self.currentLineDepth = 0
+		self.findingCurrentLineDepth = False
+
 		self.lastChar = " "
 		self.currentToken = []
 		self.currentTokenType = ""
 		self.prevTokenType = ""
 		
 		self.delimiters = {
-			"block" : ["`"],
 			"line" : [":"],
 			"class" : ["."],
 			"id" : ["#"],
@@ -130,12 +149,12 @@ class Shot:
 		
 		self.selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 		
-		self.currentNode = self.rootNode = PageElement(tag="document")
+		self.currentNode = self.rootNode = PageElement(tag="document",depth=-1,multiline=True)
 		
 		self.__EOF__ = "@ EOF @"
 
 		f = open("templates/"+fileName,"r")
-		self.code = f.read() + "\n"
+		self.code = re.sub(r"\n\s*\n", "\n", f.read()) + "\n"
 		self.codeLen = len(self.code)		
 		f.close()
 		
@@ -146,13 +165,14 @@ class Shot:
 		genFile.close()
 
 	def parseError(self,string):
-		exit("Parse Error at char " + str(self.currentPosInCode) + ": " + string)
+		exit("Parse Error on line " + str(self.currentLineNum) + ", char " + str(self.currentCharNum) + " : " + string)
 
 	def getChar(self):
 		if self.currentPosInCode >= self.codeLen:
 			return self.__EOF__
 		c = self.code[self.currentPosInCode]
 		self.currentPosInCode += 1
+		self.currentCharNum += 1
 		return c
 
 	def makeDirective(self):
@@ -188,7 +208,7 @@ class Shot:
 			self.getNextToken()
 		
 		directive.append(" %}\n")
-		self.currentNode.children.append(TextNode("".join(directive)))
+		self.currentNode.children.append(TextNode("".join(directive),depth=self.currentLineDepth))
 		
 		self.currentNode.addingDirective = False
 		logFinishedCreation("directive")
@@ -223,14 +243,20 @@ class Shot:
 
 	def makeElementWithID(self,id):
 		logCreation("id "+id)
-		newNode = PageElement(id=id,parent=self.currentNode)
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentLineDepth			
+		newNode = PageElement(id=id,parent=self.currentNode,depth=futureDepth)
 		self.currentNode.children.append(newNode)
 		self.currentNode = newNode
 		self.currentNode.elementHasID = True
 		logFinishedCreation("id "+id)
 
 	def makeBreakElement(self):
-		newNode = PageElement(tag="br",parent=self.currentNode)
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentLineDepth
+		newNode = PageElement(tag="br",parent=self.currentNode,depth=futureDepth)
 		self.currentNode.children.append(newNode)
 		self.currentNode = newNode
 	
@@ -240,7 +266,7 @@ class Shot:
 	
 		if self.currentTokenType == "digit":
 			for i in range(int(self.currentToken)-1):
-				self.currentNode.parent.children.append(PageElement(tag="br",parent=self.currentNode,selfClosing=True))
+				self.currentNode.parent.children.append(PageElement(tag="br",parent=self.currentNode,selfClosing=True,depth=futureDepth))
 			self.getNextToken()
 			if self.currentTokenType == "newline" or self.currentToken == self.__EOF__:
 				self.currentToken = "1"
@@ -250,24 +276,34 @@ class Shot:
 		return
 	
 	def makeBlockComment(self):
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentLineDepth
+		newNode = PageElement(tag="command",parent=self.currentNode,depth=futureDepth)
+		self.currentNode = newNode
+		
 		self.currentNode.makingStyleOrScript = True
 
-		commentBody = ["<!-- "]
+		commentBody = ["<!--\n"]
 
 		self.getNextToken()
-		while self.currentTokenType != "block":	
-			commentBody.append(self.currentToken)
+		while not self.currentNode.finished:
 			self.getNextToken()
+			if self.currentNode.finished:
+				break
+			else:
+				commentBody.append(self.currentToken)
 		
-		self.getNextToken() # gobble the slash
+		self.currentNode = self.currentNode.parent
 		
-		commentBody.append(" -->\n")
-		self.currentNode.children.append(TextNode("".join(commentBody)))
-		
-		self.currentNode.makingStyleOrScript = False
+		commentBody.append(" -->")
+		self.currentNode.children.append(TextNode("".join(commentBody),depth=self.currentLineDepth))
 	
 	def makeStyleElement(self):
-		newNode = PageElement(tag="style",parent=self.currentNode)
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentLineDepth
+		newNode = PageElement(tag="style",parent=self.currentNode,depth=futureDepth)
 		self.currentNode.children.append(newNode)
 		self.currentNode = newNode
 		
@@ -280,12 +316,14 @@ class Shot:
 		if self.currentTokenType == "newline":
 			self.currentNode.lookingForAttributes = False
 			self.currentNode.makingStyleOrScript = True
+			self.currentNode.multiline = True
 			
-			while self.currentTokenType != "block":
+			while not self.currentNode.finished:
 				self.getNextToken()
-				styleBody.append(self.currentToken)
-			
-			self.getNextToken() # gobble the slash
+				if self.currentNode.finished:
+					break
+				else:
+					styleBody.append(self.currentToken)
 		
 		# inline
 		elif self.currentTokenType == "line":
@@ -313,11 +351,19 @@ class Shot:
 					a.name = "href"
 		
 		if len(styleBody) > 0:
-			self.currentNode.children.append(TextNode(text="\n"+"".join(styleBody[:-1])))
-		self.currentNode = self.currentNode.parent
+			self.currentNode.children.append(TextNode(text="\n"+"".join(styleBody[:-1]),depth=self.currentLineDepth))
+		if self.currentNode.finished:
+			while self.currentLineDepth <= self.currentNode.depth:
+				self.currentNode = self.currentNode.parent
+		else:
+			self.currentNode = self.currentNode.parent
+
 	
 	def makeScriptElement(self):
-		newNode = PageElement(tag="script",parent=self.currentNode)
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentLineDepth
+		newNode = PageElement(tag="script",parent=self.currentNode,depth=futureDepth)
 		self.currentNode.children.append(newNode)
 		self.currentNode = newNode
 		
@@ -331,12 +377,14 @@ class Shot:
 		if self.currentTokenType == "newline":
 			self.currentNode.lookingForAttributes = False
 			self.currentNode.makingStyleOrScript = True
+			self.currentNode.multiline = True
 			
-			while self.currentTokenType != "block":
+			while not self.currentNode.finished:
 				self.getNextToken()
-				scriptBody.append(self.currentToken)
-			
-			self.getNextToken() # gobble the slash
+				if self.currentNode.finished:
+					break
+				else:
+					scriptBody.append(self.currentToken)
 		
 		# inline
 		elif self.currentTokenType == "line":
@@ -353,8 +401,12 @@ class Shot:
 				self.getNextToken()
 		
 		if len(scriptBody) > 0:
-			self.currentNode.children.append(TextNode(text="\n"+"".join(scriptBody[:-1])))
-		self.currentNode = self.currentNode.parent
+			self.currentNode.children.append(TextNode(text="\n"+"".join(scriptBody[:-1]),depth=self.currentLineDepth))
+		if self.currentNode.finished:
+			while self.currentLineDepth <= self.currentNode.depth:
+				self.currentNode = self.currentNode.parent
+		else:
+			self.currentNode = self.currentNode.parent
 		
 	def makeElementWithTag(self,tag):
 		logCreation(tag)
@@ -374,7 +426,10 @@ class Shot:
 			if self.currentNode.elementHasID:
 				self.currentNode.tag = tag
 			else:
-				newNode = PageElement(tag=tag,parent=self.currentNode)
+				futureDepth = 0
+				if self.currentNode.multiline:
+					futureDepth = self.currentLineDepth
+				newNode = PageElement(tag=tag,parent=self.currentNode,depth=futureDepth)
 				self.currentNode.children.append(newNode)
 				self.currentNode = newNode
 
@@ -393,8 +448,10 @@ class Shot:
 			self.currentNode.addingClasses = False
 			self.currentNode.lookingForAttributes = True
 
+			self.currentNode.multiline = True
 			while self.currentTokenType != "newline":
 				if self.currentTokenType == "line":
+					self.currentNode.multiline = False
 					self.currentNode.lookingForAttributes = False
 					self.currentNode.definingInnerHTML = True
 
@@ -409,20 +466,26 @@ class Shot:
 				self.currentNode.lookingForAttributes = False
 
 				logCreation("literal text block")
-				if self.currentNode.definingInnerHTML:
-					stopper = "newline"
-				else:
-					stopper = "block"
-			
+				
 				elemBody = []
 				self.getNextToken()
-				while self.currentTokenType != stopper:
-					elemBody.append(self.currentToken)
-					self.getNextToken()
+				
+				if self.currentNode.definingInnerHTML:
+					while self.currentTokenType != "newline":
+						elemBody.append(self.currentToken)
+						self.getNextToken()					
+				else: # block
+					while not self.currentNode.finished:
+						elemBody.append(self.currentToken)
+						self.getNextToken()
 
 				self.currentNode.children.append(TextNode(''.join(elemBody).strip()))
 				
-				self.currentNode = self.currentNode.parent
+				if self.currentNode.finished:
+					while self.currentLineDepth <= self.currentNode.depth:
+						self.currentNode = self.currentNode.parent
+				else:
+					self.currentNode = self.currentNode.parent
 				
 				logFinishedCreation("literal text block")
 				logFinishedCreation(tag)
@@ -431,17 +494,15 @@ class Shot:
 
 			self.currentNode.lookingForAttributes = False
 			if not self.currentNode.definingInnerHTML and not self.currentNode.selfClosing:
+				self.currentNode.multiline = True
 				self.currentNode.definingInnerHTML = True
-				while self.currentTokenType != "block":
+				
+				while self.currentTokenType != self.__EOF__ and self.currentNode.definingInnerHTML:
 					self.getNextToken()
-				self.getNextToken()
-			
-			self.currentNode.definingInnerHTML = False
-			self.currentNode.lookingForAttributes = False
-			
-			self.currentNode = self.currentNode.parent
 
-		logFinishedCreation(tag)
+			else:
+				self.currentNode = self.currentNode.parent
+				logFinishedCreation(tag)
 	
 	#-------------------------
 	# Get Token
@@ -453,20 +514,39 @@ class Shot:
 
 		# gobble up spaces and tabs, but NOT newlines
 		while self.lastChar == " " or self.lastChar == "\t":
+			if self.findingCurrentLineDepth:
+				self.currentLineDepth += 1
 			prevChar = self.lastChar
 			self.lastChar = self.getChar()
 			if self.currentNode.makingStyleOrScript or self.currentNode.addingDirective or self.currentNode.makingLiteralTextBlock:
 				return prevChar
 		
 		# newline
-		if self.lastChar == "\n":		
+		if self.lastChar == "\n":
 			logDigestion("newline")
 			self.currentTokenType = "newline"
+
+			self.currentLineNum += 1
+			self.currentCharNum = 0
+			self.currentLineDepth = 0
+			self.findingCurrentLineDepth = True
+
 			self.lastChar = self.getChar()
 			return "\n"
 		
+		# ending a block
+		if self.findingCurrentLineDepth:
+			self.findingCurrentLineDepth = False
+			while self.currentLineDepth <= self.currentNode.depth:
+				logFinishedCreation(self.currentNode.tag)
+				if self.currentNode.makingStyleOrScript or self.currentNode.makingLiteralTextBlock:
+					self.currentNode.finished = True
+					return
+				else :
+					self.currentNode = self.currentNode.parent
+		
 		# alpha
-		elif self.lastChar.isalpha() or self.lastChar == '_':
+		if self.lastChar.isalpha() or self.lastChar == '_':
 			logDigestion("alpha")
 			self.currentTokenType = "alpha"
 
@@ -617,27 +697,18 @@ class Shot:
 			elif self.currentNode.makingStyleOrScript or self.currentNode.addingDirective or self.currentNode.makingLiteralTextBlock:
 				return quoteChar + quote + quoteChar
 			elif self.currentNode.definingInnerHTML:
-				newNode = TextNode(quote)
-				self.currentNode.children.append(newNode)
+				if self.currentNode.multiline:
+					self.currentNode.children.append(TextNode(quote,depth=self.currentLineDepth))
+				else:
+					self.currentNode.children.append(TextNode(quote))
 			elif self.currentNode.addingClasses:
 				printTier("will make literal text block")
 				self.currentNode.willBeMakingLiteralTextBlock = True
 			else:
-				newNode = TextNode(quote)
+				newNode = TextNode(quote,depth=self.currentLineDepth)
 				self.currentNode.children.append(newNode)
 
 		# adjustable symbols
-		
-		elif self.lastChar in self.delimiters["block"]:
-
-			# if making style or script
-			# check if its escaped
-			
-			logDigestion("block")
-			self.currentTokenType = "block"
-			result = self.lastChar
-			self.lastChar = self.getChar()
-			return result
 		
 		elif self.lastChar in self.delimiters["line"]:
 
@@ -710,7 +781,7 @@ class Shot:
 				self.lastChar = self.getChar()
 			
 			comment.append(" -->\n")
-			self.currentNode.children.append(TextNode("".join(comment)))
+			self.currentNode.children.append(TextNode("".join(comment),depth=self.currentLineDepth))
 			
 			if self.lastChar != self.__EOF__:
 				return self.getToken()
@@ -745,20 +816,20 @@ class Shot:
 				for k in kids:
 					result += str(k)
 			else:
-				if kids[0].tag == "doctype":
+				if not isinstance(kids[0],TextNode) and kids[0].tag == "doctype":
 					kids[0].tag = "!doctype"
 					for k in kids:
 						result += str(k)
 				else:
 					result = "<!doctype html>\n"
-					if kids[0].tag != "html":
-						newNode = PageElement(tag="html")
+					if not isinstance(kids[0],TextNode) and kids[0].tag == "html":
+						for k in kids:
+							result += str(k)
+					else:
+						newNode = PageElement(tag="html",multiline=True)
 						for k in kids:
 							newNode.children.append(k)
 						result += str(newNode)
-					else:
-						for k in kids:
-							result += str(k)
 
 		# last minute regex for template delimiters
 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
