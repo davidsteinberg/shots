@@ -1,3 +1,39 @@
-head : title : "my page"
+head
+	title : "I'm Up Online"
+	meta name="viewport" content="width=device-width, initial-scale=1.0"
+	css src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+	css src="@ static : style.css"
 body
-	div : "my content"
+	#newMemberModal = div.modal.fade
+		div.modal-dialog
+			div.modal-header : h4.modal-title : "Welcome! Please enter a URL for yourself."
+			div.modal-body
+				div.input-group
+					span.input-group-addon : "imuponline.com/"
+					input.form-control.newMember type="text" placeholder="URL"
+			div.modal-footer
+				button.btn.btn-default type="button" data-dismiss="modal" : "Get Down"
+				#newMemberButton = button.btn.btn-info type="button" : "Get Up"
+	div.row
+		div.col-xs-2 :
+		#header = div.col-xs-8 : "I'm Up Online"
+		div.col-xs-2 :
+	div.row
+		div.col-xs-2 :
+		div.col-xs-8
+			div.form-group.bigBlock : #email = input.form-control.input-lg.main type="email" placeholder="Enter email"
+			br
+			div.form-group.bigBlock : #password = input.form-control.input-lg.main type="password" placeholder="Password"
+			br
+			#mainButton = button.btn.btn-info.pull-right: "Get Up"
+		div.col-xs-2 :
+	div.row
+		div.col-xs-2 :
+		#footer = div.col-xs-8
+			blockquote.pull-right
+				p : "I just saved 15% or more on time insurance."
+				small : "You"
+		div.col-xs-2 :
+	js src="//code.jquery.com/jquery.js"
+	js src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"
+	js src="@ static : script.js"

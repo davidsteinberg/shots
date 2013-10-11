@@ -229,7 +229,7 @@ class Shot:
 	def makeAttribute(self,name):
 		logCreation("attribute " + name)
 		newAttr = ElementAttribute(name=name)
-		if name == "href" or name == "src":
+		if name == "href" or name == "src" or "action":
 			self.currentNode.makingSrcOrHref = True
 		self.getNextToken()
 		if self.currentTokenType == "equals":
