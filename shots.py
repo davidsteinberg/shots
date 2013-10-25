@@ -151,6 +151,11 @@ class Shot:
 		
 		self.currentNode = self.rootNode = PageElement(tag="document",depth=-1,multiline=True)
 		
+		self.lookingForHead = True
+		self.fillingHead = True
+		
+		self.tagsForHead = ["base", "css", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
+		
 		self.__EOF__ = "@ EOF @"
 
 		f = open("templates/"+fileName,"r")
@@ -421,7 +426,10 @@ class Shot:
 		
 		elif tag == "comment":
 			self.makeBlockComment()
-		
+
+		elif tag == "include":
+			self.includeFile()
+
 		else:
 			if self.currentNode.elementHasID:
 				self.currentNode.tag = tag
@@ -562,7 +570,7 @@ class Shot:
 			if self.currentNode.makingStyleOrScript or self.currentNode.addingDelimiter or self.currentNode.addingDirective or self.currentNode.makingLiteralTextBlock:
 				return identifier
 	
-			if self.currentNode.makingAnID:
+			elif self.currentNode.makingAnID:
 				self.currentNode.makingAnID = False
 				self.makeElementWithID(identifier)
 	
@@ -591,12 +599,44 @@ class Shot:
 			elif identifier == "custom":
 				self.addDelimiter()
 
+			elif identifier == "replace":
+				self.replaceText()
+
 			else:
 				for delim in self.delimiters:
 					for symbol in self.delimiters[delim]:
 						if identifier == symbol:
 							self.currentTokenType = delim
 							return symbol
+				
+				if self.lookingForHead:
+					if identifier == "head":
+						self.lookingForHead = False
+# 						self.fillingHead = False
+					elif identifier != "doctype" and identifier != "html":
+						headElement = PageElement(tag="head",depth=-1,parent=self.currentNode)
+						self.currentNode.children.append(headElement)
+						self.currentNode = headElement
+					
+						self.lookingForHead = False
+						
+						if identifier not in self.tagsForHead:
+							self.fillingHead = False
+							self.currentNode = self.currentNode.parent
+							if identifier != "body":
+								bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
+								self.currentNode.children.append(bodyElement)
+								self.currentNode = bodyElement
+
+				elif self.fillingHead:
+					if identifier not in self.tagsForHead:
+						self.fillingHead = False
+						if self.currentNode.parent:
+							self.currentNode = self.currentNode.parent
+						if identifier != "body":
+							bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
+							self.currentNode.children.append(bodyElement)
+							self.currentNode = bodyElement
 				
 				self.makeElementWithTag(identifier)
 		
