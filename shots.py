@@ -3,9 +3,8 @@
 #-------------------------
 
 from shutil import copyfile
-from os import remove
-from os import listdir
-from os.path import isfile, join
+from os import remove, listdir, walk, sep
+from os.path import isfile, join, dirname, abspath
 
 from flask import render_template
 
@@ -122,10 +121,11 @@ class PageElement:
 #-------------------------
 
 class Shot:
-	def __init__(self, fileName):
+	def __init__(self, fileName, included=False):
 		self.fileName = fileName
-		self.currentPosInCode = 0
+		self.included = included
 
+		self.currentPosInCode = 0
 		self.currentLineNum = 0
 		self.currentCharNum = 0
 		self.currentLineDepth = 0
@@ -154,7 +154,7 @@ class Shot:
 		self.lookingForHead = True
 		self.fillingHead = True
 		
-		self.tagsForHead = ["base", "css", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
+		self.tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
 		
 		self.__EOF__ = "@ EOF @"
 
@@ -170,7 +170,7 @@ class Shot:
 		genFile.close()
 
 	def parseError(self,string):
-		exit("Parse Error on line " + str(self.currentLineNum) + ", char " + str(self.currentCharNum) + " : " + string)
+		exit("Parse Error on line " + str(self.currentLineNum+1) + ", char " + str(self.currentCharNum+1) + " : " + string)
 
 	def getChar(self):
 		if self.currentPosInCode >= self.codeLen:
@@ -279,6 +279,64 @@ class Shot:
 		self.currentNode = self.currentNode.parent
 
 		return
+	
+	def includeFile(self,fetch=False):
+		fileName = []
+		fileExt = []
+		
+		self.lastChar = self.getChar()
+		while self.lastChar != '\n':
+			if self.lastChar != '"' and self.lastChar != '\'':		
+				fileName.append(self.lastChar)
+				if self.lastChar == '.':
+					del fileExt[:]
+				else:
+					fileExt.append(self.lastChar)
+			self.lastChar = self.getChar()
+		
+		fileNameString = ''.join(fileName).strip()
+		fileExtString = ''.join(fileExt).strip()
+		
+		if fileExtString == "html":
+			s = Shot(fileNameString,included=True)
+			for kid in s.rootNode.children:
+				self.currentNode.children.append(kid)
+		else:
+			if fetch:
+				found = False
+				currentDir = dirname(abspath(__file__))
+				for root, dirs, files in walk(currentDir):
+					if fileNameString in files:
+						found = True
+						fileNameString = root.replace(currentDir, "", 1) + sep + fileNameString
+						break
+				if not found:
+					self.parseError("couldn't fetch file " + fileNameString)
+		
+			fileNameString = '"' + fileNameString + '"'
+		
+			if fileExtString == "css":			
+				newNode = PageElement(tag="link",parent=self.currentNode,selfClosing=True)
+
+				href = ElementAttribute(name="href")
+				href.value = fileNameString
+				newNode.attributes.append(href)
+
+				rel = ElementAttribute(name="rel")
+				rel.value = "\"stylesheet\""
+				newNode.attributes.append(rel)
+
+				self.currentNode.children.append(newNode)
+			elif fileExtString == "js":
+				newNode = PageElement(tag="script",parent=self.currentNode)
+			
+				src = ElementAttribute(name="src")
+				src.value = fileNameString
+				newNode.attributes.append(src)
+			
+				self.currentNode.children.append(newNode)
+			else:
+				self.parseError("couldn't find file extension on included file")
 	
 	def makeBlockComment(self):
 		futureDepth = 0
@@ -429,6 +487,9 @@ class Shot:
 
 		elif tag == "include":
 			self.includeFile()
+			
+		elif tag == "fetch":
+			self.includeFile(fetch=True)
 
 		else:
 			if self.currentNode.elementHasID:
@@ -609,10 +670,13 @@ class Shot:
 							self.currentTokenType = delim
 							return symbol
 				
-				if self.lookingForHead:
+				if self.included:
+					self.lookingForHead = False
+					self.fillingHead = False
+					
+				elif self.lookingForHead:
 					if identifier == "head":
 						self.lookingForHead = False
-# 						self.fillingHead = False
 					elif identifier != "doctype" and identifier != "html":
 						headElement = PageElement(tag="head",depth=-1,parent=self.currentNode)
 						self.currentNode.children.append(headElement)
@@ -625,17 +689,15 @@ class Shot:
 							self.currentNode = self.currentNode.parent
 							if identifier != "body":
 								bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
-								self.currentNode.children.append(bodyElement)
+								self.rootNode.children.append(bodyElement)
 								self.currentNode = bodyElement
 
 				elif self.fillingHead:
 					if identifier not in self.tagsForHead:
 						self.fillingHead = False
-						if self.currentNode.parent:
-							self.currentNode = self.currentNode.parent
 						if identifier != "body":
 							bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
-							self.currentNode.children.append(bodyElement)
+							self.rootNode.children.append(bodyElement)
 							self.currentNode = bodyElement
 				
 				self.makeElementWithTag(identifier)
