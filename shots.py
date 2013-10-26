@@ -160,7 +160,7 @@ class Shot:
 
 		f = open("templates/"+fileName,"r")
 		self.code = re.sub(r"\n\s*\n", "\n", f.read()) + "\n"
-		self.codeLen = len(self.code)		
+		self.codeLen = len(self.code)
 		f.close()
 		
 		self.parseSource()
@@ -279,6 +279,55 @@ class Shot:
 		self.currentNode = self.currentNode.parent
 
 		return
+
+	def replaceText(self):
+		# get strings before and after with
+		# replace before with after in code
+		
+		before = []
+		after = []
+		
+		self.lastChar = self.getChar()
+		while self.lastChar == ' ' or self.lastChar == '\t':
+			self.lastChar = self.getChar()
+		
+		quoteChar = self.lastChar
+		
+		self.lastChar = self.getChar()
+		while self.lastChar != quoteChar:
+			before.append(self.lastChar)
+			self.lastChar = self.getChar()
+			if self.lastChar == quoteChar and before[-1] == "\\":
+				before = quoteString[:-1]
+				before.append(quoteChar)
+				self.lastChar = self.getChar()
+
+		beforeString = ''.join(before)
+
+		self.lastChar = self.getChar()
+		while self.lastChar != '"' and self.lastChar != '\'':
+			self.lastChar = self.getChar()
+
+		quoteChar = self.lastChar
+					
+		self.lastChar = self.getChar()
+		while self.lastChar != quoteChar:
+			after.append(self.lastChar)
+			self.lastChar = self.getChar()
+			if self.lastChar == quoteChar and after[-1] == "\\":
+				after = after[:-1]
+				after.append(quoteChar)
+				self.lastChar = self.getChar()
+
+		afterString = ''.join(after)
+
+		self.lastChar = self.getChar()
+		while self.lastChar != '\n':
+			self.lastChar = self.getChar()
+
+		self.code = self.code[self.currentPosInCode:].replace(beforeString,afterString)
+		self.currentPosInCode = 0
+		self.codeLen = len(self.code)
 	
 	def includeFile(self,fetch=False):
 		fileName = []
@@ -286,7 +335,7 @@ class Shot:
 		
 		self.lastChar = self.getChar()
 		while self.lastChar != '\n':
-			if self.lastChar != '"' and self.lastChar != '\'':		
+			if self.lastChar != '"' and self.lastChar != '\'':
 				fileName.append(self.lastChar)
 				if self.lastChar == '.':
 					del fileExt[:]
