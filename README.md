@@ -5,9 +5,9 @@ Shots is a templating language for Flask that strives for simplicity and speed.
 
 Adding Shots to a Flask app is super simple.
 
-1. Download shots.py
+1. Download the shots package
 2. Put it in the same directory as app.py (or whatever your main file is called)
-3. Write some Shots for your app and save them in the templates/ directory
+3. Write some Shots for your app and save them in your normal templates/ directory
 4. In app.py, instead of calling render_template, instantiate a Shot and render it (passing any parameters you want)
 5. Run your app
 
@@ -18,8 +18,9 @@ Here is one of the smallest Shots you can have:
 ###index.html
 
 ```html
-head : title : 'A Little Shot'
-body : 'This is a little Shot'
+title : 'A Little Shot'
+
+'This is a little Shot'
 ```
 
 ###app.py
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 To see the template made before render_template is called on it, run:
 
 ```bash
-python shots.py {{ filename relative to templates/ }} [-d]
+python shots/shot.py {{ filename relative to templates/ }} [-d]
 ```
 
 Passing the -d or --debug flags will let you see the consumption course of the parser.
