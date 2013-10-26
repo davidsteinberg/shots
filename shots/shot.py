@@ -3,8 +3,8 @@
 #-------------------------
 
 from shutil import copyfile
-from os import remove, listdir, walk, sep
-from os.path import isfile, join, dirname, abspath
+from os import listdir, remove, sep, walk
+from os.path import abspath, dirname, isfile, join, splitext
 
 from ast import *
 
@@ -921,7 +921,11 @@ def main():
 		if sys.argv[2] == "-d":
 			debugging = True
 
-	fileName = sys.argv[1]
+	fileName, fileExt = splitext(sys.argv[1])
+	if not fileExt:
+		fileName += ".html"
+	else:
+		fileName += fileExt
 
 	s = Shot(fileName,debug=debugging)
 	print s.generateCode()
