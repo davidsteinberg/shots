@@ -98,8 +98,7 @@ class Shot:
 	
 		if fileExt == "html":
 			s = Shot(fileName,included=True)
-			for kid in s.rootNode.children:
-				self.currentNode.children.append(kid)
+			return s.rootNode
 			
 		else:		
 			fileName = '"' + fileName + '"'
@@ -115,7 +114,7 @@ class Shot:
 				rel.value = "\"stylesheet\""
 				newNode.attributes.append(rel)
 
-				self.currentNode.children.append(newNode)
+				return newNode
 			elif fileExt == "js":
 				newNode = ShotsNode(tag="script",parent=self.currentNode)
 			
@@ -123,21 +122,76 @@ class Shot:
 				src.value = fileName
 				newNode.attributes.append(src)
 			
-				self.currentNode.children.append(newNode)
+				return newNode
 			else:
 				self.parseError("couldn't find file extension on included file")
 
+	def makeBreakElement(self):
+		futureDepth = 0
+		if self.currentNode.multiline:
+			futureDepth = self.currentDepth
+		newNode = PageElement(tag="br",parent=self.currentNode,depth=futureDepth)
+		self.currentNode.children.append(newNode)
+		self.currentNode = newNode
+	
+		self.currentNode.selfClosing = True
+	
+		self.getNextToken()
+	
+		if self.currentTokenType == "digit":
+			for i in range(int(self.currentToken)-1):
+				self.currentNode.parent.children.append(PageElement(tag="br",parent=self.currentNode,selfClosing=True,depth=futureDepth))
+			self.getNextToken()
+			if self.currentTokenType == "newline" or self.currentToken == self.__EOF__:
+				self.currentToken = "1"
+	
+		self.currentNode = self.currentNode.parent
+
 	def getNodeWithTag(self):
-		if self.currentToken.value == "fetch":
+		if self.currentToken.value == "include":
+			return self.includeFile()
+		elif self.currentToken.value == "fetch":
 			self.includeFile(fetch=True)
-		elif self.currentToken.value == "include":
-			pass
 		elif self.currentToken.value == "media":
 			pass
 		elif self.currentToken.value == "link":
 			pass
+		elif self.currentToken.value == "br":
+			return self.makeBreakElement()
 		else:
 			pass
+# 			if self.included:
+# 				self.lookingForHead = False
+# 				self.fillingHead = False
+# 			
+# 			elif self.lookingForHead:
+# 				if identifier == "head":
+# 					self.lookingForHead = False
+# 				elif identifier != "doctype" and identifier != "html":
+# 					headElement = PageElement(tag="head",depth=-1,parent=self.currentNode)
+# 					self.currentNode.children.append(headElement)
+# 					self.currentNode = headElement
+# 				
+# 					self.lookingForHead = False
+# 					
+# 					if identifier not in self.tagsForHead:
+# 						self.fillingHead = False
+# 						self.currentNode = self.currentNode.parent
+# 						if identifier != "body":
+# 							bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
+# 							self.rootNode.children.append(bodyElement)
+# 							self.currentNode = bodyElement
+# 
+# 			elif self.fillingHead:
+# 				if identifier not in self.tagsForHead:
+# 					self.fillingHead = False
+# 					if identifier != "body":
+# 						bodyElement = PageElement(tag="body",depth=-1,parent=self.currentNode)
+# 						self.rootNode.children.append(bodyElement)
+# 						self.currentNode = bodyElement
+# 			
+# 			self.makeElementWithTag(identifier)
+# 			
 
 	def getDepth(self):
 		return self.tokenizer.lines[self.currentLineNum].depth
