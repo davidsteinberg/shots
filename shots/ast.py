@@ -2,7 +2,7 @@
 # AST Parts
 #-------------------------
 
-class ElementAttribute:
+class ShotsAttribute:
 	def __init__(self, name, value=None):
 		self.name = name
 		self.value = value
@@ -25,7 +25,7 @@ class TextNode:
 		result += self.text
 		return result
 
-class PageElement:
+class ShotsNode:
 	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=False):
 		self.id = id
 		self.tag = tag

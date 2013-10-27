@@ -4,29 +4,51 @@
 
 import re
 
-class Token:
+class ShotsToken:
+
+	typeAlpha = 0
+	typeClass = 1
+	typeChildElemNext = 2
+	typeComment = 3
+	typeDirective = 4
+	typeEquals = 5
+	typeEOL = 6
+	typeID = 7
+	typeNumber = 8
+	typePointer = 9
+	typeQuote = 10
+	typeText = 11
+	typeUnknown = 12
+
 	def __init__(self,value="",type="unknown"):
 		self.value = value
 		self.type = type
+	
+	def __str__(self):
+		return self.value
 
-class Tokenizer:
-	def __init__(self, fileName, log=False):
+class ShotsLine:
+	def __init__(self,depth=0):
+		self.depth = depth
+		self.tokens = []
 
-		self.logging = log
+class ShotsTokenizer:
+	def __init__(self, fileName, logging=False):
 
-		self.currentChar = " "
-		
+		self.fileName = fileName
+		self.logging = logging
+
+		self.currentChar = " "		
 		self.currentToken = None
-		
 		self.currentPosInLine = 0
+
+		self.EOL = "$"
 
 		self.currentLine = ""
 		self.currentLineNum = 0
 		self.currentLineLen = 0
 
-		self.lines = []		
-		
-		self.script = open(fileName,"r")
+		self.lines = []
 	
 	def log(self,message):
 		if self.logging:
@@ -34,8 +56,10 @@ class Tokenizer:
 		
 	def getChar(self):
 		if self.currentPosInLine >= self.currentLineLen:
-			return "EOL"
+			return self.EOL
 		c = self.currentLine[self.currentPosInLine]
+		if c == "\n" or c == "\r":
+			return self.EOL
 		self.currentPosInLine += 1
 		return c
 	
@@ -43,8 +67,8 @@ class Tokenizer:
 		self.currentChar = self.getChar()
 
 	def getToken(self):
-		if self.currentChar == "EOL" or self.currentChar == "\n" or self.currentChar == "\r":
-			return Token(type="EOL")
+		if self.currentChar == self.EOL:
+			return ShotsToken(type=ShotsToken.typeEOL)
 	
 		# gobble whitespace
 		while self.currentChar == " " or self.currentChar == "\t":
@@ -52,7 +76,7 @@ class Tokenizer:
 	
 		# alpha
 		if self.currentChar.isalpha() or self.currentChar == "_":
-			t = Token(type="alpha")
+			t = ShotsToken(type=ShotsToken.typeAlpha)
 		
 			identifier = [self.currentChar]
 
@@ -65,7 +89,7 @@ class Tokenizer:
 	
 		# number
 		elif self.currentChar.isdigit():
-			t = Token(type="number")
+			t = ShotsToken(type=ShotsToken.typeNumber)
 		
 			number = []
 			while self.currentChar.isdigit():
@@ -76,7 +100,7 @@ class Tokenizer:
 
 		# quote
 		elif self.currentChar == "'" or self.currentChar == "\"":
-			t = Token(type="quote")
+			t = ShotsToken(type=ShotsToken.typeQuote)
 		
 			quoteChar = self.currentChar
 			quote = []
@@ -99,17 +123,17 @@ class Tokenizer:
 			self.getNextChar()
 			if self.currentChar == ":":
 				self.getNextChar()
-				t = Token(type="childElemNext")
+				t = ShotsToken(type=ShotsToken.typeChildElemNext)
 			else:
-				t = Token(type="text")
+				t = ShotsToken(type=ShotsToken.typeText)
 			
 				text = []
 			
-				if self.currentChar == "EOL":
+				if self.currentChar == self.EOL:
 					t.value = ""
 				else:
 					self.getNextChar()
-					while self.currentChar != "EOL":
+					while self.currentChar != self.EOL:
 						text.append(self.currentChar)
 						self.getNextChar()
 			
@@ -117,7 +141,7 @@ class Tokenizer:
 		
 		# class
 		elif self.currentChar == ".":
-			t = Token(type="class")
+			t = ShotsToken(type=ShotsToken.typeClass)
 		
 			className = []
 			
@@ -130,7 +154,7 @@ class Tokenizer:
 	
 		# id
 		elif self.currentChar == "#":
-			t = Token(type="id")
+			t = ShotsToken(type=ShotsToken.typeID)
 			
 			id = []
 			
@@ -143,20 +167,24 @@ class Tokenizer:
 	
 		# pointer
 		elif self.currentChar == "-":
-			t = Token(type="pointer")
+			t = ShotsToken(type=ShotsToken.typePointer)
+
 			self.getNextChar()
 			if self.currentChar == ">":
+				t.value = "->"
 				self.getNextChar()
+			else:
+				t.value = "-"
 	
 		# template directive
 		elif self.currentChar == "@":
-			t = Token(type="directive")
+			t = ShotsToken(type=ShotsToken.typeDirective)
 			
 			directive = []
 			
 			self.getNextChar()
 			self.getNextChar()			
-			while self.currentChar != "EOL":
+			while self.currentChar != self.EOL:
 				directive.append(self.currentChar)
 				self.getNextChar()
 			
@@ -164,27 +192,27 @@ class Tokenizer:
 
 		# comment	
 		elif self.currentChar == "!":
-			t = Token(type="comment")
+			t = ShotsToken(type=ShotsToken.typeComment)
 			
 			comment = []
 			
 			self.getNextChar()
 			self.getNextChar()
-			while self.currentChar != "EOL":
+			while self.currentChar != self.EOL:
 				comment.append(self.currentChar)
 				self.getNextChar()
 			
 			t.value = "".join(comment)
 
 		elif self.currentChar == "=":
-			t = Token(type="equals",value=self.currentChar)
+			t = ShotsToken(type=ShotsToken.typeEquals,value=self.currentChar)
 			self.getNextChar()
 	
 		else:
-			t = Token(type="uknown",value=self.currentChar)
+			t = ShotsToken(type=ShotsToken.typeUnknown,value=self.currentChar)
 			self.getNextChar()
 
-		self.log(t.type + " : " + t.value)
+		self.log(str(t.type) + " : " + t.value)
 
 		return t
 
@@ -193,8 +221,6 @@ class Tokenizer:
 		
 	def tokenizeLine(self):
 		self.currentPosInLine = 0
-		
-		tokens = []
 
 		# find opening whitespace
 		self.getNextChar()
@@ -204,17 +230,17 @@ class Tokenizer:
 		# TODO : should tabs and spaces count the same?
 		# should you be able to set the space width of a tab, and it would count that much?
 		
-		tokens.append(self.currentPosInLine)
+		line = ShotsLine(depth=self.currentPosInLine)
 
 		self.getNextToken()
-		while self.currentToken.type != "EOL":
-			tokens.append(self.currentToken)
+		while self.currentToken.type != ShotsToken.typeEOL:
+			line.tokens.append(self.currentToken)
 			self.getNextToken()
 		
-		return tokens
+		return line
 		
 	def tokenize(self):
-		for line in self.script:
+		for line in open(self.fileName,"r"):
 			self.currentLineNum += 1
 			if not re.match(r"^\s*$",line):
 				self.currentLine = line
