@@ -1,6 +1,6 @@
 fetch "index.css"
 include "index.js"
-fetch "bottom.html"
+
 br
 br 3
 @ this is a directive
@@ -9,5 +9,23 @@ comment
 	this is a block comment
 	this is a "quote" in a comment
 
+: this is some text
 
+! .class
+! #id
+
+fetch "bottom.html"
+
+div
+	: this is text
+	span
+		a
+			img
+			br 4
+		@ other directive
+	! some more comments
+	h1
+		: some other text
+
+div attr="this"
 

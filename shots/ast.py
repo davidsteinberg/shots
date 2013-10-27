@@ -21,12 +21,12 @@ class ShotsTextNode:
 	def __str__(self):
 		result = ""
 		for d in range(self.depth):
-			result += "\t"
+			result += "    "
 		result += self.text
 		return result
 
 class ShotsNode:
-	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=False):
+	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=True):
 		self.id = id
 		self.tag = tag
 		self.classes = []
@@ -37,30 +37,18 @@ class ShotsNode:
 		
 		self.depth = depth
 		self.multiline = multiline
-		
-		self.makingAnID = False
-		self.lookingForAttributes = False
-		self.addingClasses = False
-		self.elementHasID = False
-		self.definingInnerHTML = False
-		self.makingStyleOrScript = False
-		self.addingDelimiter = False
-		self.addingDirective = False
-		self.makingLiteralTextBlock = False
-		self.willBeMakingLiteralTextBlock = False
-		self.makingSrcOrHref = False
-
-		self.finished = False
 
 	def __str__(self):
 		result = ""
 		
 		if self.tag == "":
+			for d in range(self.depth):
+				result += "    "
 			for c in self.children:
 				result += str(c)
 		else:
 			for d in range(self.depth):
-				result += "\t"
+				result += "    "
 			result += "<" + self.tag
 			if self.id:
 				result += " id=\"" + self.id + "\""
@@ -77,7 +65,7 @@ class ShotsNode:
 						result += str(c)
 					result += "\n"
 					for d in range(self.depth):
-						result += "\t"
+						result += "    "
 				else:
 					for c in self.children:
 						result += str(c)

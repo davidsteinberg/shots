@@ -28,9 +28,10 @@ class Shot:
 				fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
 				break
 		if not found:
-			self.error("couldn't find file " + fileName)
+			self.error("Shots error : couldn't find file " + fileName)
 	
 		self.fileName = fileName
+		
 		# self.fileName = Shot.templateDir + fileName
 
 		self.extending = extending
@@ -38,7 +39,7 @@ class Shot:
 			
 	def error(self,message):
 		print message
-		exit
+		exit()
 	
 	def generateCode(self):
 		result = ""

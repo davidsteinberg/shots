@@ -231,7 +231,7 @@ class ShotsTokenizer:
 		# TODO : should tabs and spaces count the same?
 		# should you be able to set the space width of a tab, and it would count that much?
 		
-		line = ShotsLine(depth=self.currentPosInLine)
+		line = ShotsLine(depth=self.currentPosInLine-1)
 
 		self.getNextToken()
 		while self.currentToken.type != ShotsToken.typeEOL:
