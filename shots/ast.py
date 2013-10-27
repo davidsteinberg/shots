@@ -13,7 +13,7 @@ class ShotsAttribute:
 			 result += "=" + self.value
 		return result
 
-class TextNode:
+class ShotsTextNode:
 	def __init__(self, text, depth=0):
 		self.text = text
 		self.depth = depth

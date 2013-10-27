@@ -21,8 +21,6 @@ class Shot:
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 	tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
 
-	EOL = "$"
-
 	def __init__(self, fileName, extending=False, including=False, logging=False):
 
 		self.fileName = Shot.templateDir + fileName
@@ -50,8 +48,12 @@ class Shot:
 	def parseError(self,string):
 		exit("Parse Error on line " + str(self.currentLineNum+1) + ", token " + str(self.currentTokenNum) + " : " + string)
 
+	def reachedEOF(self):
+		return self.currentLineNum >= len(self.tokenizer.lines)
+
 	def getNextToken(self):
 		self.currentToken = self.getToken()
+		print self.currentToken
 
 	def printTier(self,string, num=0):
 		if not self.logging:
@@ -72,7 +74,7 @@ class Shot:
 
 	def getToken(self):
 		if self.currentTokenNum >= len(self.tokenizer.lines[self.currentLineNum].tokens):
-			return self.EOL
+			return ShotsToken(type=ShotsToken.typeEOL)
 		self.currentTokenNum += 1
 		return self.tokenizer.lines[self.currentLineNum].tokens[self.currentTokenNum-1]
 
@@ -104,54 +106,53 @@ class Shot:
 			fileName = '"' + fileName + '"'
 		
 			if fileExt == "css":			
-				newNode = ShotsNode(tag="link",parent=self.currentNode,selfClosing=True)
+				node = ShotsNode(tag="link",parent=self.currentNode,selfClosing=True)
 
 				href = ShotsAttribute(name="href")
 				href.value = fileName
-				newNode.attributes.append(href)
+				node.attributes.append(href)
 
 				rel = ShotsAttribute(name="rel")
 				rel.value = "\"stylesheet\""
-				newNode.attributes.append(rel)
+				node.attributes.append(rel)
 
-				return newNode
+				return node
 			elif fileExt == "js":
-				newNode = ShotsNode(tag="script",parent=self.currentNode)
+				node = ShotsNode(tag="script",parent=self.currentNode)
 			
 				src = ShotsAttribute(name="src")
 				src.value = fileName
-				newNode.attributes.append(src)
+				node.attributes.append(src)
 			
-				return newNode
+				return node
 			else:
 				self.parseError("couldn't find file extension on included file")
 
 	def makeBreakElement(self):
-		futureDepth = 0
-		if self.currentNode.multiline:
-			futureDepth = self.currentDepth
-		newNode = PageElement(tag="br",parent=self.currentNode,depth=futureDepth)
-		self.currentNode.children.append(newNode)
-		self.currentNode = newNode
-	
-		self.currentNode.selfClosing = True
-	
 		self.getNextToken()
 	
-		if self.currentTokenType == "digit":
-			for i in range(int(self.currentToken)-1):
-				self.currentNode.parent.children.append(PageElement(tag="br",parent=self.currentNode,selfClosing=True,depth=futureDepth))
-			self.getNextToken()
-			if self.currentTokenType == "newline" or self.currentToken == self.__EOF__:
-				self.currentToken = "1"
-	
-		self.currentNode = self.currentNode.parent
+		if self.currentToken.type == ShotsToken.typeNumber:
+			node = ShotsNode(tag="span",parent=self.currentNode)
+			for i in range(int(self.currentToken.value)-1):
+				node.children.append(ShotsNode(tag="br",parent=self.currentNode,selfClosing=True))
+
+		else:
+			node = ShotsNode(tag="br",parent=self.currentNode)
+			node.selfClosing = True
+			
+		return node
+
+	def getNodeWithDirective(self):
+		return ShotsTextNode(text="{% "+self.currentToken.value+" %}")
+		
+	def getNodeWithComment(self):
+		return ShotsTextNode(text="<!-- "+self.currentToken.value+" -->")
 
 	def getNodeWithTag(self):
 		if self.currentToken.value == "include":
 			return self.includeFile()
 		elif self.currentToken.value == "fetch":
-			self.includeFile(fetch=True)
+			return self.includeFile(fetch=True)
 		elif self.currentToken.value == "media":
 			pass
 		elif self.currentToken.value == "link":
@@ -196,7 +197,10 @@ class Shot:
 	def getDepth(self):
 		return self.tokenizer.lines[self.currentLineNum].depth
 
-	def getNode(self):	
+	def getNode(self):
+		if self.reachedEOF():
+			return None
+	
 		nextDepth = self.getDepth()
 		
 		if nextDepth <= self.currentNode.depth:
@@ -204,7 +208,8 @@ class Shot:
 
 		self.getNextToken()
 
-		node = None
+		if self.currentToken.type == ShotsToken.typeEOL:
+			return None
 
 		if self.currentToken.type == ShotsToken.typeAlpha:
 			node = self.getNodeWithTag()
@@ -214,11 +219,16 @@ class Shot:
 			node = self.getNodeWithID()
 		elif self.currentToken.type == ShotsToken.typeText:
 			node = self.getNodeWithText()
-
+		elif self.currentToken.type == ShotsToken.typeDirective:
+			node = self.getNodeWithDirective()
+		elif self.currentToken.type == ShotsToken.typeComment:
+			node = self.getNodeWithComment()
 		return node
 
 	def getNextNode(self):
 		self.nextNode = self.getNode()
+		self.currentLineNum += 1
+		self.currentTokenNum = 0
 
 	def tokenize(self):
 		self.tokenizer.tokenize()
@@ -237,20 +247,20 @@ class Shot:
 				for k in kids:
 					result += str(k)
 			else:
-				if not isinstance(kids[0],TextNode) and kids[0].tag == "doctype":
+				if not isinstance(kids[0],ShotsTextNode) and kids[0].tag == "doctype":
 					kids[0].tag = "!doctype"
 					for k in kids:
 						result += str(k)
 				else:
 					result = "<!doctype html>\n"
-					if not isinstance(kids[0],TextNode) and kids[0].tag == "html":
+					if not isinstance(kids[0],ShotsTextNode) and kids[0].tag == "html":
 						for k in kids:
 							result += str(k)
 					else:
-						newNode = ShotsNode(tag="html",multiline=True)
+						node = ShotsNode(tag="html",multiline=True)
 						for k in kids:
-							newNode.children.append(k)
-						result += str(newNode)
+							node.children.append(k)
+						result += str(node)
 
 		# last minute regex for template delimiters
 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
