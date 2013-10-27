@@ -28,7 +28,7 @@ class Shot:
 				fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
 				break
 		if not found:
-			self.parseError("couldn't find file " + fileName)
+			self.error("couldn't find file " + fileName)
 	
 		self.fileName = fileName
 		# self.fileName = Shot.templateDir + fileName
@@ -36,6 +36,10 @@ class Shot:
 		self.extending = extending
 		self.parser = ShotsParser(self.fileName,logging=logging)
 			
+	def error(self,message):
+		print message
+		exit
+	
 	def generateCode(self):
 		result = ""
 		kids = self.parser.rootNode.children
