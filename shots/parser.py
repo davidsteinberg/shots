@@ -69,6 +69,9 @@ class ShotsParser:
 		self.getNextToken()
 		
 		fileName = self.currentToken.value
+		quoteChar = fileName[0]
+		fileName = fileName.replace(quoteChar,"")
+		
 		fileExt = fileName.split('.')[-1]
 		
 		if fetch:
@@ -77,17 +80,24 @@ class ShotsParser:
 			for root, dirs, files in walk(currentDir):
 				if fileName in files:
 					found = True
-					fileName = root.replace(currentDir, "", 1) + sep + fileName
+					fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
 					break
 			if not found:
 				self.parseError("couldn't fetch file " + fileName)
 	
 		if fileExt == "html":
-			s = Shot(fileName,included=True)
-			return s.rootNode
+			p = ShotsParser(fileName)
+			p.tokenize()
+			p.parse()
 			
-		else:		
-			fileName = '"' + fileName + '"'
+			node = ShotsNode(tag="",parent=self.currentNode)
+			for kid in p.rootNode.children:
+				node.children.append(kid)
+			
+			return node
+			
+		else:
+			fileName = quoteChar + fileName + quoteChar
 		
 			if fileExt == "css":			
 				node = ShotsNode(tag="link",parent=self.currentNode,selfClosing=True)
@@ -112,12 +122,12 @@ class ShotsParser:
 			else:
 				self.parseError("couldn't find file extension on included file")
 
-	def makeBreakElement(self):
+	def getBreakElement(self):
 		self.getNextToken()
 	
 		if self.currentToken.type == ShotsToken.typeNumber:
-			node = ShotsNode(tag="span",parent=self.currentNode)
-			for i in range(int(self.currentToken.value)-1):
+			node = ShotsNode(tag="",parent=self.currentNode)
+			for i in range(int(self.currentToken.value)):
 				node.children.append(ShotsNode(tag="br",parent=self.currentNode,selfClosing=True))
 
 		else:
@@ -126,11 +136,39 @@ class ShotsParser:
 			
 		return node
 
-	def getNodeWithDirective(self):
+	def getDirective(self):
 		return ShotsTextNode(text="{% "+self.currentToken.value+" %}")
 		
-	def getNodeWithComment(self):
+	def getComment(self):
 		return ShotsTextNode(text="<!-- "+self.currentToken.value+" -->")
+
+	def getBlockComment(self):
+		commentBody = []
+		
+		self.getNextToken()
+		while self.currentToken.type != ShotsToken.typeEOL:
+			commentBody.append(self.currentToken.value)
+			self.getNextToken()
+		
+		commentDepth = self.getDepth()
+		
+		self.currentLineNum += 1
+		if self.currentLineNum < len(self.tokenizer.lines):
+			line = self.tokenizer.lines[self.currentLineNum]
+		
+			while line.depth > commentDepth:
+				for i in range(line.depth-1):
+					commentBody.append("    ")
+				for token in line.tokens:
+					commentBody.append(token.value + " ")
+				commentBody.append("\n")
+			
+				self.currentLineNum += 1
+				if self.currentLineNum >= len(self.tokenizer.lines):
+					break
+				line = self.tokenizer.lines[self.currentLineNum]
+
+		return ShotsTextNode(text="<!--\n"+"".join(commentBody)+"-->")
 
 	def getNodeWithTag(self):
 		if self.currentToken.value == "include":
@@ -142,7 +180,9 @@ class ShotsParser:
 		elif self.currentToken.value == "link":
 			pass
 		elif self.currentToken.value == "br":
-			return self.makeBreakElement()
+			return self.getBreakElement()
+		elif self.currentToken.value == "comment":
+			return self.getBlockComment()
 		else:
 			pass
 # 			if self.included:
@@ -184,10 +224,8 @@ class ShotsParser:
 	def getNode(self):
 		if self.reachedEOF():
 			return None
-	
-		nextDepth = self.getDepth()
-		
-		if nextDepth <= self.currentNode.depth:
+
+		if self.getDepth() <= self.currentNode.depth:
 			self.currentNode = self.currentNode.parent
 
 		self.getNextToken()
@@ -202,11 +240,12 @@ class ShotsParser:
 		elif self.currentToken.type == ShotsToken.typeID:
 			node = self.getNodeWithID()
 		elif self.currentToken.type == ShotsToken.typeText:
-			node = self.getNodeWithText()
+			node = self.getText()
 		elif self.currentToken.type == ShotsToken.typeDirective:
-			node = self.getNodeWithDirective()
+			node = self.getDirective()
 		elif self.currentToken.type == ShotsToken.typeComment:
-			node = self.getNodeWithComment()
+			node = self.getComment()
+			
 		return node
 
 	def getNextNode(self):

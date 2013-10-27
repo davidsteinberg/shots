@@ -103,7 +103,7 @@ class ShotsTokenizer:
 			t = ShotsToken(type=ShotsToken.typeQuote)
 		
 			quoteChar = self.currentChar
-			quote = []
+			quote = [quoteChar]
 			
 			self.getNextChar()
 			while self.currentChar != quoteChar:
@@ -116,6 +116,7 @@ class ShotsTokenizer:
 
 			self.getNextChar()
 
+			quote.append(quoteChar)
 			t.value = "".join(quote)
 
 		# text

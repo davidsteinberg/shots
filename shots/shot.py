@@ -7,8 +7,8 @@ from tokenizer import *
 from parser import ShotsParser
 
 from shutil import copyfile
-from os import listdir, remove
-from os.path import isfile, join, splitext
+from os import listdir, remove, sep, walk
+from os.path import abspath, dirname, isfile, join, splitext
 
 from flask import render_template
 
@@ -17,10 +17,22 @@ import sys
 
 class Shot:
 
-	templateDir = "../templates/"
+	# templateDir = "templates/"
 
 	def __init__(self, fileName, extending=False, logging=False):
-		self.fileName = Shot.templateDir + fileName
+		found = False
+		currentDir = dirname(dirname(abspath(__file__)))
+		for root, dirs, files in walk(currentDir):
+			if fileName in files:
+				found = True
+				fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
+				break
+		if not found:
+			self.parseError("couldn't find file " + fileName)
+	
+		self.fileName = fileName
+		# self.fileName = Shot.templateDir + fileName
+
 		self.extending = extending
 		self.parser = ShotsParser(self.fileName,logging=logging)
 			
@@ -52,7 +64,7 @@ class Shot:
 		return result
 	
 	def generateFile(self):
-		genFile = open(Shot.templateDir+self.fileName+".shot","w")
+		genFile = open(self.fileName+".shot","w")
 		genFile.write(self.generateCode())
 		genFile.close()
 
@@ -65,11 +77,6 @@ class Shot:
 		result = f.read() # render_template(self.fileName + ".shot", **varArgs)
 		f.close()
 
-		templates = [ f for f in listdir(Shot.templateDir) if isfile(join(Shot.templateDir,f)) ]
-		for t in templates:
-			if re.match(".+\.shot",t):
-				remove(Shot.templateDir + t)
-		
 		return result
 
 #-------------------------

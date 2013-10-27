@@ -54,27 +54,33 @@ class ShotsNode:
 
 	def __str__(self):
 		result = ""
-		for d in range(self.depth):
-			result += "\t"
-		result += "<" + self.tag
-		if self.id:
-			result += " id=\"" + self.id + "\""
-		if len(self.classes) > 0:
-			result += " class=\"" + " ".join(self.classes) + "\""
-		if len(self.attributes) > 0:
-			for a in self.attributes:
-				result += " " + str(a)
-		result += ">"
-		if not self.selfClosing:
-			if self.multiline:
-				for c in self.children:
+		
+		if self.tag == "":
+			for c in self.children:
+				result += str(c)
+		else:
+			for d in range(self.depth):
+				result += "\t"
+			result += "<" + self.tag
+			if self.id:
+				result += " id=\"" + self.id + "\""
+			if len(self.classes) > 0:
+				result += " class=\"" + " ".join(self.classes) + "\""
+			if len(self.attributes) > 0:
+				for a in self.attributes:
+					result += " " + str(a)
+			result += ">"
+			if not self.selfClosing:
+				if self.multiline:
+					for c in self.children:
+						result += "\n"
+						result += str(c)
 					result += "\n"
-					result += str(c)
-				result += "\n"
-				for d in range(self.depth):
-					result += "\t"
-			else:
-				for c in self.children:
-					result += str(c)
-			result += "</" + self.tag + ">"
+					for d in range(self.depth):
+						result += "\t"
+				else:
+					for c in self.children:
+						result += str(c)
+				result += "</" + self.tag + ">"
+			
 		return result
