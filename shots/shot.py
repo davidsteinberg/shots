@@ -13,7 +13,7 @@ from flask import render_template
 import re
 import sys
 
-class Shot(object):
+class Shot():
 	def __init__(self, fileName, included=False, debug=False):
 		self.debugging = debug
 		
