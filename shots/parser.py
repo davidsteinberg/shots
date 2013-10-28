@@ -29,6 +29,7 @@ class ShotsParser:
 		
 		self.lookingForHead = True
 		self.fillingHead = True
+		self.bodyCreated = False
 
 	def parseError(self,string):
 		exit("Parse Error on line " + str(self.currentLineNum+1) + ", token " + str(self.currentTokenNum) + " : " + string)
@@ -191,7 +192,7 @@ class ShotsParser:
 			node = self.getBlockComment()
 
 		else:
-			if self.included:
+			if self.included or self.bodyCreated:
 				self.lookingForHead = False
 				self.fillingHead = False
 		
@@ -212,6 +213,8 @@ class ShotsParser:
 							bodyElement = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
 							self.currentNode.children.append(bodyElement)
 							self.currentNode = bodyElement
+						
+						self.bodyCreated = True
 
 			elif self.fillingHead:
 				if self.currentToken.value not in self.tagsForHead:
@@ -221,6 +224,8 @@ class ShotsParser:
 						bodyElement = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
 						self.currentNode.children.append(bodyElement)
 						self.currentNode = bodyElement
+
+					self.bodyCreated = True
 	
 			if self.currentToken.value == "include":
 				node = self.includeFile()
@@ -339,14 +344,25 @@ class ShotsParser:
 			self.currentTokenNum = 0
 			self.getNodeWithTag()
 
-		elif self.currentToken.type == ShotsToken.typeText:
-			self.getText()
-
-		elif self.currentToken.type == ShotsToken.typeDirective:
-			self.getDirective()
-
 		elif self.currentToken.type == ShotsToken.typeComment:
 			self.getComment()
+
+		else:
+			if not self.bodyCreated:
+				head = ShotsNode(tag="head",depth=-1,parent=self.currentNode)
+				self.currentNode.children.append(head)
+
+				body = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
+				self.currentNode.children.append(body)
+
+				self.currentNode = body
+				self.bodyCreated = True
+		
+			if self.currentToken.type == ShotsToken.typeText:
+				self.getText()
+
+			elif self.currentToken.type == ShotsToken.typeDirective:
+				self.getDirective()
 			
 		return True
 

@@ -56,7 +56,8 @@ class ShotsNode:
 			if len(self.children) > 0:
 				for c in self.children:
 					result += "\n"
-					result += str(c)
+					kid = str(c)[4:]
+					result += kid
 				result += "\n"			
 				for d in range(self.depth):
 					result += "    "

@@ -10,14 +10,12 @@ from shutil import copyfile
 from os import listdir, remove, sep, walk
 from os.path import abspath, dirname, isfile, join, splitext
 
-from flask import render_template
+from jinja2 import Template
 
 import re
 import sys
 
 class Shot:
-
-	# templateDir = "templates/"
 
 	def __init__(self, fileName, extending=False, logging=False):
 		found = False
@@ -31,8 +29,6 @@ class Shot:
 			self.error("Shots error : couldn't find file " + fileName)
 	
 		self.fileName = fileName
-		
-		# self.fileName = Shot.templateDir + fileName
 
 		self.extending = extending
 		self.parser = ShotsParser(self.fileName,logging=logging)
@@ -67,22 +63,14 @@ class Shot:
 		# last minute regex for template delimiters
 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
 		return result
-	
-	def generateFile(self):
-		genFile = open(self.fileName+".shot","w")
-		genFile.write(self.generateCode())
-		genFile.close()
 
 	def render(self,**varArgs):
 		self.parser.tokenize()
 		self.parser.parse()
-		self.generateFile()
-	
-		f = open(self.fileName + ".shot","r")
-		result = f.read() # render_template(self.fileName + ".shot", **varArgs)
-		f.close()
+		
+		result = Template(self.generateCode())
 
-		return result
+		return result.render(**varArgs)
 
 #-------------------------
 # Main
