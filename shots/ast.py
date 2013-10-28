@@ -8,6 +8,8 @@ class ShotAttribute:
 		self.value = value
 	
 	def __str__(self):
+		if self.name == "css":
+			self.name = "style"
 		result = self.name
 		if self.value:
 			 result += "=" + self.value

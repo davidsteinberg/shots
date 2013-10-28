@@ -17,7 +17,7 @@ class Shot:
 
 	def __init__(self, fileName, fetch=True, extending=False, logging=False):
 		if fetch:
-			fileName = "." + ShotParser.getTemplatePath(fileName)
+			fileName = "." + getTemplatePath(fileName)
 	
 		self.fileName = fileName
 

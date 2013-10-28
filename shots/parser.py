@@ -66,34 +66,6 @@ class ShotParser:
 	def getNextToken(self):
 		self.currentToken = self.getToken()
 
-	@staticmethod
-	def getTemplatePath(fileName):
-		found = False
-		currentDir = dirname(dirname(abspath(__file__))) + ShotParser.templateDir
-		for root, dirs, files in walk(currentDir):
-			if fileName in files:
-				found = True
-				fileName = ShotParser.templateDir + root.replace(currentDir, "", 1) + sep + fileName
-				break
-		if not found:
-			self.parseError("couldn't find file " + fileName)
-		
-		return fileName
-
-	@staticmethod
-	def getStaticPath(fileName):
-		found = False
-		currentDir = dirname(dirname(abspath(__file__))) + ShotParser.staticDir
-		for root, dirs, files in walk(currentDir):
-			if fileName in files:
-				found = True
-				fileName = ShotParser.staticDir + root.replace(currentDir, "", 1) + sep + fileName
-				break
-		if not found:
-			self.parseError("couldn't find file " + fileName)
-		
-		return fileName
-
 	def includeFile(self,fetch=False):
 		self.getNextToken()
 		
@@ -101,11 +73,11 @@ class ShotParser:
 		quoteChar = fileName[0]
 		fileName = fileName.replace(quoteChar,"")
 		
-		fileExt = fileName.split('.')[-1]
+		fileExt = fileName.split(".")[-1]
 	
 		if fileExt == "html":
 			if fetch:
-				fileName = "." + ShotParser.getTemplatePath(fileName)
+				fileName = "." + getTemplatePath(fileName)
 				
 			p = ShotParser(fileName,included=True)
 			p.tokenize()
@@ -119,7 +91,7 @@ class ShotParser:
 			
 		else:
 			if fetch:
-				fileName = ShotParser.getStaticPath(fileName)
+				fileName = getStaticPath(fileName)
 		
 			fileName = quoteChar + fileName + quoteChar
 		
@@ -157,9 +129,9 @@ class ShotParser:
 		
 		if self.currentToken.type == ShotToken.typeAlpha and self.currentToken.value == "raw":
 			self.getNextToken()
-			url = self.currentToken.value.replace("\"","")
+			url = self.currentToken.value[1:-1]
 		elif self.currentToken.type == ShotToken.typeQuote:
-			url = ShotParser.getStaticPath(self.currentToken.value.replace("\"",""))
+			url = getStaticPath(self.currentToken.value[1:-1])
 		else:
 			self.parseError("expected raw or file path for favicon")
 		
@@ -293,7 +265,7 @@ class ShotParser:
 				node.attributes.append(attr)
 
 			else:
-				self.parseError("expected media or scoped in css attributes")
+				self.parseError("expected async or defer in js attributes")
 			
 		return node
 
@@ -558,3 +530,33 @@ class ShotParser:
 		self.getNextNode()
 		while self.nextNode:
 			self.getNextNode()
+
+#-------------------------
+# Finding Files
+#-------------------------
+
+def getTemplatePath(fileName):
+	found = False
+	currentDir = dirname(dirname(abspath(__file__))) + ShotParser.templateDir
+	for root, dirs, files in walk(currentDir):
+		if fileName in files:
+			found = True
+			fileName = ShotParser.templateDir + root.replace(currentDir, "", 1) + sep + fileName
+			break
+	if not found:
+		print "Error: couldn't find file " + fileName
+	
+	return fileName
+
+def getStaticPath(fileName):
+	found = False
+	currentDir = dirname(dirname(abspath(__file__))) + ShotParser.staticDir
+	for root, dirs, files in walk(currentDir):
+		if fileName in files:
+			found = True
+			fileName = ShotParser.staticDir + root.replace(currentDir, "", 1) + sep + fileName
+			break
+	if not found:
+		print "Error: couldn't find file " + fileName
+	
+	return fileName
