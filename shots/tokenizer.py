@@ -11,14 +11,15 @@ class ShotsToken:
 	typeChildElemNext = 2
 	typeComment = 3
 	typeDirective = 4
-	typeEquals = 5
-	typeEOL = 6
-	typeID = 7
-	typeNumber = 8
-	typePointer = 9
-	typeQuote = 10
-	typeText = 11
-	typeUnknown = 12
+	typeDirectiveWithClosing = 5
+	typeEquals = 6
+	typeEOL = 7
+	typeID = 8
+	typeNumber = 9
+	typePointer = 10
+	typeQuote = 11
+	typeText = 12
+	typeUnknown = 13
 
 	def __init__(self,value="",type="unknown"):
 		self.value = value
@@ -83,7 +84,7 @@ class ShotsTokenizer:
 			templating = True if self.currentChar == "|" else False
 
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
 				identifier.append(self.currentChar)
 				if self.currentChar == "|":
 					templating = not templating
@@ -153,7 +154,7 @@ class ShotsTokenizer:
 			templating = False
 
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
 				className.append(self.currentChar)
 				if self.currentChar == "|":
 					templating = not templating
@@ -170,7 +171,7 @@ class ShotsTokenizer:
 			templating = False
 
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
 				id.append(self.currentChar)
 				if self.currentChar == "|":
 					templating = not templating
@@ -180,12 +181,17 @@ class ShotsTokenizer:
 	
 		# template directive
 		elif self.currentChar == "-":
-			t = ShotsToken(type=ShotsToken.typeDirective)
+			self.getNextChar()
+			
+			if self.currentChar == "-":
+				t = ShotsToken(type=ShotsToken.typeDirectiveWithClosing)
+				self.getNextChar()
+			else:
+				t = ShotsToken(type=ShotsToken.typeDirective)
 			
 			directive = []
 			
 			self.getNextChar()
-			self.getNextChar()			
 			while self.currentChar != self.EOL:
 				directive.append(self.currentChar)
 				self.getNextChar()

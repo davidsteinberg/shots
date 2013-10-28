@@ -142,11 +142,15 @@ class ShotsParser:
 		node = ShotsTextNode(self.currentToken.value,depth=self.getDepth())
 		self.currentNode.children.append(node)
 
-	def getDirective(self):
+	def getDirective(self,closing=False):
 		node = ShotsNode(tag="templateDirective",depth=self.getDepth(),parent=self.currentNode)
 		
 		text = self.currentToken.value
-		keyword = text.split(" ")[0]
+		
+		if closing:
+			keyword = text.split(" ")[0]
+		else:
+			keyword = ""
 		attr = ShotsAttribute(name=keyword,value=text)
 		node.attributes.append(attr)
 
@@ -363,6 +367,9 @@ class ShotsParser:
 
 			elif self.currentToken.type == ShotsToken.typeDirective:
 				self.getDirective()
+				
+			elif self.currentToken.type == ShotsToken.typeDirectiveWithClosing:
+				self.getDirective(closing=True)
 			
 		return True
 

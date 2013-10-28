@@ -38,6 +38,9 @@ class Shot:
 		exit()
 	
 	def generateCode(self):
+		self.parser.tokenize()
+		self.parser.parse()
+	
 		result = ""
 		kids = self.parser.rootNode.children
 		if len(kids) > 0:
@@ -65,11 +68,7 @@ class Shot:
 		return result
 
 	def render(self,**varArgs):
-		self.parser.tokenize()
-		self.parser.parse()
-		
 		result = Template(self.generateCode())
-
 		return result.render(**varArgs)
 
 #-------------------------
@@ -77,13 +76,13 @@ class Shot:
 #-------------------------
 
 def main():
-	logging = False
+	debugging = False
 	
 	if len(sys.argv) < 2:
 		exit("Usage : " + sys.argv[0] + " <filename> [-d]\n        " + sys.argv[0] + " requires at least a file name as a parameter, with an optional debug flag")
 	elif len(sys.argv) > 2:
 		if sys.argv[2] == "-d":
-			logging = True
+			debugging = True
 
 	fileName, fileExt = splitext(sys.argv[1])
 	if not fileExt:
@@ -91,8 +90,12 @@ def main():
 	else:
 		fileName += fileExt
 
-	s = Shot(fileName,logging=logging)
-	print s.render()
+	s = Shot(fileName)
+
+	if debugging:
+		print s.generateCode()
+	else:
+		print s.render()
 
 if __name__ == "__main__":
 	main()

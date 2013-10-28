@@ -62,7 +62,8 @@ class ShotsNode:
 				for d in range(self.depth):
 					result += "    "
 
-			result += "{% end" + keyword + " %}"
+			if keyword != "":
+				result += "{% end" + keyword + " %}"
 
 		else:
 			result += "<" + self.tag
