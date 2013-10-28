@@ -59,7 +59,7 @@ class ShotsNode:
 					result += " " + str(a)
 			result += ">"
 			if not self.selfClosing:
-				if self.multiline:
+				if self.multiline and len(self.children) > 0:
 					for c in self.children:
 						result += "\n"
 						result += str(c)

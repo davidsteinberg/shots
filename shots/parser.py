@@ -113,7 +113,7 @@ class ShotsParser:
 
 				return node
 			elif fileExt == "js":
-				node = ShotsNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
+				node = ShotsNode(tag="script",depth=self.getDepth(),parent=self.currentNode)
 			
 				src = ShotsAttribute(name="src")
 				src.value = fileName
@@ -298,6 +298,7 @@ class ShotsParser:
 			
 						self.currentLineNum -= 1
 					
+					del elemBody[-1] # get rid of last newline
 					self.currentNode.children.append(''.join(elemBody))
 		
 		if node:
