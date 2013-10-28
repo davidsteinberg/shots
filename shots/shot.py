@@ -2,8 +2,7 @@
 # Shot
 #-------------------------
 
-# from ast import *
-from tokenizer import *
+from ast import *
 from parser import ShotParser
 
 from os import sep, walk
