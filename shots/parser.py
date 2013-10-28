@@ -320,10 +320,14 @@ class ShotsParser:
 			self.getNodeWithTag()
 
 		elif self.currentToken.type == ShotsToken.typeClass:
-			self.getNodeWithClass()
+			self.currentToken = ShotsToken(value="div")
+			self.currentTokenNum = 0
+			self.getNodeWithTag()
 
 		elif self.currentToken.type == ShotsToken.typeID:
-			self.getNodeWithID()
+			self.currentToken = ShotsToken(value="div")
+			self.currentTokenNum = 0
+			self.getNodeWithTag()
 
 		elif self.currentToken.type == ShotsToken.typeText:
 			self.getText()

@@ -18,9 +18,9 @@ Here is one of the smallest Shots you can have:
 ###index.html
 
 ```html
-title : 'A Little Shot'
+title : A Little Shot
 
-'This is a little Shot'
+a : This is a little Shot
 ```
 
 ###app.py
