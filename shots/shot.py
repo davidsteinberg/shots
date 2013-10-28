@@ -17,16 +17,17 @@ import sys
 
 class Shot:
 
-	def __init__(self, fileName, extending=False, logging=False):
-		found = False
-		currentDir = dirname(dirname(abspath(__file__)))
-		for root, dirs, files in walk(currentDir):
-			if fileName in files:
-				found = True
-				fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
-				break
-		if not found:
-			self.error("Shots error : couldn't find file " + fileName)
+	def __init__(self, fileName, fetch=True, extending=False, logging=False):
+		if fetch:
+			found = False
+			currentDir = dirname(dirname(abspath(__file__)))
+			for root, dirs, files in walk(currentDir):
+				if fileName in files:
+					found = True
+					fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
+					break
+			if not found:
+				self.error("Shots error : couldn't find file " + fileName)
 	
 		self.fileName = fileName
 
