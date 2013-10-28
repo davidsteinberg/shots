@@ -3,7 +3,7 @@
 #-------------------------
 
 from ast import *
-from parser import ShotParser
+from parser import *
 
 from os import sep, walk
 from os.path import abspath, dirname, splitext
@@ -17,15 +17,7 @@ class Shot:
 
 	def __init__(self, fileName, fetch=True, extending=False, logging=False):
 		if fetch:
-			found = False
-			currentDir = dirname(dirname(abspath(__file__)))
-			for root, dirs, files in walk(currentDir):
-				if fileName in files:
-					found = True
-					fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
-					break
-			if not found:
-				self.error("Shot error : couldn't find file " + fileName)
+			fileName = "." + ShotParser.getTemplatePath(fileName)
 	
 		self.fileName = fileName
 

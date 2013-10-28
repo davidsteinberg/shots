@@ -5,10 +5,16 @@
 from ast import *
 from tokenizer import *
 
+from os import sep, walk
+from os.path import abspath, dirname
+
 class ShotParser:
 
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-	tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
+	tagsForHead = ["base", "comment", "css", "favicon", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
+
+	templateDir = "/templates"
+	staticDir = "/static"
 
 	def __init__(self,fileName, included=False, logging=False):
 		self.tokenizer = ShotTokenizer(fileName,logging=logging)
@@ -60,6 +66,34 @@ class ShotParser:
 	def getNextToken(self):
 		self.currentToken = self.getToken()
 
+	@staticmethod
+	def getTemplatePath(fileName):
+		found = False
+		currentDir = dirname(dirname(abspath(__file__))) + ShotParser.templateDir
+		for root, dirs, files in walk(currentDir):
+			if fileName in files:
+				found = True
+				fileName = ShotParser.templateDir + root.replace(currentDir, "", 1) + sep + fileName
+				break
+		if not found:
+			self.parseError("couldn't find file " + fileName)
+		
+		return fileName
+
+	@staticmethod
+	def getStaticPath(fileName):
+		found = False
+		currentDir = dirname(dirname(abspath(__file__))) + ShotParser.staticDir
+		for root, dirs, files in walk(currentDir):
+			if fileName in files:
+				found = True
+				fileName = ShotParser.staticDir + root.replace(currentDir, "", 1) + sep + fileName
+				break
+		if not found:
+			self.parseError("couldn't find file " + fileName)
+		
+		return fileName
+
 	def includeFile(self,fetch=False):
 		self.getNextToken()
 		
@@ -68,19 +102,11 @@ class ShotParser:
 		fileName = fileName.replace(quoteChar,"")
 		
 		fileExt = fileName.split('.')[-1]
-		
-		if fetch:
-			found = False
-			currentDir = dirname(dirname(abspath(__file__)))
-			for root, dirs, files in walk(currentDir):
-				if fileName in files:
-					found = True
-					fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
-					break
-			if not found:
-				self.parseError("couldn't fetch file " + fileName)
 	
 		if fileExt == "html":
+			if fetch:
+				fileName = "." + ShotParser.getTemplatePath(fileName)
+				
 			p = ShotParser(fileName,included=True)
 			p.tokenize()
 			p.parse()
@@ -92,6 +118,9 @@ class ShotParser:
 			return node
 			
 		else:
+			if fetch:
+				fileName = ShotParser.getStaticPath(fileName)
+		
 			fileName = quoteChar + fileName + quoteChar
 		
 			if fileExt == "css":
@@ -116,6 +145,43 @@ class ShotParser:
 				return node
 			else:
 				self.parseError("couldn't find file extension on " + ("fetch" if fetch else "includ") + "ed file")
+
+	def getFaviconElement(self):
+		node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
+
+		rel = ShotAttribute(name="rel")
+		rel.value = "\"shortcut icon\""
+		node.attributes.append(rel)
+		
+		self.getNextToken()
+		
+		if self.currentToken.type == ShotToken.typeAlpha and self.currentToken.value == "raw":
+			self.getNextToken()
+			url = self.currentToken.value.replace("\"","")
+		elif self.currentToken.type == ShotToken.typeQuote:
+			url = ShotParser.getStaticPath(self.currentToken.value.replace("\"",""))
+		else:
+			self.parseError("expected raw or file path for favicon")
+		
+		href = ShotAttribute(name="href")
+		href.value = "\"" + url + "\""
+		node.attributes.append(href)
+		
+		fileExt = url.split(".")[-1]
+
+		type = ShotAttribute(name="type")
+		type.value = "\"image/"
+
+		if fileExt == "ico":
+			type.value += "x-icon"
+		else:
+			type.value=fileExt
+		
+		type.value += "\""
+
+		node.attributes.append(type)
+
+		return node
 
 	def getRawScriptOrStyle(self):
 	

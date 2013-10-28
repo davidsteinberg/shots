@@ -1,27 +1,6 @@
-css "index.css"
+fetch "index.css"
 
-css : * { background-color: lemonchiffon }
+favicon "favicon.ico"
 
-css
-	h1 { color: green }
-	h2 { color: blue }
-	h3 { color: orange }
-
-css scoped : * { background-color: lemonchiffon }
-
-css media="screen"
-	* { font-family: sans-serif }
-
-js "index.js"
-
-js : alert("Ad")
-
-js
-	for (i = 0; i < 10; i++) {
-		$("body").append(i);
-	}
-
-js async "index.js"
-
-js defer "index.js"
+: hi
 
