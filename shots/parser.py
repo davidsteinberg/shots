@@ -11,7 +11,7 @@ from os.path import abspath, dirname
 class ShotParser:
 
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-	tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
+	tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 
 	def __init__(self,fileName, included=False, logging=False):
 		self.tokenizer = ShotTokenizer(fileName,logging=logging)
@@ -241,10 +241,10 @@ class ShotParser:
 				node = self.getMediaElement()
 
 			elif self.currentToken.value == "link":
-				node = seld.getLinkElement()
+				node = self.getLinkElement()
 				
 			elif self.currentToken.value == "favicon":
-				node = seld.getFaviconElement()
+				node = self.getFaviconElement()
 
 			elif self.currentToken.value == "br":
 				node = self.getBreakElement()
