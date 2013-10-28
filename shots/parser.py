@@ -5,9 +5,6 @@
 from ast import *
 from tokenizer import *
 
-from os import sep, walk
-from os.path import abspath, dirname
-
 class ShotParser:
 
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]

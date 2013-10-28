@@ -6,9 +6,8 @@ from ast import *
 from tokenizer import *
 from parser import ShotParser
 
-from shutil import copyfile
-from os import listdir, remove, sep, walk
-from os.path import abspath, dirname, isfile, join, splitext
+from os import sep, walk
+from os.path import abspath, dirname, splitext
 
 from jinja2 import Template
 
