@@ -8,22 +8,22 @@ from tokenizer import *
 from os import sep, walk
 from os.path import abspath, dirname
 
-class ShotsParser:
+class ShotParser:
 
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 	tagsForHead = ["base", "comment", "css", "fetch", "include", "js", "javascript", "link", "meta", "noscript", "script", "style", "title"]
 
 	def __init__(self,fileName, included=False, logging=False):
-		self.tokenizer = ShotsTokenizer(fileName,logging=logging)
+		self.tokenizer = ShotTokenizer(fileName,logging=logging)
 		self.included = included
 
 		self.currentLineNum = 0
 		self.currentTokenNum = 0
 
 		self.currentToken = None
-		self.prevTokenType = ShotsToken.typeUnknown
+		self.prevTokenType = ShotToken.typeUnknown
 
-		self.rootNode = ShotsNode(tag="",depth=-1)
+		self.rootNode = ShotNode(tag="",depth=-1)
 		self.currentNode = self.rootNode
 		self.nextNode = None
 		
@@ -60,7 +60,7 @@ class ShotsParser:
 
 	def getToken(self):
 		if self.currentTokenNum >= len(self.tokenizer.lines[self.currentLineNum].tokens):
-			return ShotsToken(type=ShotsToken.typeEOL)
+			return ShotToken(type=ShotToken.typeEOL)
 		self.currentTokenNum += 1
 		return self.tokenizer.lines[self.currentLineNum].tokens[self.currentTokenNum-1]
 
@@ -88,11 +88,11 @@ class ShotsParser:
 				self.parseError("couldn't fetch file " + fileName)
 	
 		if fileExt == "html":
-			p = ShotsParser(fileName,included=True)
+			p = ShotParser(fileName,included=True)
 			p.tokenize()
 			p.parse()
 			
-			node = ShotsNode(tag="",depth=self.getDepth(),parent=self.currentNode)
+			node = ShotNode(tag="",depth=self.getDepth(),parent=self.currentNode)
 			for kid in p.rootNode.children:
 				node.children.append(kid)
 			
@@ -102,21 +102,21 @@ class ShotsParser:
 			fileName = quoteChar + fileName + quoteChar
 		
 			if fileExt == "css":
-				node = ShotsNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
+				node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
 
-				href = ShotsAttribute(name="href")
+				href = ShotAttribute(name="href")
 				href.value = fileName
 				node.attributes.append(href)
 
-				rel = ShotsAttribute(name="rel")
+				rel = ShotAttribute(name="rel")
 				rel.value = "\"stylesheet\""
 				node.attributes.append(rel)
 
 				return node
 			elif fileExt == "js":
-				node = ShotsNode(tag="script",depth=self.getDepth(),parent=self.currentNode)
+				node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode)
 			
-				src = ShotsAttribute(name="src")
+				src = ShotAttribute(name="src")
 				src.value = fileName
 				node.attributes.append(src)
 			
@@ -127,23 +127,23 @@ class ShotsParser:
 	def getBreakElement(self):
 		self.getNextToken()
 	
-		if self.currentToken.type == ShotsToken.typeNumber:
-			node = ShotsNode(tag="",depth=self.getDepth(),parent=self.currentNode)
+		if self.currentToken.type == ShotToken.typeNumber:
+			node = ShotNode(tag="",depth=self.getDepth(),parent=self.currentNode)
 			for i in range(int(self.currentToken.value)):
-				node.children.append(ShotsNode(tag="br",parent=self.currentNode,selfClosing=True))
+				node.children.append(ShotNode(tag="br",parent=self.currentNode,selfClosing=True))
 
 		else:
-			node = ShotsNode(tag="br",depth=self.getDepth(),parent=self.currentNode)
+			node = ShotNode(tag="br",depth=self.getDepth(),parent=self.currentNode)
 			node.selfClosing = True
 			
 		return node
 
 	def getText(self):
-		node = ShotsTextNode(self.currentToken.value,depth=self.getDepth())
+		node = ShotTextNode(self.currentToken.value,depth=self.getDepth())
 		self.currentNode.children.append(node)
 
 	def getDirective(self,closing=False):
-		node = ShotsNode(tag="templateDirective",depth=self.getDepth(),parent=self.currentNode)
+		node = ShotNode(tag="templateDirective",depth=self.getDepth(),parent=self.currentNode)
 		
 		text = self.currentToken.value
 		
@@ -151,21 +151,21 @@ class ShotsParser:
 			keyword = text.split(" ")[0]
 		else:
 			keyword = ""
-		attr = ShotsAttribute(name=keyword,value=text)
+		attr = ShotAttribute(name=keyword,value=text)
 		node.attributes.append(attr)
 
 		self.currentNode.children.append(node)
 		self.currentNode = node
 		
 	def getComment(self):
-		node = ShotsTextNode(text="<!-- "+self.currentToken.value+" -->",depth=self.getDepth())
+		node = ShotTextNode(text="<!-- "+self.currentToken.value+" -->",depth=self.getDepth())
 		self.currentNode.children.append(node)
 
 	def getBlockComment(self):
 		commentBody = []
 		
 		self.getNextToken()
-		while self.currentToken.type != ShotsToken.typeEOL:
+		while self.currentToken.type != ShotToken.typeEOL:
 			commentBody.append(self.currentToken.value)
 			self.getNextToken()
 		
@@ -189,7 +189,7 @@ class ShotsParser:
 			
 			self.currentLineNum -= 1
 
-		return ShotsTextNode(text="<!--\n"+"".join(commentBody)+"-->",depth=commentDepth)
+		return ShotTextNode(text="<!--\n"+"".join(commentBody)+"-->",depth=commentDepth)
 
 	def getNodeWithTag(self):
 		if self.currentToken.value == "comment":
@@ -204,7 +204,7 @@ class ShotsParser:
 				if self.currentToken.value == "head":
 					self.lookingForHead = False
 				elif self.currentToken.value != "doctype" and self.currentToken.value != "html":
-					headElement = ShotsNode(tag="head",depth=-1,parent=self.currentNode)
+					headElement = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 					self.currentNode.children.append(headElement)
 					self.currentNode = headElement
 			
@@ -214,7 +214,7 @@ class ShotsParser:
 						self.fillingHead = False
 						self.currentNode = self.currentNode.parent
 						if self.currentToken.value != "body":
-							bodyElement = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
+							bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 							self.currentNode.children.append(bodyElement)
 							self.currentNode = bodyElement
 						
@@ -225,7 +225,7 @@ class ShotsParser:
 					self.fillingHead = False
 					self.currentNode = self.currentNode.parent
 					if self.currentToken.value != "body":
-						bodyElement = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
+						bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 						self.currentNode.children.append(bodyElement)
 						self.currentNode = bodyElement
 
@@ -256,7 +256,7 @@ class ShotsParser:
 				node = self.getScriptElement()
 
 			else:
-				node = ShotsNode(tag=self.currentToken.value,depth=self.getDepth(),parent=self.currentNode)
+				node = ShotNode(tag=self.currentToken.value,depth=self.getDepth(),parent=self.currentNode)
 				self.currentNode.children.append(node)
 				self.currentNode = node
 				node = None
@@ -264,33 +264,33 @@ class ShotsParser:
 				blockText = False
 				
 				self.getNextToken()
-				while self.currentToken.type != ShotsToken.typeEOL:
+				while self.currentToken.type != ShotToken.typeEOL:
 					
-					if self.currentToken.type == ShotsToken.typeAlpha:
-						attr = ShotsAttribute(name=self.currentToken.value)
+					if self.currentToken.type == ShotToken.typeAlpha:
+						attr = ShotAttribute(name=self.currentToken.value)
 						self.getNextToken()
 						
-						if self.currentToken.type == ShotsToken.typeEquals:
+						if self.currentToken.type == ShotToken.typeEquals:
 							self.getNextToken()
 							attr.value = self.currentToken.value
 						
 						self.currentNode.attributes.append(attr)
 					
-					elif self.currentToken.type == ShotsToken.typeClass:
+					elif self.currentToken.type == ShotToken.typeClass:
 						self.currentNode.classes.append(self.currentToken.value)
 					
-					elif self.currentToken.type == ShotsToken.typeID:
+					elif self.currentToken.type == ShotToken.typeID:
 						self.currentNode.id = self.currentToken.value
 					
-					elif self.currentToken.type == ShotsToken.typeText:
+					elif self.currentToken.type == ShotToken.typeText:
 						if self.currentToken.value == "":
 							blockText = True
 						else:
-							self.currentNode.children.append(ShotsTextNode(text=self.currentToken.value))
+							self.currentNode.children.append(ShotTextNode(text=self.currentToken.value))
 							self.currentNode.multiline = False
 						break
 						
-					elif self.currentToken.type == ShotsToken.typeChildElemNext:
+					elif self.currentToken.type == ShotToken.typeChildElemNext:
 						break
 				
 					self.getNextToken()
@@ -335,40 +335,40 @@ class ShotsParser:
 
 		self.getNextToken()
 
-		if self.currentToken.type == ShotsToken.typeAlpha:
+		if self.currentToken.type == ShotToken.typeAlpha:
 			self.getNodeWithTag()
 
-		elif self.currentToken.type == ShotsToken.typeClass:
-			self.currentToken = ShotsToken(value="div")
+		elif self.currentToken.type == ShotToken.typeClass:
+			self.currentToken = ShotToken(value="div")
 			self.currentTokenNum = 0
 			self.getNodeWithTag()
 
-		elif self.currentToken.type == ShotsToken.typeID:
-			self.currentToken = ShotsToken(value="div")
+		elif self.currentToken.type == ShotToken.typeID:
+			self.currentToken = ShotToken(value="div")
 			self.currentTokenNum = 0
 			self.getNodeWithTag()
 
-		elif self.currentToken.type == ShotsToken.typeComment:
+		elif self.currentToken.type == ShotToken.typeComment:
 			self.getComment()
 
 		else:
 			if not self.bodyCreated:
-				head = ShotsNode(tag="head",depth=-1,parent=self.currentNode)
+				head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(head)
 
-				body = ShotsNode(tag="body",depth=-1,parent=self.currentNode)
+				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
 
 				self.currentNode = body
 				self.bodyCreated = True
 		
-			if self.currentToken.type == ShotsToken.typeText:
+			if self.currentToken.type == ShotToken.typeText:
 				self.getText()
 
-			elif self.currentToken.type == ShotsToken.typeDirective:
+			elif self.currentToken.type == ShotToken.typeDirective:
 				self.getDirective()
 				
-			elif self.currentToken.type == ShotsToken.typeDirectiveWithClosing:
+			elif self.currentToken.type == ShotToken.typeDirectiveWithClosing:
 				self.getDirective(closing=True)
 			
 		return True

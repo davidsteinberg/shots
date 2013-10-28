@@ -4,7 +4,7 @@
 
 import re
 
-class ShotsToken:
+class ShotToken:
 
 	typeAlpha = 0
 	typeClass = 1
@@ -28,12 +28,12 @@ class ShotsToken:
 	def __str__(self):
 		return self.value
 
-class ShotsLine:
+class ShotLine:
 	def __init__(self,depth=0):
 		self.depth = depth
 		self.tokens = []
 
-class ShotsTokenizer:
+class ShotTokenizer:
 	def __init__(self, fileName, logging=False):
 
 		self.fileName = fileName
@@ -69,7 +69,7 @@ class ShotsTokenizer:
 
 	def getToken(self):
 		if self.currentChar == self.EOL:
-			return ShotsToken(type=ShotsToken.typeEOL)
+			return ShotToken(type=ShotToken.typeEOL)
 	
 		# gobble whitespace
 		while self.currentChar == " " or self.currentChar == "\t":
@@ -77,7 +77,7 @@ class ShotsTokenizer:
 	
 		# alpha
 		if self.currentChar.isalpha() or self.currentChar == "_" or self.currentChar == "|":
-			t = ShotsToken(type=ShotsToken.typeAlpha)
+			t = ShotToken(type=ShotToken.typeAlpha)
 		
 			identifier = [self.currentChar]
 
@@ -94,7 +94,7 @@ class ShotsTokenizer:
 		
 		# number
 		elif self.currentChar.isdigit():
-			t = ShotsToken(type=ShotsToken.typeNumber)
+			t = ShotToken(type=ShotToken.typeNumber)
 		
 			number = []
 			while self.currentChar.isdigit():
@@ -105,7 +105,7 @@ class ShotsTokenizer:
 
 		# quote
 		elif self.currentChar == "'" or self.currentChar == "\"":
-			t = ShotsToken(type=ShotsToken.typeQuote)
+			t = ShotToken(type=ShotToken.typeQuote)
 		
 			quoteChar = self.currentChar
 			quote = [quoteChar]
@@ -129,9 +129,9 @@ class ShotsTokenizer:
 			self.getNextChar()
 			if self.currentChar == ":":
 				self.getNextChar()
-				t = ShotsToken(type=ShotsToken.typeChildElemNext)
+				t = ShotToken(type=ShotToken.typeChildElemNext)
 			else:
-				t = ShotsToken(type=ShotsToken.typeText)
+				t = ShotToken(type=ShotToken.typeText)
 			
 				text = []
 			
@@ -147,7 +147,7 @@ class ShotsTokenizer:
 		
 		# class
 		elif self.currentChar == ".":
-			t = ShotsToken(type=ShotsToken.typeClass)
+			t = ShotToken(type=ShotToken.typeClass)
 		
 			className = []
 			
@@ -164,7 +164,7 @@ class ShotsTokenizer:
 	
 		# id
 		elif self.currentChar == "#":
-			t = ShotsToken(type=ShotsToken.typeID)
+			t = ShotToken(type=ShotToken.typeID)
 			
 			id = []
 
@@ -184,10 +184,10 @@ class ShotsTokenizer:
 			self.getNextChar()
 			
 			if self.currentChar == "-":
-				t = ShotsToken(type=ShotsToken.typeDirectiveWithClosing)
+				t = ShotToken(type=ShotToken.typeDirectiveWithClosing)
 				self.getNextChar()
 			else:
-				t = ShotsToken(type=ShotsToken.typeDirective)
+				t = ShotToken(type=ShotToken.typeDirective)
 			
 			directive = []
 			
@@ -200,7 +200,7 @@ class ShotsTokenizer:
 
 		# comment	
 		elif self.currentChar == "!":
-			t = ShotsToken(type=ShotsToken.typeComment)
+			t = ShotToken(type=ShotToken.typeComment)
 			
 			comment = []
 			
@@ -213,11 +213,11 @@ class ShotsTokenizer:
 			t.value = "".join(comment)
 
 		elif self.currentChar == "=":
-			t = ShotsToken(type=ShotsToken.typeEquals,value=self.currentChar)
+			t = ShotToken(type=ShotToken.typeEquals,value=self.currentChar)
 			self.getNextChar()
 	
 		else:
-			t = ShotsToken(type=ShotsToken.typeUnknown,value=self.currentChar)
+			t = ShotToken(type=ShotToken.typeUnknown,value=self.currentChar)
 			self.getNextChar()
 
 		self.log(str(t.type) + " : " + t.value)
@@ -238,10 +238,10 @@ class ShotsTokenizer:
 		# TODO : should tabs and spaces count the same?
 		# should you be able to set the space width of a tab, and it would count that much?
 		
-		line = ShotsLine(depth=self.currentPosInLine-1)
+		line = ShotLine(depth=self.currentPosInLine-1)
 
 		self.getNextToken()
-		while self.currentToken.type != ShotsToken.typeEOL:
+		while self.currentToken.type != ShotToken.typeEOL:
 			line.tokens.append(self.currentToken)
 			self.getNextToken()
 		

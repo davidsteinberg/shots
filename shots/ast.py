@@ -2,7 +2,7 @@
 # AST Parts
 #-------------------------
 
-class ShotsAttribute:
+class ShotAttribute:
 	def __init__(self, name, value=None):
 		self.name = name
 		self.value = value
@@ -13,7 +13,7 @@ class ShotsAttribute:
 			 result += "=" + self.value
 		return result
 
-class ShotsTextNode:
+class ShotTextNode:
 	def __init__(self, text, depth=0):
 		self.text = text
 		self.depth = depth
@@ -25,7 +25,7 @@ class ShotsTextNode:
 		result += self.text
 		return result
 
-class ShotsNode:
+class ShotNode:
 	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=True):
 		self.id = id
 		self.tag = tag

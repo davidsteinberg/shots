@@ -4,7 +4,7 @@
 
 from ast import *
 from tokenizer import *
-from parser import ShotsParser
+from parser import ShotParser
 
 from shutil import copyfile
 from os import listdir, remove, sep, walk
@@ -27,12 +27,12 @@ class Shot:
 					fileName = "." + root.replace(currentDir, "", 1) + sep + fileName
 					break
 			if not found:
-				self.error("Shots error : couldn't find file " + fileName)
+				self.error("Shot error : couldn't find file " + fileName)
 	
 		self.fileName = fileName
 
 		self.extending = extending
-		self.parser = ShotsParser(self.fileName,logging=logging)
+		self.parser = ShotParser(self.fileName,logging=logging)
 			
 	def error(self,message):
 		print message
@@ -49,17 +49,17 @@ class Shot:
 				for k in kids:
 					result += str(k)
 			else:
-				if not isinstance(kids[0],ShotsTextNode) and kids[0].tag == "doctype":
+				if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "doctype":
 					kids[0].tag = "!doctype"
 					for k in kids:
 						result += str(k)
 				else:
 					result = "<!doctype html>\n"
-					if not isinstance(kids[0],ShotsTextNode) and kids[0].tag == "html":
+					if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "html":
 						for k in kids:
 							result += str(k)
 					else:
-						node = ShotsNode(tag="html",multiline=True)
+						node = ShotNode(tag="html",multiline=True)
 						for k in kids:
 							node.children.append(k)
 						result += str(node)
