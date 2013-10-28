@@ -43,7 +43,7 @@ class ShotTokenizer:
 		self.currentToken = None
 		self.currentPosInLine = 0
 
-		self.EOL = "$"
+		self.EOL = "$___$"
 
 		self.currentLine = ""
 		self.currentLineNum = 0

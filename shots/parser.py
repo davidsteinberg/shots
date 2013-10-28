@@ -34,10 +34,6 @@ class ShotParser:
 	def reachedEOF(self):
 		return self.currentLineNum >= len(self.tokenizer.lines)
 
-	def getNextToken(self):
-		self.currentToken = self.getToken()
-		print self.currentToken
-
 	def printTier(self,string, num=0):
 		if not self.logging:
 			return
@@ -120,6 +116,120 @@ class ShotParser:
 				return node
 			else:
 				self.parseError("couldn't find file extension on " + ("fetch" if fetch else "includ") + "ed file")
+
+	def getRawScriptOrStyle(self):
+	
+		body = []
+		
+		depth = self.getDepth()
+	
+		self.currentLineNum += 1
+		if self.currentLineNum < len(self.tokenizer.lines):
+			line = self.tokenizer.lines[self.currentLineNum]
+	
+			while line.depth > depth:
+				for i in range(line.depth):
+					body.append("    ")
+				for token in line.tokens:
+					if token.type == ShotToken.typeText:
+						token.value = ":" + token.value
+					body.append(token.value + " ")
+				body.append("\n")
+		
+				self.currentLineNum += 1
+				if self.currentLineNum >= len(self.tokenizer.lines):
+					break
+				line = self.tokenizer.lines[self.currentLineNum]
+		
+			self.currentLineNum -= 1
+
+		del body[-1] # get rid of last newline, was causing problems
+		return ''.join(body)
+
+	def getStyleElement(self):
+		self.getNextToken()
+		
+		# raw css body
+		if self.currentToken.type == ShotToken.typeEOL:
+			node = ShotNode(tag="style",depth=self.getDepth(),parent=self.currentNode)
+			node.children.append(ShotTextNode(text=self.getRawScriptOrStyle()))
+
+		# single line body
+		elif self.currentToken.type == ShotToken.typeText:
+			node = ShotNode(tag="style",depth=self.getDepth(),parent=self.currentNode,multiline=False)
+			node.children.append(ShotTextNode(text=self.currentToken.value))
+
+		# link to file
+		elif self.currentToken.type == ShotToken.typeQuote:
+			self.currentTokenNum -= 1
+			return self.includeFile()
+
+		# scoped and media
+		elif self.currentToken.type == ShotToken.typeAlpha:
+			node = ShotNode(tag="style",depth=self.getDepth(),parent=self.currentNode)
+
+			if self.currentToken.value == "scoped":
+				scoped = ShotAttribute(name="scoped")
+				node.attributes.append(scoped)
+		
+			elif self.currentToken.value == "media":
+				attr = ShotAttribute(name="media")
+				self.getNextToken()
+				self.getNextToken()
+				attr.value = self.currentToken.value
+				
+				node.attributes.append(attr)
+				
+			else:
+				self.parseError("expected media or scoped in css attributes")
+
+			self.getNextToken()
+			
+			if self.currentToken.type == ShotToken.typeEOL:
+				node.children.append(ShotTextNode(text=self.getRawScriptOrStyle()))
+				
+			else:
+				node.multiline=False
+				node.children.append(ShotTextNode(text=self.currentToken.value))
+			
+		return node
+		
+	def getScriptElement(self):
+		self.getNextToken()
+		
+		# raw js body
+		if self.currentToken.type == ShotToken.typeEOL:
+			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode)
+			node.children.append(ShotTextNode(text=self.getRawScriptOrStyle()))
+
+		# single line body
+		elif self.currentToken.type == ShotToken.typeText:
+			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
+			node.children.append(ShotTextNode(text=self.currentToken.value))
+
+		# link to file
+		elif self.currentToken.type == ShotToken.typeQuote:
+			self.currentTokenNum -= 1
+			return self.includeFile()
+
+		# async and defer
+		elif self.currentToken.type == ShotToken.typeAlpha:
+			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
+
+			if self.currentToken.value == "async" or self.currentToken.value == "defer":
+				scoped = ShotAttribute(name=self.currentToken.value)
+				node.attributes.append(scoped)
+
+				self.getNextToken()
+
+				attr = ShotAttribute(name="src")
+				attr.value = self.currentToken.value
+				node.attributes.append(attr)
+
+			else:
+				self.parseError("expected media or scoped in css attributes")
+			
+		return node
 
 	def getBreakElement(self):
 		self.getNextToken()
