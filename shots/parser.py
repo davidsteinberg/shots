@@ -226,6 +226,9 @@ class ShotsParser:
 
 			elif self.currentToken.value == "link":
 				node = seld.getLinkElement()
+				
+			elif self.currentToken.value == "favicon":
+				node = seld.getFaviconElement()
 
 			elif self.currentToken.value == "br":
 				node = self.getBreakElement()
