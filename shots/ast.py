@@ -41,14 +41,29 @@ class ShotsNode:
 	def __str__(self):
 		result = ""
 		
+		for d in range(self.depth):
+			result += "    "
+		
 		if self.tag == "":
-			for d in range(self.depth):
-				result += "    "
 			for c in self.children:
 				result += str(c)
+		
+		elif self.tag == "templateDirective":
+			keyword = self.attributes[0].name
+			text = self.attributes[0].value
+			
+			result += "{% " + text + " %}"
+			if len(self.children) > 0:
+				for c in self.children:
+					result += "\n"
+					result += str(c)
+				result += "\n"			
+				for d in range(self.depth):
+					result += "    "
+
+			result += "{% end" + keyword + " %}"
+
 		else:
-			for d in range(self.depth):
-				result += "    "
 			result += "<" + self.tag
 			if self.id:
 				result += " id=\"" + self.id + "\""

@@ -75,18 +75,22 @@ class ShotsTokenizer:
 			self.getNextChar()
 	
 		# alpha
-		if self.currentChar.isalpha() or self.currentChar == "_":
+		if self.currentChar.isalpha() or self.currentChar == "_" or self.currentChar == "|":
 			t = ShotsToken(type=ShotsToken.typeAlpha)
 		
 			identifier = [self.currentChar]
 
+			templating = True if self.currentChar == "|" else False
+
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-":
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
 				identifier.append(self.currentChar)
+				if self.currentChar == "|":
+					templating = not templating
 				self.getNextChar()
 
 			t.value = "".join(identifier)
-	
+		
 		# number
 		elif self.currentChar.isdigit():
 			t = ShotsToken(type=ShotsToken.typeNumber)
@@ -146,9 +150,13 @@ class ShotsTokenizer:
 		
 			className = []
 			
+			templating = False
+
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-":
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
 				className.append(self.currentChar)
+				if self.currentChar == "|":
+					templating = not templating
 				self.getNextChar()
 
 			t.value = "".join(className)
@@ -158,27 +166,20 @@ class ShotsTokenizer:
 			t = ShotsToken(type=ShotsToken.typeID)
 			
 			id = []
-			
+
+			templating = False
+
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-":
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or (templating and self.currentChar.isspace()):
 				id.append(self.currentChar)
+				if self.currentChar == "|":
+					templating = not templating
 				self.getNextChar()
 
 			t.value = "".join(id)
 	
-		# pointer
-		elif self.currentChar == "-":
-			t = ShotsToken(type=ShotsToken.typePointer)
-
-			self.getNextChar()
-			if self.currentChar == ">":
-				t.value = "->"
-				self.getNextChar()
-			else:
-				t.value = "-"
-	
 		# template directive
-		elif self.currentChar == "@":
+		elif self.currentChar == "-":
 			t = ShotsToken(type=ShotsToken.typeDirective)
 			
 			directive = []

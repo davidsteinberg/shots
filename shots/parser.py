@@ -142,8 +142,15 @@ class ShotsParser:
 		self.currentNode.children.append(node)
 
 	def getDirective(self):
-		node = ShotsTextNode(text="{% "+self.currentToken.value+" %}",depth=self.getDepth())
+		node = ShotsNode(tag="templateDirective",depth=self.getDepth(),parent=self.currentNode)
+		
+		text = self.currentToken.value
+		keyword = text.split(" ")[0]
+		attr = ShotsAttribute(name=keyword,value=text)
+		node.attributes.append(attr)
+
 		self.currentNode.children.append(node)
+		self.currentNode = node
 		
 	def getComment(self):
 		node = ShotsTextNode(text="<!-- "+self.currentToken.value+" -->",depth=self.getDepth())
