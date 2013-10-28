@@ -2,7 +2,7 @@
 # Shot
 #-------------------------
 
-from ast import *
+# from ast import *
 from tokenizer import *
 from parser import ShotParser
 
