@@ -1,0 +1,24 @@
+fetch "index.css"
+favicon "favicon.ico"
+
+title : my page
+
+-- for i in range(1,7)
+	h|i| : this is a h|i|
+
+br
+
+pre css="color: blue" :
+	this is block text
+	it will stay formatted as it is
+
+br
+
+: this is some text
+
+table
+	-- for person in people
+		tr
+			td : | person.name |
+			td : | person.age |
+

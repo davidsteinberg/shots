@@ -546,8 +546,11 @@ class ShotParser:
 
 		else:
 			if not self.bodyCreated:
-				head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
-				self.currentNode.children.append(head)
+				if self.lookingForHead:
+					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
+					self.currentNode.children.append(head)
+				else:
+					self.currentNode = self.currentNode.parent
 
 				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
