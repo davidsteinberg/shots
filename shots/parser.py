@@ -427,10 +427,13 @@ class ShotParser:
 							
 								if self.currentToken.type == ShotToken.typeArrayOpener:
 									self.getNextToken()
+
 									while self.currentToken.type != ShotToken.typeArrayCloser:
 										if self.currentToken.type == ShotToken.typeQuote:
 											sources.append(self.currentToken.value)
+
 										self.getNextToken()
+
 									self.getNextToken()
 									
 								elif self.currentToken.type == ShotToken.typeQuote:
