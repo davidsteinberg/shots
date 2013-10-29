@@ -14,7 +14,7 @@ class ShotToken:
 	typeComma = 5
 	typeComment = 6
 	typeDirective = 7
-	typeDirectiveWithClosing = 8
+	typeDirectiveSelfClosing = 8
 	typeEquals = 9
 	typeEOL = 10
 	typeID = 11
@@ -22,6 +22,25 @@ class ShotToken:
 	typeQuote = 13
 	typeText = 14
 	typeUnknown = 15
+
+	typeNumToName = [
+		"typeAlpha",
+		"typeArrayCloser",
+		"typeArrayOpener",
+		"typeClass",
+		"typeChildElemNext",
+		"typeComma",
+		"typeComment",
+		"typeDirective",
+		"typeDirectiveSelfClosing",
+		"typeEquals",
+		"typeEOL",
+		"typeID",
+		"typeNumber",
+		"typeQuote",
+		"typeText",
+		"typeUnknown"
+	]
 
 	def __init__(self,value="",type="unknown"):
 		self.value = value
@@ -36,10 +55,9 @@ class ShotLine:
 		self.tokens = []
 
 class ShotTokenizer:
-	def __init__(self, fileName, logging=False):
+	def __init__(self, fileName):
 
 		self.fileName = fileName
-		self.logging = logging
 
 		self.currentChar = " "		
 		self.currentToken = None
@@ -52,10 +70,6 @@ class ShotTokenizer:
 		self.currentLineLen = 0
 
 		self.lines = []
-	
-	def log(self,message):
-		if self.logging:
-			print message
 		
 	def getChar(self):
 		if self.currentPosInLine >= self.currentLineLen:
@@ -186,7 +200,7 @@ class ShotTokenizer:
 			self.getNextChar()
 			
 			if self.currentChar == "-":
-				t = ShotToken(type=ShotToken.typeDirectiveWithClosing)
+				t = ShotToken(type=ShotToken.typeDirectiveSelfClosing)
 				self.getNextChar()
 			else:
 				t = ShotToken(type=ShotToken.typeDirective)
@@ -233,8 +247,6 @@ class ShotTokenizer:
 		else:
 			t = ShotToken(type=ShotToken.typeUnknown,value=self.currentChar)
 			self.getNextChar()
-
-		self.log(str(t.type) + " : " + t.value)
 
 		return t
 

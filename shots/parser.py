@@ -17,8 +17,9 @@ class ShotParser:
 	staticDir = "/static"
 
 	def __init__(self,fileName, included=False, logging=False):
-		self.tokenizer = ShotTokenizer(fileName,logging=logging)
+		self.tokenizer = ShotTokenizer(fileName)
 		self.included = included
+		self.logging = logging
 
 		self.currentLineNum = 0
 		self.currentTokenNum = 0
@@ -34,34 +35,35 @@ class ShotParser:
 		self.fillingHead = True
 		self.bodyCreated = False
 
+	def log(self,message):
+		if self.logging:
+			print message
+
+	def logDigestion(self,eaten):
+		self.log("    - eat " + eaten)
+
+	def logCreation(self,tag):
+		self.log("make " + tag)
+
+	def logFinishedCreation(self,tag):
+		self.log("finished making " + tag)
+			
 	def parseError(self,string):
 		exit("Parse Error on line " + str(self.currentLineNum+1) + ", token " + str(self.currentTokenNum) + " : " + string)
 
 	def reachedEOF(self):
 		return self.currentLineNum >= len(self.tokenizer.lines)
 
-	def printTier(self,string, num=0):
-		if not self.logging:
-			return
-	
-		for i in range(num):
-			print "    ",
-		print string
-
-	def logDigestion(self,eaten):
-		self.printTier("- eat " + eaten,1)
-
-	def logCreation(self,tag):
-		self.printTier("make " + tag)
-
-	def logFinishedCreation(self,tag):
-		self.printTier("finished making " + tag)
-
 	def getToken(self):
 		if self.currentTokenNum >= len(self.tokenizer.lines[self.currentLineNum].tokens):
+			self.logDigestion("EOL")
 			return ShotToken(type=ShotToken.typeEOL)
 		self.currentTokenNum += 1
-		return self.tokenizer.lines[self.currentLineNum].tokens[self.currentTokenNum-1]
+
+		token = self.tokenizer.lines[self.currentLineNum].tokens[self.currentTokenNum-1]
+		self.logDigestion(ShotToken.typeNumToName[token.type])
+
+		return token
 
 	def getNextToken(self):
 		self.currentToken = self.getToken()
@@ -337,6 +339,8 @@ class ShotParser:
 		return ShotTextNode(text="<!--\n"+"".join(commentBody)+"-->",depth=commentDepth)
 
 	def getNodeWithTag(self):
+		self.logCreation(self.currentToken.value)
+	
 		if self.currentToken.value == "comment":
 			node = self.getBlockComment()
 
@@ -524,6 +528,7 @@ class ShotParser:
 			return None
 
 		while self.getDepth() <= self.currentNode.depth:
+			self.logFinishedCreation(self.currentNode.tag)
 			self.currentNode = self.currentNode.parent
 
 		self.getNextToken()
@@ -542,7 +547,9 @@ class ShotParser:
 			self.getNodeWithTag()
 
 		elif self.currentToken.type == ShotToken.typeComment:
+			self.logCreation("line comment")
 			self.getComment()
+			self.logFinishedCreation("line comment")
 
 		else:
 			if not self.bodyCreated:
@@ -559,13 +566,19 @@ class ShotParser:
 				self.bodyCreated = True
 		
 			if self.currentToken.type == ShotToken.typeText:
+				self.logCreation("text")
 				self.getText()
+				self.logFinishedCreation("text")
 
 			elif self.currentToken.type == ShotToken.typeDirective:
+				self.logCreation("directive")
 				self.getDirective()
+				self.logFinishedCreation("directive")
 				
-			elif self.currentToken.type == ShotToken.typeDirectiveWithClosing:
+			elif self.currentToken.type == ShotToken.typeDirectiveSelfClosing:
+				self.logCreation("self closing directive")
 				self.getDirective(closing=True)
+				self.logFinishedCreation("self closing directive")
 			
 		return True
 

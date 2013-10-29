@@ -67,13 +67,16 @@ class Shot:
 #-------------------------
 
 def main():
-	debugging = False
+	beforeJinja = False
+	logging = False
 	
 	if len(sys.argv) < 2:
 		exit("Usage : " + sys.argv[0] + " <filename> [-d]\n        " + sys.argv[0] + " requires at least a file name as a parameter, with an optional debug flag")
 	elif len(sys.argv) > 2:
-		if sys.argv[2] == "-d":
-			debugging = True
+		if "-j" in sys.argv:
+			beforeJinja = True
+		if "-l" in sys.argv:
+			logging = True
 
 	fileName, fileExt = splitext(sys.argv[1])
 	if not fileExt:
@@ -81,12 +84,12 @@ def main():
 	else:
 		fileName += fileExt
 
-	s = Shot(fileName)
+	s = Shot(fileName,logging=logging)
 
-	if debugging:
-		print s.generateCode()
-	else:
-		print s.render()
+	if beforeJinja:
+		print s.generateCode() + "\n\n----------------\n"
+	
+	print s.render()
 
 if __name__ == "__main__":
 	main()
