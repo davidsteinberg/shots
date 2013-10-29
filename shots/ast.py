@@ -78,7 +78,7 @@ class ShotNode:
 					result += " " + str(a)
 			result += ">"
 			if not self.selfClosing:
-				if self.multiline and len(self.children) > 0:
+				if self.multiline:
 					for c in self.children:
 						result += "\n"
 						result += str(c)
@@ -87,7 +87,7 @@ class ShotNode:
 						result += "    "
 				else:
 					for c in self.children:
-						result += str(c)
+						result += str(c).strip()
 				result += "</" + self.tag + ">"
 			
 		return result

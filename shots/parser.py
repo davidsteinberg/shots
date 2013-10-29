@@ -406,11 +406,15 @@ class ShotParser:
 
 			else:
 				node = ShotNode(tag=self.currentToken.value,depth=self.getDepth(),parent=self.currentNode)
+				if node.tag in ShotParser.selfClosers:
+					node.selfClosing = True
+				
 				self.currentNode.children.append(node)
 				self.currentNode = node
 				node = None
 				
 				blockText = False
+				childElemNext = False
 				
 				self.getNextToken()
 				while self.currentToken.type != ShotToken.typeEOL:
@@ -488,6 +492,7 @@ class ShotParser:
 						break
 						
 					elif self.currentToken.type == ShotToken.typeChildElemNext:
+						childElemNext = True
 						break
 				
 					self.getNextToken()
@@ -516,6 +521,16 @@ class ShotParser:
 					
 					del elemBody[-1] # get rid of last newline
 					self.currentNode.children.append(''.join(elemBody))
+				
+				elif childElemNext:
+					self.currentNode.multiline = False
+					self.currentNode.depth -= 1
+
+					self.getNextNode()
+
+					self.currentLineNum -= 1
+					self.currentNode = self.currentNode.parent
+					self.currentNode.depth += 1
 		
 		if node:
 			self.currentNode.children.append(node)
@@ -579,7 +594,7 @@ class ShotParser:
 				self.logCreation("self closing directive")
 				self.getDirective(closing=True)
 				self.logFinishedCreation("self closing directive")
-			
+		
 		return True
 
 	def getNextNode(self):
