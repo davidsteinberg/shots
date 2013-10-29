@@ -7,19 +7,21 @@ import re
 class ShotToken:
 
 	typeAlpha = 0
-	typeClass = 1
-	typeChildElemNext = 2
-	typeComment = 3
-	typeDirective = 4
-	typeDirectiveWithClosing = 5
-	typeEquals = 6
-	typeEOL = 7
-	typeID = 8
-	typeNumber = 9
-	typePointer = 10
-	typeQuote = 11
-	typeText = 12
-	typeUnknown = 13
+	typeArrayCloser = 1
+	typeArrayOpener = 2
+	typeClass = 3
+	typeChildElemNext = 4
+	typeComma = 5
+	typeComment = 6
+	typeDirective = 7
+	typeDirectiveWithClosing = 8
+	typeEquals = 9
+	typeEOL = 10
+	typeID = 11
+	typeNumber = 12
+	typeQuote = 13
+	typeText = 14
+	typeUnknown = 15
 
 	def __init__(self,value="",type="unknown"):
 		self.value = value
@@ -213,7 +215,19 @@ class ShotTokenizer:
 			t.value = "".join(comment)
 
 		elif self.currentChar == "=":
-			t = ShotToken(type=ShotToken.typeEquals,value=self.currentChar)
+			t = ShotToken(type=ShotToken.typeEquals)
+			self.getNextChar()
+		
+		elif self.currentChar == "[":
+			t = ShotToken(type=ShotToken.typeArrayOpener)
+			self.getNextChar()
+			
+		elif self.currentChar == "]":
+			t = ShotToken(type=ShotToken.typeArrayCloser)
+			self.getNextChar()
+			
+		elif self.currentChar == ",":
+			t = ShotToken(type=ShotToken.typeComma)
 			self.getNextChar()
 	
 		else:

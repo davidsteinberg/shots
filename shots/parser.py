@@ -410,16 +410,58 @@ class ShotParser:
 				
 				self.getNextToken()
 				while self.currentToken.type != ShotToken.typeEOL:
-					
+				
 					if self.currentToken.type == ShotToken.typeAlpha:
 						attr = ShotAttribute(name=self.currentToken.value)
 						self.getNextToken()
 						
-						if self.currentToken.type == ShotToken.typeEquals:
+						if self.currentToken.type != ShotToken.typeEquals:
+							self.currentNode.attributes.append(attr)
+							self.currentTokenNum -= 1
+
+						else:
 							self.getNextToken()
-							attr.value = self.currentToken.value
-						
-						self.currentNode.attributes.append(attr)
+							
+							if (self.currentNode.tag == "audio" or self.currentNode.tag == "video") and attr.name == "src":
+								sources = []
+							
+								if self.currentToken.type == ShotToken.typeArrayOpener:
+									self.getNextToken()
+									while self.currentToken.type != ShotToken.typeArrayCloser:
+										if self.currentToken.type == ShotToken.typeQuote:
+											sources.append(self.currentToken.value)
+										self.getNextToken()
+									self.getNextToken()
+									
+								elif self.currentToken.type == ShotToken.typeQuote:
+									sources.append(self.currentToken.value)
+
+								else:
+									self.parseError("expected quote or array after audio or video src")
+								
+								for s in sources:
+									source = ShotNode(tag="source",depth=self.getDepth()+1,parent=self.currentNode,selfClosing=True)
+
+									fileName = s[1:-1]
+									fileExt = fileName.split(".")[-1]
+									if fileExt == "mp3":
+										fileExt = "mpeg"
+
+									src = ShotAttribute(name="src",value="\"" + getStaticPath(fileName) + "\"")
+									source.attributes.append(src)
+									
+									type = ShotAttribute(name="type")
+									type.value = "\""+("audio" if self.currentNode.tag == "audio" else "video")+"/"+fileExt+"\""
+									source.attributes.append(type)
+									
+									self.currentNode.children.append(source)
+								
+							elif self.currentToken.type == ShotToken.typeQuote:
+								attr.value = self.currentToken.value
+								self.currentNode.attributes.append(attr)
+
+							else:
+								self.parseError("expected quote after attribute")
 					
 					elif self.currentToken.type == ShotToken.typeClass:
 						self.currentNode.classes.append(self.currentToken.value)
@@ -431,8 +473,11 @@ class ShotParser:
 						if self.currentToken.value == "":
 							blockText = True
 						else:
-							self.currentNode.children.append(ShotTextNode(text=self.currentToken.value))
-							self.currentNode.multiline = False
+							if self.currentNode.tag == "audio" or self.currentNode.tag == "video":
+								self.currentNode.children.append(ShotTextNode(text=self.currentToken.value,depth=self.getDepth()+1))
+							else:
+								self.currentNode.children.append(ShotTextNode(text=self.currentToken.value))
+								self.currentNode.multiline = False
 						break
 						
 					elif self.currentToken.type == ShotToken.typeChildElemNext:
