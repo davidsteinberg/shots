@@ -2,65 +2,29 @@
 # Shot
 #-------------------------
 
-from ast import *
-from parser import *
+import re
+import sys
 
 from os import sep, walk
 from os.path import abspath, dirname, splitext
 
-from jinja2 import Template
-
-import re
-import sys
+from jinja2 import Environment
+from loader import ShotLoader
 
 class Shot:
 
-	def __init__(self, fileName, fetch=True, extending=False, logging=False):
-		if fetch:
-			fileName = "." + getTemplatePath(fileName)
-	
-		self.fileName = fileName
+	environment = Environment(loader=ShotLoader())
 
-		self.extending = extending
-		self.parser = ShotParser(self.fileName,logging=logging)
+	def __init__(self, fileName, logging=False):
+		self.fileName = fileName
 			
 	def error(self,message):
 		print message
 		exit()
-	
-	def generateCode(self):
-		self.parser.tokenize()
-		self.parser.parse()
-	
-		result = ""
-		kids = self.parser.rootNode.children
-		if len(kids) > 0:
-			if self.extending:
-				for k in kids:
-					result += str(k)
-			else:
-				if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "doctype":
-					kids[0].tag = "!doctype"
-					for k in kids:
-						result += str(k)
-				else:
-					result = "<!doctype html>\n"
-					if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "html":
-						for k in kids:
-							result += str(k)
-					else:
-						node = ShotNode(tag="html",multiline=True)
-						for k in kids:
-							node.children.append(k)
-						result += str(node)
-
-		# last minute regex for template delimiters
-		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
-		return result
 
 	def render(self,**varArgs):
-		result = Template(self.generateCode())
-		return result.render(**varArgs)
+		template = Shot.environment.get_template(self.fileName)
+		return template.render(**varArgs)
 
 #-------------------------
 # Main

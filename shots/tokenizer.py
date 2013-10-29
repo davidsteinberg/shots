@@ -55,9 +55,9 @@ class ShotLine:
 		self.tokens = []
 
 class ShotTokenizer:
-	def __init__(self, fileName):
+	def __init__(self, filename):
 
-		self.fileName = fileName
+		self.filename = filename
 
 		self.currentChar = " "		
 		self.currentToken = None
@@ -274,7 +274,7 @@ class ShotTokenizer:
 		return line
 		
 	def tokenize(self):
-		for line in open(self.fileName,"r"):
+		for line in open(self.filename,"r"):
 			self.currentLineNum += 1
 			if not re.match(r"^\s*$",line):
 				self.currentLine = line

@@ -16,8 +16,8 @@ class ShotParser:
 	templateDir = "/templates"
 	staticDir = "/static"
 
-	def __init__(self,fileName, included=False, logging=False):
-		self.tokenizer = ShotTokenizer(fileName)
+	def __init__(self, filename, included=False, logging=False):
+		self.tokenizer = ShotTokenizer(filename)
 		self.included = included
 		self.logging = logging
 
@@ -173,6 +173,8 @@ class ShotParser:
 				for token in line.tokens:
 					if token.type == ShotToken.typeText:
 						token.value = ":" + token.value
+					elif token.type == ShotToken.typeID:
+						token.value = "#" + token.value
 					body.append(token.value + " ")
 				body.append("\n")
 		
@@ -610,22 +612,40 @@ class ShotParser:
 		while self.nextNode:
 			self.getNextNode()
 
-#-------------------------
-# Finding Files
-#-------------------------
-
-def getTemplatePath(fileName):
-	found = False
-	currentDir = dirname(dirname(abspath(__file__))) + ShotParser.templateDir
-	for root, dirs, files in walk(currentDir):
-		if fileName in files:
-			found = True
-			fileName = ShotParser.templateDir + root.replace(currentDir, "", 1) + sep + fileName
-			break
-	if not found:
-		print "Error: couldn't find file " + fileName
+	def generateCode(self):
+		self.tokenize()
+		self.parse()
 	
-	return fileName
+		result = ""
+		kids = self.rootNode.children
+		if len(kids) > 0:
+# 			if self.extending:
+# 				for k in kids:
+# 					result += str(k)
+# 			else:
+				if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "doctype":
+					kids[0].tag = "!doctype"
+					for k in kids:
+						result += str(k)
+				else:
+					result = "<!doctype html>\n"
+					if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "html":
+						for k in kids:
+							result += str(k)
+					else:
+						node = ShotNode(tag="html",multiline=True)
+						for k in kids:
+							node.children.append(k)
+						result += str(node)
+
+		# last minute regex for template delimiters
+		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
+		return result
+
+
+#-------------------------
+# Finding Resources
+#-------------------------
 
 def getStaticPath(fileName):
 	found = False
