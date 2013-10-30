@@ -12,10 +12,13 @@ class ShotLoader(BaseLoader):
 
 	templateDir = "/templates"
 
-	def get_source(self, environment, filename, parent=None):
-		if parent:
-			print "AA"
-	
+	def __init__(self, path=None):
+		self.path = path
+
+	def get_source(self, environment, filename):
+		
+		print "load " + filename
+		
 		found = False
 		currentDir = dirname(dirname(abspath(__file__))) + ShotLoader.templateDir
 		for root, dirs, files in walk(currentDir):

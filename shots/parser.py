@@ -13,12 +13,10 @@ class ShotParser:
 	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
 	tagsForHead = ["base", "comment", "css", "favicon", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 
-	templateDir = "/templates"
-	staticDir = "/static"
-
-	def __init__(self, filename, included=False, logging=False):
+	def __init__(self, filename, included=False, extending=False, logging=False):
 		self.tokenizer = ShotTokenizer(filename)
 		self.included = included
+		self.extending = extending
 		self.logging = logging
 
 		self.currentLineNum = 0
@@ -296,10 +294,28 @@ class ShotParser:
 		
 		text = self.currentToken.value
 		
-		if closing:
-			keyword = text.split(" ")[0]
-		else:
+		pieces = text.split(" ")
+		keyword = pieces[0]
+		
+		if keyword == "extends":
+			self.extending = True
+			self.currentNode = self.rootNode
+			del self.currentNode.children[:]
+			node.parent = self.currentNode
+		
+		if keyword == "extends" or keyword == "include" or keyword == "import":
+			filename = pieces[1][1:-1]
+			shot = Shot(filename,logging=self.logging)
+			text = text.replace(filename, locate(filename) + fileSuffix)
+			shot.generateShot()
+			
+			self.lookingForHead = False
+			self.fillingHead = False
+			self.bodyCreated = True
+		
+		if not closing:
 			keyword = ""
+
 		attr = ShotAttribute(name=keyword,value=text)
 		node.attributes.append(attr)
 
@@ -347,6 +363,9 @@ class ShotParser:
 			node = self.getBlockComment()
 
 		else:
+#
+#			OPTIONAL HEAD AND BODY TAGS
+#
 			if self.included or self.bodyCreated:
 				self.lookingForHead = False
 				self.fillingHead = False
@@ -569,6 +588,9 @@ class ShotParser:
 			self.logFinishedCreation("line comment")
 
 		else:
+#
+#			OPTIONAL HEAD AND BODY TAGS
+#
 			if not self.bodyCreated:
 				if self.lookingForHead:
 					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
@@ -581,7 +603,7 @@ class ShotParser:
 
 				self.currentNode = body
 				self.bodyCreated = True
-		
+
 			if self.currentToken.type == ShotToken.typeText:
 				self.logCreation("text")
 				self.getText()
@@ -619,10 +641,10 @@ class ShotParser:
 		result = ""
 		kids = self.rootNode.children
 		if len(kids) > 0:
-# 			if self.extending:
-# 				for k in kids:
-# 					result += str(k)
-# 			else:
+			if self.extending:
+				for k in kids:
+					result += str(k)
+			else:
 				if not isinstance(kids[0],ShotTextNode) and kids[0].tag == "doctype":
 					kids[0].tag = "!doctype"
 					for k in kids:
@@ -648,14 +670,19 @@ class ShotParser:
 #-------------------------
 
 def getStaticPath(fileName):
+
+	staticDir = "/static"
+
 	found = False
-	currentDir = dirname(dirname(abspath(__file__))) + ShotParser.staticDir
+	currentDir = dirname(dirname(abspath(__file__))) + staticDir
 	for root, dirs, files in walk(currentDir):
 		if fileName in files:
 			found = True
-			fileName = ShotParser.staticDir + root.replace(currentDir, "", 1) + sep + fileName
+			fileName = staticDir + root.replace(currentDir, "", 1) + sep + fileName
 			break
 	if not found:
 		print "Error: couldn't find file " + fileName
 	
 	return fileName
+
+from shot import fileSuffix, locate, Shot

@@ -6,52 +6,80 @@ import re
 import sys
 
 from os import sep, walk
-from os.path import abspath, dirname, splitext
+from os.path import abspath, dirname, isfile, splitext
 
-from jinja2 import Environment
-from loader import ShotLoader
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+
+from parser import ShotParser
+
+environment = Environment(loader=FileSystemLoader("/"))
+templateDir = "/templates"
+fileSuffix = ".shot"
+overwriteShot = True
 
 class Shot:
+	def __init__(self, filename, logging=False):
+		fileExt = filename.split(".")[-1]
+		if not fileExt or fileExt != "html":
+			filename += ".html"
 
-	environment = Environment(loader=ShotLoader())
+		self.filename = locate(filename)
+		self.parser = ShotParser(self.filename, logging=logging)
+		self.filename += fileSuffix
+		
+		self.logging = logging
 
-	def __init__(self, fileName, logging=False):
-		self.fileName = fileName
-			
-	def error(self,message):
-		print message
-		exit()
+	def log(self, message):
+		if self.logging:
+			print message
+
+	def generateShot(self):
+		self.log("generating " + self.filename)
+	
+		if overwriteShot or not isfile(self.filename):
+			f = open(self.filename,"w")
+			code = self.parser.generateCode()
+			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
+			f.write(code)
+			f.close()
 
 	def render(self,**varArgs):
-		template = Shot.environment.get_template(self.fileName)
+		self.generateShot()
+		template = environment.get_template(self.filename)
 		return template.render(**varArgs)
+
+#-------------------------
+# Locate
+#-------------------------
+
+def locate(filename):
+	found = False
+	currentDir = dirname(dirname(abspath(__file__))) + templateDir
+	for root, dirs, files in walk(currentDir):
+		if filename in files:
+			found = True
+			filename = currentDir + sep + filename
+			break
+	if not found:
+		raise TemplateNotFound(filename)
+	
+	return filename
+
 
 #-------------------------
 # Main
 #-------------------------
 
 def main():
-	beforeJinja = False
 	logging = False
 	
 	if len(sys.argv) < 2:
 		exit("Usage : " + sys.argv[0] + " <filename> [-d]\n        " + sys.argv[0] + " requires at least a file name as a parameter, with an optional debug flag")
 	elif len(sys.argv) > 2:
-		if "-j" in sys.argv:
-			beforeJinja = True
 		if "-l" in sys.argv:
 			logging = True
 
-	fileName, fileExt = splitext(sys.argv[1])
-	if not fileExt:
-		fileName += ".html"
-	else:
-		fileName += fileExt
-
-	s = Shot(fileName,logging=logging)
-
-	if beforeJinja:
-		print s.generateCode() + "\n\n----------------\n"
+	s = Shot(sys.argv[1],logging=logging)
 	
 	print s.render()
 

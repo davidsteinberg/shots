@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+<div><a>some text</a></div>
+<a href="http://wikipedia.org">Wikipedia</a>
+{% block content %}{% endblock %}
+then some other stuff
+</body>
+</html>

@@ -1,0 +1,3 @@
+{% extends "/Users/davidsteinberg/github/shots/templates/layout.html.shot" %}{% block content %}
+    i'm in a block
+{% endblock %}

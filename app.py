@@ -5,8 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-	things = ["fun", "thinking"]
-	return Shot('index.html').render(topStuff=things)
+	return Shot('index.html').render()
 
 @app.route('/bootstrap')
 def bootstrap():
