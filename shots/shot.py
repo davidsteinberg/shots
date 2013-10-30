@@ -27,6 +27,9 @@ class Shot:
 		self.included = included
 		self.logging = logging
 
+		if self.overwrite or not isfile(self.filename):
+			self.parser = ShotParser(self.filename, included=self.included, logging=self.logging)
+
 	def log(self, message):
 		if self.logging:
 			print message
@@ -35,12 +38,10 @@ class Shot:
 		self.log("generating " + self.filename)
 	
 		if self.overwrite or not isfile(self.filename):
-			parser = ShotParser(self.filename, included=self.included, logging=self.logging)
-
 			self.filename += fileSuffix
 			f = open(self.filename,"w")
 
-			code = parser.generateCode()
+			code = self.parser.generateCode()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
 
 			f.write(code)
@@ -74,6 +75,7 @@ def locate(filename):
 #-------------------------
 
 def main():
+	beforeJinja = False
 	logging = False
 	
 	if len(sys.argv) < 2:
@@ -81,10 +83,15 @@ def main():
 	elif len(sys.argv) > 2:
 		if "-l" in sys.argv:
 			logging = True
+		if "-j" in sys.argv:
+			beforeJinja = True
 
-	s = Shot(sys.argv[1],logging=logging)
-	
-	print s.render()
+	if beforeJinja:
+		s = Shot(sys.argv[1], overwrite=True, logging=logging)
+		print s.parser.generateCode()
+	else:
+		s = Shot(sys.argv[1], logging=logging)
+		print s.render()
 
 if __name__ == "__main__":
 	main()

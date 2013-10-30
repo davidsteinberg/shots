@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+{% for i in range(1, 7) %}
+    <h{{ i }}>this is a header</h{{ i }}>
+    <h{{ i }}>this is a header</h{{ i }}>
+{% endfor %}
+</body>
+</html>
