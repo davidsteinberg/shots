@@ -15,18 +15,16 @@ from parser import ShotParser
 environment = Environment(loader=FileSystemLoader("/"))
 templateDir = "/templates"
 fileSuffix = ".shot"
-overwriteShot = True
 
 class Shot:
-	def __init__(self, filename, logging=False):
+	def __init__(self, filename, overwrite=True, included=False, logging=False):
 		fileExt = filename.split(".")[-1]
 		if not fileExt or fileExt != "html":
 			filename += ".html"
 
 		self.filename = locate(filename)
-		self.parser = ShotParser(self.filename, logging=logging)
-		self.filename += fileSuffix
-		
+		self.overwrite = overwrite
+		self.included = included
 		self.logging = logging
 
 	def log(self, message):
@@ -36,10 +34,15 @@ class Shot:
 	def generateShot(self):
 		self.log("generating " + self.filename)
 	
-		if overwriteShot or not isfile(self.filename):
+		if self.overwrite or not isfile(self.filename):
+			parser = ShotParser(self.filename, included=self.included, logging=self.logging)
+
+			self.filename += fileSuffix
 			f = open(self.filename,"w")
-			code = self.parser.generateCode()
+
+			code = parser.generateCode()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
+
 			f.write(code)
 			f.close()
 

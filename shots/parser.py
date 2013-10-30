@@ -108,7 +108,7 @@ class ShotParser:
 
 				return node
 			elif fileExt == "js":
-				node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode)
+				node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
 			
 				src = ShotAttribute(name="src")
 				src.value = fileName
@@ -297,21 +297,27 @@ class ShotParser:
 		pieces = text.split(" ")
 		keyword = pieces[0]
 		
-		if keyword == "extends":
-			self.extending = True
-			self.currentNode = self.rootNode
-			del self.currentNode.children[:]
-			node.parent = self.currentNode
-		
 		if keyword == "extends" or keyword == "include" or keyword == "import":
 			filename = pieces[1][1:-1]
-			shot = Shot(filename,logging=self.logging)
-			text = text.replace(filename, locate(filename) + fileSuffix)
-			shot.generateShot()
+
+			shot = Shot(filename, logging=self.logging)
+				
+			if keyword == "include":
+				shot.included = True
+				
+			elif keyword == "extends":
+				self.extending = True
+
+				self.lookingForHead = False
+				self.fillingHead = False
+				self.bodyCreated = True
+
+				self.currentNode = self.rootNode
+				del self.currentNode.children[:]
+				node.parent = self.currentNode
 			
-			self.lookingForHead = False
-			self.fillingHead = False
-			self.bodyCreated = True
+			text = text.replace(filename, shot.filename + fileSuffix)
+			shot.generateShot()
 		
 		if not closing:
 			keyword = ""
@@ -366,7 +372,12 @@ class ShotParser:
 #
 #			OPTIONAL HEAD AND BODY TAGS
 #
-			if self.included or self.bodyCreated:
+			if self.included:
+				self.lookingForHead = False
+				self.fillingHead = False
+				self.bodyCreated = True
+
+			elif self.bodyCreated:
 				self.lookingForHead = False
 				self.fillingHead = False
 		
@@ -591,7 +602,7 @@ class ShotParser:
 #
 #			OPTIONAL HEAD AND BODY TAGS
 #
-			if not self.bodyCreated:
+			if not self.included and not self.bodyCreated:
 				if self.lookingForHead:
 					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 					self.currentNode.children.append(head)
@@ -641,7 +652,7 @@ class ShotParser:
 		result = ""
 		kids = self.rootNode.children
 		if len(kids) > 0:
-			if self.extending:
+			if self.extending or self.included:
 				for k in kids:
 					result += str(k)
 			else:
