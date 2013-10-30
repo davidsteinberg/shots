@@ -51,21 +51,24 @@ class ShotNode:
 				result += str(c)
 		
 		elif self.tag == "templateDirective":
-			keyword = self.attributes[0].name
-			text = self.attributes[0].value
+			if self.parent.tag == "comment":
+				result = ""
+			else:
+				keyword = self.attributes[0].name
+				text = self.attributes[0].value
 			
-			result += "{% " + text + " %}"
-			if len(self.children) > 0:
-				for c in self.children:
-					result += "\n"
-					kid = str(c)
-					result += kid
-				result += "\n"			
-				for d in range(self.depth):
-					result += "    "
+				result += "{% " + text + " %}"
+				if len(self.children) > 0:
+					for c in self.children:
+						result += "\n"
+						kid = str(c)
+						result += kid
+					result += "\n"			
+					for d in range(self.depth):
+						result += "    "
 
-			if keyword != "":
-				result += "{% end" + keyword + " %}"
+				if keyword != "":
+					result += "{% end" + keyword + " %}"
 
 		else:
 			result += "<" + self.tag

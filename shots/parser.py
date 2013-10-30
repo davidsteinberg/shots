@@ -332,7 +332,7 @@ class ShotParser:
 		node = ShotTextNode(text="<!-- "+self.currentToken.value+" -->",depth=self.getDepth())
 		self.currentNode.children.append(node)
 
-	def getBlockComment(self):
+	def getBlockComment(self,secret=False):
 		commentBody = []
 		
 		self.getNextToken()
@@ -360,13 +360,17 @@ class ShotParser:
 			
 			self.currentLineNum -= 1
 
-		return ShotTextNode(text="<!--\n"+"".join(commentBody)+"-->",depth=commentDepth)
+		text = "" if secret else "<!--\n"+"".join(commentBody)+"-->"
+		return ShotTextNode(text=text,depth=commentDepth)
 
 	def getNodeWithTag(self):
 		self.logCreation(self.currentToken.value)
 	
 		if self.currentToken.value == "comment":
 			node = self.getBlockComment()
+			
+		elif self.currentToken.value == "disable" or self.currentToken.value == "secret":
+			node = self.getBlockComment(secret=True)
 
 		else:
 #
