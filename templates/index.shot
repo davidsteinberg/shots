@@ -1,7 +1,0 @@
-if name
-	: this
-elif age
-	: that
-else
-	: foo
-

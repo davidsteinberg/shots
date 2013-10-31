@@ -1,4 +1,52 @@
+! template directives
 
+! include "file"
+
+! import "file"
+
+extends "file"
+
+block content
+
+for i in range(1, 7)
+	: do stuff
+
+for e in elements
+	: do something
+else
+	: do something else
+
+if name
+	: hi |name|
+
+if name
+	: hi |name|
+else
+	: hi world
+
+if name
+	: hi there
+elif age
+	: hey there
+
+if name
+	: hi there
+elif age
+	: hey there
+else
+	: foo
+
+call a macro
+
+filter with stuff
+
+from someplace import stuff
+
+macro stuff
+
+raw
+
+set x = 10
 
 audio src="sound.mp3" controls : your browser doesn't support me
 audio src=["sound.mp3", "sound.ogg"]

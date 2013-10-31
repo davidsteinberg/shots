@@ -327,7 +327,7 @@ class ShotParser:
 					shot.included = True
 			
 				newfilename, ext = splitext(shot.filename)
-				text = text.replace(filename, newfilename + ".html")
+				text[1] = "\"" + newfilename + ".html\""
 				shot.generateShot()
 			
 			if keyword == "extends":

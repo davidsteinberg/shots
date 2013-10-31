@@ -72,18 +72,30 @@ class ShotNode:
 					currentIndex = parent.children.index(self)
 					nextSibling = None if currentIndex+1 >= len(parent.children) else parent.children[currentIndex+1]
 
+					deleteSpaces = False
+
 					if keyword == "if" or keyword == "elif":
 						if not nextSibling or (nextSibling.attributes[0].name != "elif" and nextSibling.attributes[0].name != "else"):
 							result += "{% endif %}"
+						else:
+							deleteSpaces = True
 					elif keyword == "for":
 						if not nextSibling or nextSibling.attributes[0].name != "else":
 							result += "{% endfor %}"
+						else:
+							deleteSpaces = True
 					elif keyword == "else":
 						prevSibling = parent.children[currentIndex-1]
 						if prevSibling.attributes[0].name == "if" or prevSibling.attributes[0].name == "elif":
 							result += "{% endif %}"
 						elif prevSibling.attributes[0].name == "for":
 							result += "{% endfor %}"
+					
+					if deleteSpaces:
+						count = -1
+						for d in range(self.depth):
+							count -= 4
+						result = result[:count]
 
 		else:
 			result += "<" + self.tag
