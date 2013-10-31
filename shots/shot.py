@@ -3,7 +3,6 @@ import sys
 from os.path import splitext
 
 from locator import getTemplate, getTemplatePath
-from parser import ShotParser
 
 class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
@@ -69,3 +68,6 @@ def main():
 
 if __name__ == "__main__":
 	main()
+
+# at the bottom to avoid import loop
+from parser import ShotParser
