@@ -297,14 +297,19 @@ class ShotParser:
 		keyword = pieces[0]
 		
 		if keyword == "extends" or keyword == "include" or keyword == "import":
-			filename = pieces[1][1:-1]
 
-			shot = Shot(filename, logging=self.logging)
+			if pieces[1][0] == "\"" or pieces[1][0] == "'":
+				filename = pieces[1][1:-1]
 
-			if keyword == "include":
-				shot.included = True
-				
-			elif keyword == "extends":
+				shot = Shot(filename, logging=self.logging)
+				if keyword == "include":
+					shot.included = True
+			
+				newfilename, ext = splitext(shot.filename)
+				text = text.replace(filename, newfilename + ".html")
+				shot.generateShot()
+			
+			if keyword == "extends":
 				self.extending = True
 
 				self.lookingForHead = False
@@ -314,10 +319,6 @@ class ShotParser:
 				self.currentNode = self.rootNode
 				del self.currentNode.children[:]
 				node.parent = self.currentNode
-			
-			newfilename, ext = splitext(shot.filename)
-			text = text.replace(filename, newfilename + ".html")
-			shot.generateShot()
 		
 		if not closing:
 			keyword = ""
