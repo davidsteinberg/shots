@@ -15,7 +15,7 @@ Check out [the docs](http://flaskshots.herokuapp.com/docs) for language details.
 
 Here is one of the smallest Shots you can have:
 
-###index.html
+###index.shot
 
 ```html
 title : A Little Shot
