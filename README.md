@@ -33,7 +33,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-	return Shot('index.html').render()
+	return Shot('index').render()
 	
 if __name__ == '__main__':
 	app.run()
@@ -41,10 +41,11 @@ if __name__ == '__main__':
 
 ###Look under the hood
 
-To see the template made before render_template is called on it, run:
+To see the HTML output of a Shot, run:
 
 ```bash
-python shots/shot.py {{ filename relative to templates/ }} [-d]
+python shots/shot.py {{ filename relative to templates folder }} [-d]
 ```
 
-Passing the -d or --debug flags will let you see the consumption course of the parser.
+The -j flag will let you see a template before Jinja2 has processed it.
+The -l flag will let you see the consumption course of the parser.
