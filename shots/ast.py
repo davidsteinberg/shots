@@ -23,6 +23,8 @@ class ShotTextNode:
 		result += self.text
 		return result
 
+closeDirectives = ["block", "call", "filter", "macro", "raw"]
+
 class ShotNode:
 	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=True):
 		self.id = id
@@ -46,7 +48,7 @@ class ShotNode:
 			for c in self.children:
 				result += str(c)
 		
-		elif self.tag == "templateDirective":
+		elif self.tag == "directive":
 			if self.parent.tag == "comment":
 				result = ""
 			else:
@@ -63,8 +65,25 @@ class ShotNode:
 					for d in range(self.depth):
 						result += "    "
 
-				if keyword != "":
+				if keyword in closeDirectives:
 					result += "{% end" + keyword + " %}"
+				else:
+					parent = self.parent
+					currentIndex = parent.children.index(self)
+					nextSibling = None if currentIndex+1 >= len(parent.children) else parent.children[currentIndex+1]
+
+					if keyword == "if" or keyword == "elif":
+						if not nextSibling or (nextSibling.attributes[0].name != "elif" and nextSibling.attributes[0].name != "else"):
+							result += "{% endif %}"
+					elif keyword == "for":
+						if not nextSibling or nextSibling.attributes[0].name != "else":
+							result += "{% endfor %}"
+					elif keyword == "else":
+						prevSibling = parent.children[currentIndex-1]
+						if prevSibling.attributes[0].name == "if" or prevSibling.attributes[0].name == "elif":
+							result += "{% endif %}"
+						elif prevSibling.attributes[0].name == "for":
+							result += "{% endfor %}"
 
 		else:
 			result += "<" + self.tag

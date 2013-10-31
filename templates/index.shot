@@ -1,23 +1,7 @@
-css
-	* {
-		margin: 0;
-		padding: 0;
-	}
-	
-	#code {
-		font-family: monospace;
-		border: none;
-		padding: 20px;
-	}
-	.topPiece {
-		height: 400px;
-	}
-
-textarea #code .topPiece autofocus placeholder="Enter Shots code here and click Go!"
-
-iframe #result .topPiece
-
-br 2
-
-button #submit : Go
+if name
+	: this
+elif age
+	: that
+else
+	: foo
 

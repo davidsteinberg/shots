@@ -5,10 +5,11 @@ from locator import getStaticPath
 from ast import *
 from tokenizer import *
 
-class ShotParser:
+selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
+tagsForHead = ["base", "comment", "css", "favicon", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
+directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
-	selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-	tagsForHead = ["base", "comment", "css", "favicon", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
+class ShotParser:
 
 	def __init__(self, filename, included=False, extending=False, logging=False):
 		self.tokenizer = ShotTokenizer(filename)
@@ -288,18 +289,38 @@ class ShotParser:
 		node = ShotTextNode(self.currentToken.value,depth=self.getDepth())
 		self.currentNode.children.append(node)
 
-	def getDirective(self,closing=False):
-		node = ShotNode(tag="templateDirective",depth=self.getDepth(),parent=self.currentNode)
+	def getDirective(self):
+		self.logCreation("directive")
+	
+		node = ShotNode(tag="directive",depth=self.getDepth(),parent=self.currentNode)
 		
-		text = self.currentToken.value
+		text = []
+
+		while self.currentToken.type != ShotToken.typeEOL:
+			if self.currentToken.type == ShotToken.typeText:
+				text.append(":" + self.currentToken.value)
+			elif self.currentToken.type == ShotToken.typeClass:
+				text.append("." + self.currentToken.value)
+			elif self.currentToken.type == ShotToken.typeID:
+				text.append("#" + self.currentToken.value)
+			elif self.currentToken.type == ShotToken.typeEquals:
+				text.append("=")
+			elif self.currentToken.type == ShotToken.typeArrayOpener:
+				text.append("[")
+			elif self.currentToken.type == ShotToken.typeArrayCloser:
+				text.append("]")
+			elif self.currentToken.type == ShotToken.typeComma:
+				text.append(",")
+			else:
+				text.append(self.currentToken.value)
+			self.getNextToken()
 		
-		pieces = text.split(" ")
-		keyword = pieces[0]
+		keyword = text[0]
 		
 		if keyword == "extends" or keyword == "include" or keyword == "import":
 
-			if pieces[1][0] == "\"" or pieces[1][0] == "'":
-				filename = pieces[1][1:-1]
+			if text[1][0] == "\"" or text[1][0] == "'":
+				filename = text[1][1:-1]
 
 				shot = Shot(filename, logging=self.logging)
 				if keyword == "include":
@@ -319,15 +340,14 @@ class ShotParser:
 				self.currentNode = self.rootNode
 				del self.currentNode.children[:]
 				node.parent = self.currentNode
-		
-		if not closing:
-			keyword = ""
 
-		attr = ShotAttribute(name=keyword,value=text)
+		attr = ShotAttribute(name=keyword,value=' '.join(text))
 		node.attributes.append(attr)
 
 		self.currentNode.children.append(node)
 		self.currentNode = node
+	
+		self.logFinishedCreation("directive")
 		
 	def getComment(self):
 		node = ShotTextNode(text="<!-- "+self.currentToken.value+" -->",depth=self.getDepth())
@@ -366,7 +386,8 @@ class ShotParser:
 
 	def getNodeWithTag(self):
 		self.logCreation(self.currentToken.value)
-	
+		
+		# comment check
 		if self.currentToken.value == "comment":
 			node = self.getBlockComment()
 			
@@ -396,7 +417,7 @@ class ShotParser:
 			
 					self.lookingForHead = False
 				
-					if self.currentToken.value not in self.tagsForHead:
+					if self.currentToken.value not in tagsForHead:
 						self.fillingHead = False
 						self.currentNode = self.currentNode.parent
 						if self.currentToken.value != "body":
@@ -407,7 +428,7 @@ class ShotParser:
 						self.bodyCreated = True
 
 			elif self.fillingHead:
-				if self.currentToken.value not in self.tagsForHead:
+				if self.currentToken.value not in tagsForHead:
 					self.fillingHead = False
 					self.currentNode = self.currentNode.parent
 					if self.currentToken.value != "body":
@@ -416,6 +437,11 @@ class ShotParser:
 						self.currentNode = bodyElement
 
 					self.bodyCreated = True
+					
+			# template directive check		
+			if self.currentToken.value in directiveOpeners:
+				self.getDirective()
+				return
 	
 			if self.currentToken.value == "include":
 				node = self.includeFile()
@@ -443,7 +469,7 @@ class ShotParser:
 
 			else:
 				node = ShotNode(tag=self.currentToken.value,depth=self.getDepth(),parent=self.currentNode)
-				if node.tag in ShotParser.selfClosers:
+				if node.tag in selfClosers:
 					node.selfClosing = True
 				
 				self.currentNode.children.append(node)
@@ -624,16 +650,6 @@ class ShotParser:
 				self.logCreation("text")
 				self.getText()
 				self.logFinishedCreation("text")
-
-			elif self.currentToken.type == ShotToken.typeDirective:
-				self.logCreation("directive")
-				self.getDirective()
-				self.logFinishedCreation("directive")
-				
-			elif self.currentToken.type == ShotToken.typeDirectiveSelfClosing:
-				self.logCreation("self closing directive")
-				self.getDirective(closing=True)
-				self.logFinishedCreation("self closing directive")
 		
 		return True
 

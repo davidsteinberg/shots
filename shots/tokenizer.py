@@ -9,15 +9,13 @@ class ShotToken:
 	typeChildElemNext = 4
 	typeComma = 5
 	typeComment = 6
-	typeDirective = 7
-	typeDirectiveSelfClosing = 8
-	typeEquals = 9
-	typeEOL = 10
-	typeID = 11
-	typeNumber = 12
-	typeQuote = 13
-	typeText = 14
-	typeUnknown = 15
+	typeEquals = 7
+	typeEOL = 8
+	typeID = 9
+	typeNumber = 10
+	typeQuote = 11
+	typeText = 12
+	typeUnknown = 13
 
 	typeNumToName = [
 		"typeAlpha",
@@ -27,8 +25,6 @@ class ShotToken:
 		"typeChildElemNext",
 		"typeComma",
 		"typeComment",
-		"typeDirective",
-		"typeDirectiveSelfClosing",
 		"typeEquals",
 		"typeEOL",
 		"typeID",
@@ -190,27 +186,8 @@ class ShotTokenizer:
 				self.getNextChar()
 
 			t.value = "".join(id)
-	
-		# template directive
-		elif self.currentChar == "-":
-			self.getNextChar()
-			
-			if self.currentChar == "-":
-				t = ShotToken(type=ShotToken.typeDirectiveSelfClosing)
-				self.getNextChar()
-			else:
-				t = ShotToken(type=ShotToken.typeDirective)
-			
-			directive = []
-			
-			self.getNextChar()
-			while self.currentChar != self.EOL:
-				directive.append(self.currentChar)
-				self.getNextChar()
-			
-			t.value = "".join(directive)
 
-		# comment	
+		# comment
 		elif self.currentChar == "!":
 			t = ShotToken(type=ShotToken.typeComment)
 			
@@ -224,10 +201,12 @@ class ShotTokenizer:
 			
 			t.value = "".join(comment)
 
+		# equals (for attributes)
 		elif self.currentChar == "=":
 			t = ShotToken(type=ShotToken.typeEquals)
 			self.getNextChar()
-		
+
+		# array tokens (for audio and video src)
 		elif self.currentChar == "[":
 			t = ShotToken(type=ShotToken.typeArrayOpener)
 			self.getNextChar()
@@ -239,7 +218,8 @@ class ShotTokenizer:
 		elif self.currentChar == ",":
 			t = ShotToken(type=ShotToken.typeComma)
 			self.getNextChar()
-	
+		
+		# unknown
 		else:
 			t = ShotToken(type=ShotToken.typeUnknown,value=self.currentChar)
 			self.getNextChar()
