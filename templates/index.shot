@@ -1,3 +1,2 @@
-include "file"
+link to="http://google.com" : Google
 
-: index text

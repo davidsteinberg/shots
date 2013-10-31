@@ -5,7 +5,7 @@ from locator import getStaticPath
 from ast import *
 from tokenizer import *
 
-selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
+selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 tagsForHead = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
@@ -450,9 +450,6 @@ class ShotParser:
 			elif self.currentToken.value == "media":
 				node = self.getMediaElement()
 
-			elif self.currentToken.value == "link":
-				node = self.getLinkElement()
-				
 			elif self.currentToken.value == "favicon":
 				node = self.getFaviconElement()
 

@@ -98,6 +98,16 @@ class ShotNode:
 						result = result[:count]
 
 		else:
+			if self.tag == "link":
+				self.tag = "a"
+				self.classes.append("shots-link")
+				href = ""
+				for attr in self.attributes:
+					if attr.name == "to":
+						self.attributes.append(ShotAttribute(name="href",value=attr.value))
+						del self.attributes[self.attributes.index(attr)]
+						break
+		
 			result += "<" + self.tag
 			if self.id:
 				result += " id=\"" + self.id + "\""
