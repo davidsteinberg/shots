@@ -1,12 +1,9 @@
-#-------------------------
-# Parser
-#-------------------------
+from os.path import splitext
+
+from locator import getStaticPath
 
 from ast import *
 from tokenizer import *
-
-from os import sep, walk
-from os.path import abspath, dirname
 
 class ShotParser:
 
@@ -171,6 +168,8 @@ class ShotParser:
 				for token in line.tokens:
 					if token.type == ShotToken.typeText:
 						token.value = ":" + token.value
+					elif token.type == ShotToken.typeClass:
+						token.value = "." + token.value
 					elif token.type == ShotToken.typeID:
 						token.value = "#" + token.value
 					body.append(token.value + " ")
@@ -301,7 +300,7 @@ class ShotParser:
 			filename = pieces[1][1:-1]
 
 			shot = Shot(filename, logging=self.logging)
-				
+
 			if keyword == "include":
 				shot.included = True
 				
@@ -316,7 +315,8 @@ class ShotParser:
 				del self.currentNode.children[:]
 				node.parent = self.currentNode
 			
-			text = text.replace(filename, shot.filename + fileSuffix)
+			newfilename, ext = splitext(shot.filename)
+			text = text.replace(filename, newfilename + ".html")
 			shot.generateShot()
 		
 		if not closing:
@@ -679,25 +679,5 @@ class ShotParser:
 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
 		return result
 
-
-#-------------------------
-# Finding Resources
-#-------------------------
-
-def getStaticPath(fileName):
-
-	staticDir = "/static"
-
-	found = False
-	currentDir = dirname(dirname(abspath(__file__))) + staticDir
-	for root, dirs, files in walk(currentDir):
-		if fileName in files:
-			found = True
-			fileName = staticDir + root.replace(currentDir, "", 1) + sep + fileName
-			break
-	if not found:
-		print "Error: couldn't find file " + fileName
-	
-	return fileName
-
-from shot import fileSuffix, locate, Shot
+# at the bottom to avoid import loop
+from shot import Shot

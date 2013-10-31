@@ -1,34 +1,27 @@
-#-------------------------
-# Shot
-#-------------------------
-
-import re
 import sys
 
-from os import sep, walk
-from os.path import abspath, dirname, isfile, splitext
+from os.path import splitext
 
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound
-
+from locator import getTemplate, getTemplatePath
 from parser import ShotParser
-
-environment = Environment(loader=FileSystemLoader("/"))
-templateDir = "/templates"
-fileSuffix = ".shot"
 
 class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
-		fileExt = filename.split(".")[-1]
-		if not fileExt or fileExt != "html":
-			filename += ".html"
+		filename, ext = splitext(filename)
+		if ext and ext != "shot":
+			filename += "." + ext
+		filename += ".shot"
 
-		self.filename = locate(filename)
+		self.filename = getTemplatePath(filename)
 		self.overwrite = overwrite
 		self.included = included
 		self.logging = logging
 
 		if self.overwrite or not isfile(self.filename):
 			self.parser = ShotParser(self.filename, included=self.included, logging=self.logging)
+
+		self.filename, ext = splitext(self.filename)
+		self.filename += ".html"
 
 	def log(self, message):
 		if self.logging:
@@ -38,8 +31,7 @@ class Shot:
 		self.log("generating " + self.filename)
 	
 		if self.overwrite or not isfile(self.filename):
-			self.filename += fileSuffix
-			f = open(self.filename,"w")
+			f = open(self.filename, "w")
 
 			code = self.parser.generateCode()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
@@ -49,26 +41,8 @@ class Shot:
 
 	def render(self,**varArgs):
 		self.generateShot()
-		template = environment.get_template(self.filename)
+		template = getTemplate(self.filename)
 		return template.render(**varArgs)
-
-#-------------------------
-# Locate
-#-------------------------
-
-def locate(filename):
-	found = False
-	currentDir = dirname(dirname(abspath(__file__))) + templateDir
-	for root, dirs, files in walk(currentDir):
-		if filename in files:
-			found = True
-			filename = currentDir + sep + filename
-			break
-	if not found:
-		raise TemplateNotFound(filename)
-	
-	return filename
-
 
 #-------------------------
 # Main
@@ -86,11 +60,11 @@ def main():
 		if "-j" in sys.argv:
 			beforeJinja = True
 
+	s = Shot(sys.argv[1], overwrite=True, logging=logging)
+
 	if beforeJinja:
-		s = Shot(sys.argv[1], overwrite=True, logging=logging)
 		print s.parser.generateCode()
 	else:
-		s = Shot(sys.argv[1], logging=logging)
 		print s.render()
 
 if __name__ == "__main__":

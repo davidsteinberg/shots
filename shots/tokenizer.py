@@ -1,7 +1,3 @@
-#-------------------------
-# Tokenizer
-#-------------------------
-
 import re
 
 class ShotToken:
