@@ -6,7 +6,7 @@ from ast import *
 from tokenizer import *
 
 selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr"]
-tagsForHead = ["base", "comment", "css", "favicon", "fetch", "include", "js", "javascript", "meta", "noscript", "script", "style", "title"]
+tagsForHead = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
 class ShotParser:
@@ -322,9 +322,7 @@ class ShotParser:
 			if text[1][0] == "\"" or text[1][0] == "'":
 				filename = text[1][1:-1]
 
-				shot = Shot(filename, logging=self.logging)
-				if keyword == "include":
-					shot.included = True
+				shot = Shot(filename, included=(True if keyword == "include" else False), logging=self.logging)
 			
 				newfilename, ext = splitext(shot.filename)
 				text[1] = "\"" + newfilename + ".html\""
