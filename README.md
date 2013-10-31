@@ -47,5 +47,5 @@ To see the HTML output of a Shot, run:
 python shots/shot.py {{ filename relative to templates folder }} [-d]
 ```
 
-The -j flag will let you see a template before Jinja2 has processed it.
-The -l flag will let you see the consumption course of the parser.
+The -j (for jinja) flag will let you see a template before Jinja2 has processed it.  
+The -l (for log) flag will let you see the step-by-step process of the parser.
