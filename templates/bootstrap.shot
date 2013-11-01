@@ -1,4 +1,4 @@
-include "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+css "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
 meta name="viewport" content="width=device-width, initial-scale=1.0"
 
 
@@ -7,6 +7,6 @@ title : Bootstrap 101 Template
 h1 : Hello, world!
 
 
-include "http://code.jquery.com/jquery.js"
-include "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"
+js "http://code.jquery.com/jquery.js"
+js "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"
 

@@ -71,19 +71,22 @@ class ShotParser:
 	def includeFile(self,fetch=False):
 		self.getNextToken()
 		
-		fileName = self.currentToken.value
-		quoteChar = fileName[0]
-		fileName = fileName.replace(quoteChar,"")
+		filename = self.currentToken.value
+		quoteChar = filename[0]
+		filename = filename.replace(quoteChar,"")
 		
-		fileExt = fileName.split(".")[-1]
-	
-		fileName = quoteChar + getStaticPath(fileName) + quoteChar
+		fileExt = filename.split(".")[-1]
+
+		if filename[0] != "/" and (len(filename) < 4 or filename[:4] != "http"):
+			filename = getStaticPath(filename)
+		
+		filename = quoteChar + filename + quoteChar
 	
 		if fileExt == "css":
 			node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
 
 			href = ShotAttribute(name="href")
-			href.value = fileName
+			href.value = filename
 			node.attributes.append(href)
 
 			rel = ShotAttribute(name="rel")
@@ -95,7 +98,7 @@ class ShotParser:
 			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
 		
 			src = ShotAttribute(name="src")
-			src.value = fileName
+			src.value = filename
 			node.attributes.append(src)
 		
 			return node
@@ -407,19 +410,25 @@ class ShotParser:
 							self.currentNode = bodyElement
 						
 						self.bodyCreated = True
-
-			else:
-				if self.currentToken.value == "body":
-					self.forceSpaceOneDeeper = False
+			elif not self.bodyCreated:
+				if self.currentToken.value not in tagsForHead:
 					self.currentNode = self.currentNode.parent if self.currentNode.parent else self.rootNode
-					self.bodyCreated = True
+					if self.currentToken.value == "body":
+						self.forceSpaceOneDeeper = False
+					else:
+						bodyElement = ShotNode(tag="body",depth=0,parent=self.currentNode)
+						self.forceSpaceOneDeeper = True
+						self.currentNode.children.append(bodyElement)
+						self.currentNode = bodyElement
+					
+					self.bodyCreated = True				
 					
 			# template directive check		
 			if self.currentToken.value in directiveOpeners:
 				self.getDirective()
 				return
 	
-			if self.currentToken.value == "favicon":
+			elif self.currentToken.value == "favicon":
 				node = self.getFaviconElement()
 
 			elif self.currentToken.value == "br":
@@ -483,12 +492,12 @@ class ShotParser:
 								for s in sources:
 									source = ShotNode(tag="source",depth=self.getDepth()+1,parent=self.currentNode,selfClosing=True)
 
-									fileName = s[1:-1]
-									fileExt = fileName.split(".")[-1]
+									filename = s[1:-1]
+									fileExt = filename.split(".")[-1]
 									if fileExt == "mp3":
 										fileExt = "mpeg"
 
-									src = ShotAttribute(name="src",value="\"" + getStaticPath(fileName) + "\"")
+									src = ShotAttribute(name="src",value="\"" + getStaticPath(filename) + "\"")
 									source.attributes.append(src)
 									
 									type = ShotAttribute(name="type")
