@@ -28,7 +28,6 @@ class ShotParser:
 		self.nextNode = None
 		
 		self.lookingForHead = True
-		self.fillingHead = True
 		self.bodyCreated = False
 
 	def log(self,message):
@@ -332,7 +331,6 @@ class ShotParser:
 				self.extending = True
 
 				self.lookingForHead = False
-				self.fillingHead = False
 				self.bodyCreated = True
 
 				self.currentNode = self.rootNode
@@ -398,12 +396,10 @@ class ShotParser:
 #
 			if self.included:
 				self.lookingForHead = False
-				self.fillingHead = False
 				self.bodyCreated = True
 
 			elif self.bodyCreated:
 				self.lookingForHead = False
-				self.fillingHead = False
 		
 			elif self.lookingForHead:
 				if self.currentToken.value == "head":
@@ -416,7 +412,6 @@ class ShotParser:
 					self.lookingForHead = False
 				
 					if self.currentToken.value not in tagsForHead:
-						self.fillingHead = False
 						self.currentNode = self.currentNode.parent
 						if self.currentToken.value != "body":
 							bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
@@ -425,16 +420,6 @@ class ShotParser:
 						
 						self.bodyCreated = True
 
-			elif self.fillingHead:
-				if self.currentToken.value not in tagsForHead:
-					self.fillingHead = False
-					self.currentNode = self.currentNode.parent if self.currentNode.parent else self.rootNode
-					if self.currentToken.value != "body":
-						bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
-						self.currentNode.children.append(bodyElement)
-						self.currentNode = bodyElement
-
-					self.bodyCreated = True
 			else:
 				if self.currentToken.value == "body":
 					self.bodyCreated = True
@@ -605,8 +590,6 @@ class ShotParser:
 
 		while self.getDepth() <= self.currentNode.depth:
 			self.logFinishedCreation(self.currentNode.tag)
-			if self.currentNode.tag == "head":
-				self.fillingHead = False
 			self.currentNode = self.currentNode.parent
 
 		self.getNextToken()
@@ -637,8 +620,6 @@ class ShotParser:
 				if self.lookingForHead:
 					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 					self.currentNode.children.append(head)
-				elif self.fillingHead:
-					self.currentNode = self.currentNode.parent
 
 				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
