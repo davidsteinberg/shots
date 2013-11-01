@@ -1,4 +1,8 @@
-css "index.css"
+!! this is a secret comment
 
-js "index.js"
+: this is here
+
+!! this is also secret
+
+: yay
 

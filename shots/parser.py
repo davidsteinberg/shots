@@ -581,10 +581,13 @@ class ShotParser:
 			self.currentTokenNum = 0
 			self.getNodeWithTag()
 
-		elif self.currentToken.type == ShotToken.typeComment:
+		elif self.currentToken.type == ShotToken.typeHTMLComment:
 			self.logCreation("line comment")
 			self.getComment()
 			self.logFinishedCreation("line comment")
+
+		elif self.currentToken.type == ShotToken.typeShotComment:
+			return True
 
 		else:
 #

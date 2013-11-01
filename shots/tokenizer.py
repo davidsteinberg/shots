@@ -8,14 +8,15 @@ class ShotToken:
 	typeClass = 3
 	typeChildElemNext = 4
 	typeComma = 5
-	typeComment = 6
-	typeEquals = 7
-	typeEOL = 8
+	typeEquals = 6
+	typeEOL = 7
+	typeHTMLComment = 8
 	typeID = 9
 	typeNumber = 10
 	typeQuote = 11
-	typeText = 12
-	typeUnknown = 13
+	typeShotComment = 12
+	typeText = 13
+	typeUnknown = 14
 
 	typeNumToName = [
 		"typeAlpha",
@@ -24,12 +25,13 @@ class ShotToken:
 		"typeClass",
 		"typeChildElemNext",
 		"typeComma",
-		"typeComment",
 		"typeEquals",
 		"typeEOL",
+		"typeHTMLComment",
 		"typeID",
 		"typeNumber",
 		"typeQuote",
+		"typeShotComment",
 		"typeText",
 		"typeUnknown"
 	]
@@ -187,13 +189,18 @@ class ShotTokenizer:
 
 			t.value = "".join(id)
 
-		# comment
+		# comments
 		elif self.currentChar == "!":
-			t = ShotToken(type=ShotToken.typeComment)
+			self.getNextChar()
+
+			if self.currentChar == "!":
+				t = ShotToken(type=ShotToken.typeShotComment)
+				self.getNextChar()
+			else:
+				t = ShotToken(type=ShotToken.typeHTMLComment)
 			
 			comment = []
-			
-			self.getNextChar()
+
 			self.getNextChar()
 			while self.currentChar != self.EOL:
 				comment.append(self.currentChar)
