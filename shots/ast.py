@@ -98,7 +98,7 @@ class ShotNode:
 						result = result[:count]
 
 		else:
-			if self.tag == "link":
+			if self.tag == "shots-link":
 				self.tag = "a"
 				self.classes.append("shots-link")
 				href = ""

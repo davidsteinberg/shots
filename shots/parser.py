@@ -72,48 +72,30 @@ class ShotParser:
 		
 		fileExt = fileName.split(".")[-1]
 	
-		if fileExt == "html":
-			if fetch:
-				fileName = "." + getTemplatePath(fileName)
-				
-			p = ShotParser(fileName,included=True)
-			p.tokenize()
-			p.parse()
-			
-			node = ShotNode(tag="",depth=self.getDepth(),parent=self.currentNode)
-			for kid in p.rootNode.children:
-				node.children.append(kid)
-			
+		fileName = quoteChar + getStaticPath(fileName) + quoteChar
+	
+		if fileExt == "css":
+			node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
+
+			href = ShotAttribute(name="href")
+			href.value = fileName
+			node.attributes.append(href)
+
+			rel = ShotAttribute(name="rel")
+			rel.value = "\"stylesheet\""
+			node.attributes.append(rel)
+
 			return node
-			
+		elif fileExt == "js":
+			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
+		
+			src = ShotAttribute(name="src")
+			src.value = fileName
+			node.attributes.append(src)
+		
+			return node
 		else:
-			if fetch:
-				fileName = getStaticPath(fileName)
-		
-			fileName = quoteChar + fileName + quoteChar
-		
-			if fileExt == "css":
-				node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
-
-				href = ShotAttribute(name="href")
-				href.value = fileName
-				node.attributes.append(href)
-
-				rel = ShotAttribute(name="rel")
-				rel.value = "\"stylesheet\""
-				node.attributes.append(rel)
-
-				return node
-			elif fileExt == "js":
-				node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
-			
-				src = ShotAttribute(name="src")
-				src.value = fileName
-				node.attributes.append(src)
-			
-				return node
-			else:
-				self.parseError("couldn't find file extension on " + ("fetch" if fetch else "includ") + "ed file")
+			self.parseError("couldn't find file extension on " + ("fetch" if fetch else "includ") + "ed file")
 
 	def getFaviconElement(self):
 		node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
@@ -429,16 +411,7 @@ class ShotParser:
 				self.getDirective()
 				return
 	
-			if self.currentToken.value == "include":
-				node = self.includeFile()
-
-			elif self.currentToken.value == "fetch":
-				node = self.includeFile(fetch=True)
-
-			elif self.currentToken.value == "media":
-				node = self.getMediaElement()
-
-			elif self.currentToken.value == "favicon":
+			if self.currentToken.value == "favicon":
 				node = self.getFaviconElement()
 
 			elif self.currentToken.value == "br":
@@ -451,6 +424,9 @@ class ShotParser:
 				node = self.getScriptElement()
 
 			else:
+				if self.currentToken.value == "link":
+					self.currentToken.value = "shots-link"
+			
 				node = ShotNode(tag=self.currentToken.value,depth=self.getDepth(),parent=self.currentNode)
 				if node.tag in selfClosers:
 					node.selfClosing = True
@@ -683,4 +659,5 @@ class ShotParser:
 		return result
 
 # at the bottom to avoid import loop
+
 from shot import Shot
