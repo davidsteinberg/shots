@@ -4,7 +4,7 @@ secret
 
 css "index"
 
-title : [[ brand_name or "Shits" ]]
+title : [[ brand_name or "Shots" ]]
 
 #header
 	#brand_name : [[ brand_name or "Shots" ]]
