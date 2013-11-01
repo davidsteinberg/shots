@@ -6,7 +6,8 @@ from tokenizer import *
 _self_closers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 _tags_for_head = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 _directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
-_img_extensions = ["bmp", "gif", "jpeg", "jpg", "png"]
+_img_extensions = ["apng", "bmp", "gif", "jpeg", "jpg", "png", "svg"]
+_favicon_extensions = ["apng", "gif", "ico", "jpeg", "jpg", "png", "svg"]
 
 class ShotParser:
 
@@ -118,20 +119,35 @@ class ShotParser:
 		
 		self.get_next_token()
 		
-		if self.current_token.type == TOKEN_TYPE_ALPHA and self.current_token.value == "raw":
-			self.get_next_token()
-			url = self.current_token.value[1:-1]
-		elif self.current_token.type == TOKEN_TYPE_QUOTE:
-			url = get_static_path(self.current_token.value[1:-1])
+		url = ""
+		file_ext = ""
+		
+		if "[[" in self.current_token.value or "{{" in self.current_token.value:
+			url = self.current_token.value
+		
 		else:
-			self.parse_error("expected raw or file path for favicon")
+			filename = self.current_token.value[1:-1]
+
+			if filename[0] == "/" or filename[0] == "." or (len(filename) > 4 and filename[:4] == "http"):
+				url = self.current_token.value
+
+			else:
+				file_ext = filename.split(".")[-1]
+
+				if file_ext in _favicon_extensions:
+					url = self.current_token.value
+
+				else:
+					for ext in _favicon_extensions:
+						path = get_static_path(filename + "." + ext)
+						if path != filename + "." + ext:
+							url = path
+							break
 		
 		href = ShotAttribute(name="href")
 		href.value = "\"" + url + "\""
 		node.attributes.append(href)
 		
-		file_ext = url.split(".")[-1]
-
 		type = ShotAttribute(name="type")
 		type.value = "\"image/"
 

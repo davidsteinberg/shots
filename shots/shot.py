@@ -5,9 +5,7 @@ from parser import ShotParser
 
 class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
-		filename = shotify(filename)
-
-		self.filename = get_template_path(filename)
+		self.filename = get_template_path(shotify(filename))
 		self.overwrite = overwrite
 		self.included = included
 		self.logging = logging
