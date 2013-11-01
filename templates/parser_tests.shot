@@ -66,3 +66,65 @@ div
 				this
 				that
 
+!------------------
+!	TAG
+!------------------
+
+head
+	title : this
+
+body
+	h1 : this
+
+!------------------
+
+head
+	title : this
+
+h1 : this
+
+!------------------
+
+title : this
+
+body
+	h1 : this
+
+!------------------
+
+title : this
+
+h1 : this
+
+!------------------
+!	TEXT
+!------------------
+
+head
+	title : this
+
+body
+	h1 : this
+
+!------------------
+
+head
+	title : this
+
+h1 : this
+
+!------------------
+
+title : this
+
+body
+	h1 : this
+
+!------------------
+
+title : this
+
+h1 : this
+
+!------------------
+
