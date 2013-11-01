@@ -1,4 +1,4 @@
-from fileHandler import getStaticPath, splitext
+from file_assistant import *
 
 from ast import *
 from tokenizer import *
@@ -6,8 +6,6 @@ from tokenizer import *
 selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 tagsForHead = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
-
-from shot import Shot
 
 class ShotParser:
 
@@ -320,12 +318,16 @@ class ShotParser:
 
 			if text[1][0] == "\"" or text[1][0] == "'":
 				filename = text[1][1:-1]
+				filename = getTemplatePath(shotify(filename))
 
-				shot = Shot(filename, included=(True if keyword == "include" else False), logging=self.logging)
+				parser = ShotParser(filename, included=(True if keyword == "include" else False), logging=self.logging)
+				
+				filename = htmlify(filename)
+		
+				code = parser.generateCode()
+				write_shot_to_file(filename,shot=code)
 			
-				newfilename, ext = splitext(shot.filename)
-				text[1] = "\"" + newfilename + ".html\""
-				shot.generateShot()
+				text[1] = "\"" + filename + "\""
 			
 			if keyword == "extends":
 				self.extending = True
@@ -700,5 +702,3 @@ class ShotParser:
 # 		result = re.sub(r" }",r" }}",result)
 		result = re.sub(r"= =",r"==",result)
 		return result
-
-# at the bottom to avoid import loop

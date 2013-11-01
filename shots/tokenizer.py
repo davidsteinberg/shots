@@ -94,7 +94,7 @@ class ShotTokenizer:
 			self.getNextChar()
 	
 		# alpha
-		if self.currentChar.isalpha() or self.currentChar == "_" or (self.currentChar == "{" and self.peekNextChar() == "{") or (self.currentChar == "[" and self.peekNextChar() == "]"):
+		if self.currentChar.isalpha() or self.currentChar == "_" or ((self.currentChar == "{" or self.currentChar == "[") and self.peekNextChar() == self.currentChar):
 			
 			t = ShotToken(type=ShotToken.typeAlpha)
 		
@@ -108,9 +108,9 @@ class ShotTokenizer:
 				identifier.append(self.currentChar)
 				
 			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or templating or (self.currentChar == "}" and self.peekNextChar() == "}") or (self.currentChar == "]" and self.peekNextChar() == "]"):
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or templating or ((self.currentChar == "}" or self.currentChar == "]") and self.peekNextChar() == self.currentChar) or ((self.currentChar == "{" or self.currentChar == "[") and self.peekNextChar() == self.currentChar):
 				identifier.append(self.currentChar)
-				if self.currentChar == "}" or self.currentChar == "]":
+				if self.currentChar == "}" or self.currentChar == "]" or self.currentChar == "{" or self.currentChar == "[":
 					templating = not templating
 					self.getNextChar()
 					identifier.append(self.currentChar)

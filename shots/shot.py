@@ -1,13 +1,11 @@
 import sys
 
-from fileHandler import getTemplate, getTemplatePath, splitext
+from file_assistant import *
+from parser import ShotParser
 
 class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
-		filename, ext = splitext(filename)
-		if ext and ext != "shot":
-			filename += "." + ext
-		filename += ".shot"
+		filename = shotify(filename)
 
 		self.filename = getTemplatePath(filename)
 		self.overwrite = overwrite
@@ -17,8 +15,7 @@ class Shot:
 		if self.overwrite or not isfile(self.filename):
 			self.parser = ShotParser(self.filename, included=self.included, logging=self.logging)
 
-		self.filename, ext = splitext(self.filename)
-		self.filename += ".html"
+		self.filename = htmlify(self.filename)
 
 	def log(self, message):
 		if self.logging:
@@ -28,15 +25,11 @@ class Shot:
 		self.log("generating " + self.filename)
 	
 		if self.overwrite or not isfile(self.filename):
-			f = open(self.filename, "w")
-
 			code = self.parser.generateCode()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
-
-			f.write(code)
-			f.close()
-
-	def render(self,**varArgs):
+			write_shot_to_file(self.filename,shot=code)
+			
+	def render(self, **varArgs):
 		self.generateShot()
 		template = getTemplate(self.filename)
 		return template.render(**varArgs)
@@ -66,5 +59,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-
-from parser import ShotParser

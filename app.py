@@ -4,12 +4,12 @@ from shots import Shot
 app = Flask(__name__)
 
 @app.route('/')
-def index():
-	return Shot('index').render()
-
-@app.route('/bootstrap')
-def bootstrap():
-	return Shot('bootstrap').render()
+@app.route('/<page>')
+def index(page=None):
+	if page:
+		return Shot(page).render(page=page)
+	else:
+		return Shot('index').render()
 
 if __name__ == '__main__':
 	app.debug = True

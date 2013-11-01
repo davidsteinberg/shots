@@ -8,6 +8,23 @@ staticDir = sep + "static"
 
 environment = Environment(loader=FileSystemLoader(sep))
 
+def shotify(filename):
+	filename, ext = splitext(filename)
+	if ext and ext != "shot":
+		filename += "." + ext
+	filename += ".shot"
+	return filename
+	
+def htmlify(filename):
+	filename, ext = splitext(filename)
+	filename += ".html"
+	return filename
+
+def write_shot_to_file(filename,shot=""):
+	f = open(filename, "w")
+	f.write(shot)
+	f.close()
+
 def getTemplate(filename):
 	return environment.get_template(filename)
 
