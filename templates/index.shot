@@ -1,6 +1,5 @@
-set sites = ["amazon", "apple", "google", "yahoo"]
+head
+	title : this
 
-for s in sites
-	link to="http://| s |.com" : | s.title() |
-	br
+: some text
 

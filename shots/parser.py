@@ -428,7 +428,7 @@ class ShotParser:
 			elif self.fillingHead:
 				if self.currentToken.value not in tagsForHead:
 					self.fillingHead = False
-					self.currentNode = self.currentNode.parent
+					self.currentNode = self.currentNode.parent if self.currentNode.parent else self.rootNode
 					if self.currentToken.value != "body":
 						bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 						self.currentNode.children.append(bodyElement)
@@ -602,6 +602,8 @@ class ShotParser:
 
 		while self.getDepth() <= self.currentNode.depth:
 			self.logFinishedCreation(self.currentNode.tag)
+			if self.currentNode.tag == "head":
+				self.fillingHead = False
 			self.currentNode = self.currentNode.parent
 
 		self.getNextToken()
@@ -632,8 +634,10 @@ class ShotParser:
 				if self.lookingForHead:
 					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 					self.currentNode.children.append(head)
-				else:
+				elif self.fillingHead:
 					self.currentNode = self.currentNode.parent
+				else:
+					pass
 
 				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
