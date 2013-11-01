@@ -7,7 +7,7 @@ class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
 		filename = shotify(filename)
 
-		self.filename = getTemplatePath(filename)
+		self.filename = get_template_path(filename)
 		self.overwrite = overwrite
 		self.included = included
 		self.logging = logging
@@ -21,17 +21,17 @@ class Shot:
 		if self.logging:
 			print message
 
-	def generateShot(self):
+	def generate_shot(self):
 		self.log("generating " + self.filename)
 	
 		if self.overwrite or not isfile(self.filename):
-			code = self.parser.generateCode()
+			code = self.parser.generate_code()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
 			write_shot_to_file(self.filename,shot=code)
 			
 	def render(self, **varArgs):
-		self.generateShot()
-		template = getTemplate(self.filename)
+		self.generate_shot()
+		template = get_template(self.filename)
 		return template.render(**varArgs)
 
 #-------------------------
@@ -39,7 +39,7 @@ class Shot:
 #-------------------------
 
 def main():
-	beforeJinja = False
+	before_jinja = False
 	logging = False
 	
 	if len(sys.argv) < 2:
@@ -48,12 +48,12 @@ def main():
 		if "-l" in sys.argv:
 			logging = True
 		if "-j" in sys.argv:
-			beforeJinja = True
+			before_jinja = True
 
 	s = Shot(sys.argv[1], overwrite=True, logging=logging)
 
-	if beforeJinja:
-		print s.parser.generateCode()
+	if before_jinja:
+		print s.parser.generate_code()
 	else:
 		print s.render()
 

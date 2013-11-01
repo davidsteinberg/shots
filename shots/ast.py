@@ -23,17 +23,17 @@ class ShotTextNode:
 		result += self.text
 		return result
 
-closeDirectives = ["block", "call", "filter", "macro", "raw"]
+_close_directives = ["block", "call", "filter", "macro", "raw"]
 
 class ShotNode:
-	def __init__(self, tag=None, parent=None, id=None, selfClosing=False, depth=0, multiline=True):
+	def __init__(self, tag=None, parent=None, id=None, self_closing=False, depth=0, multiline=True):
 		self.id = id
 		self.tag = tag
 		self.classes = []
 		self.attributes = []
 		self.parent = parent
 		self.children = []
-		self.selfClosing = selfClosing
+		self.self_closing = self_closing
 		
 		self.depth = depth
 		self.multiline = multiline
@@ -65,33 +65,33 @@ class ShotNode:
 					for d in range(self.depth):
 						result += "    "
 
-				if keyword in closeDirectives:
+				if keyword in _close_directives:
 					result += "{% end" + keyword + " %}"
 				else:
 					parent = self.parent
-					currentIndex = parent.children.index(self)
-					nextSibling = None if currentIndex+1 >= len(parent.children) else parent.children[currentIndex+1]
+					current_index = parent.children.index(self)
+					next_sibling = None if current_index+1 >= len(parent.children) else parent.children[current_index+1]
 
-					deleteSpaces = False
+					delete_spaces = False
 
 					if keyword == "if" or keyword == "elif":
-						if not nextSibling or (nextSibling.attributes[0].name != "elif" and nextSibling.attributes[0].name != "else"):
+						if not next_sibling or (next_sibling.attributes[0].name != "elif" and next_sibling.attributes[0].name != "else"):
 							result += "{% endif %}"
 						else:
-							deleteSpaces = True
+							delete_spaces = True
 					elif keyword == "for":
-						if not nextSibling or isinstance(nextSibling,ShotTextNode) or nextSibling.attributes[0].name != "else":
+						if not next_sibling or isinstance(next_sibling,ShotTextNode) or next_sibling.attributes[0].name != "else":
 							result += "{% endfor %}"
 						else:
-							deleteSpaces = True
+							delete_spaces = True
 					elif keyword == "else":
-						prevSibling = parent.children[currentIndex-1]
-						if prevSibling.attributes[0].name == "if" or prevSibling.attributes[0].name == "elif":
+						prev_sibling = parent.children[current_index-1]
+						if prev_sibling.attributes[0].name == "if" or prev_sibling.attributes[0].name == "elif":
 							result += "{% endif %}"
-						elif prevSibling.attributes[0].name == "for":
+						elif prev_sibling.attributes[0].name == "for":
 							result += "{% endfor %}"
 					
-					if deleteSpaces:
+					if delete_spaces:
 						count = -1
 						for d in range(self.depth):
 							count -= 4
@@ -117,7 +117,7 @@ class ShotNode:
 				for a in self.attributes:
 					result += " " + str(a)
 			result += ">"
-			if not self.selfClosing:
+			if not self.self_closing:
 				if self.multiline and len(self.children) > 0:
 					for c in self.children:
 						result += "\n"

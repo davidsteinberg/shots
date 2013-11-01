@@ -1,41 +1,40 @@
 import re
 
+TOKEN_TYPE_ALPHA = 0
+TOKEN_TYPE_ARRAY_CLOSER = 1
+TOKEN_TYPE_ARRAY_OPENER = 2
+TOKEN_TYPE_CLASS = 3
+TOKEN_TYPE_CHILD_NEXT_ELEMENT = 4
+TOKEN_TYPE_COMMA = 5
+TOKEN_TYPE_EQUALS = 6
+TOKEN_TYPE_EOL = 7
+TOKEN_TYPE_HTML_COMMENT = 8
+TOKEN_TYPE_ID = 9
+TOKEN_TYPE_NUMBER = 10
+TOKEN_TYPE_QUOTE = 11
+TOKEN_TYPE_SHOT_COMMENT = 12
+TOKEN_TYPE_TEXT = 13
+TOKEN_TYPE_UNKNOWN = 14
+
+TOKEN_TYPE_NUM_TO_NAME = [
+	"alpha",
+	"array closer",
+	"array cpener",
+	"class",
+	"child elem next",
+	"comma",
+	"equals",
+	"EOL",
+	"html comment",
+	"id",
+	"number",
+	"quote",
+	"shot comment",
+	"text",
+	"unknown"
+]
+
 class ShotToken:
-
-	typeAlpha = 0
-	typeArrayCloser = 1
-	typeArrayOpener = 2
-	typeClass = 3
-	typeChildElemNext = 4
-	typeComma = 5
-	typeEquals = 6
-	typeEOL = 7
-	typeHTMLComment = 8
-	typeID = 9
-	typeNumber = 10
-	typeQuote = 11
-	typeShotComment = 12
-	typeText = 13
-	typeUnknown = 14
-
-	typeNumToName = [
-		"typeAlpha",
-		"typeArrayCloser",
-		"typeArrayOpener",
-		"typeClass",
-		"typeChildElemNext",
-		"typeComma",
-		"typeEquals",
-		"typeEOL",
-		"typeHTMLComment",
-		"typeID",
-		"typeNumber",
-		"typeQuote",
-		"typeShotComment",
-		"typeText",
-		"typeUnknown"
-	]
-
 	def __init__(self,value="",type="unknown"):
 		self.value = value
 		self.type = type
@@ -53,229 +52,229 @@ class ShotTokenizer:
 
 		self.filename = filename
 
-		self.currentChar = " "		
-		self.currentToken = None
-		self.currentPosInLine = 0
+		self.current_char = " "		
+		self.current_token = None
+		self.current_pos_in_line = 0
 
 		self.EOL = "-1"
 
-		self.currentLine = ""
-		self.currentLineNum = 0
-		self.currentLineLen = 0
+		self.current_line = ""
+		self.current_line_num = 0
+		self.current_line_len = 0
 
 		self.lines = []
 		
-	def getChar(self):
-		if self.currentPosInLine >= self.currentLineLen:
+	def get_char(self):
+		if self.current_pos_in_line >= self.current_line_len:
 			return self.EOL
-		c = self.currentLine[self.currentPosInLine]
+		c = self.current_line[self.current_pos_in_line]
 		if c == "\n" or c == "\r":
 			return self.EOL
-		self.currentPosInLine += 1
+		self.current_pos_in_line += 1
 		return c
 	
-	def getNextChar(self):
-		self.currentChar = self.getChar()
+	def get_next_char(self):
+		self.current_char = self.get_char()
 		
-	def peekNextChar(self):
-		if self.currentPosInLine >= self.currentLineLen:
+	def peek_next_char(self):
+		if self.current_pos_in_line >= self.current_line_len:
 			return self.EOL
-		c = self.currentLine[self.currentPosInLine]
+		c = self.current_line[self.current_pos_in_line]
 		if c == "\n" or c == "\r":
 			return self.EOL
 		return c
 
-	def getToken(self):
-		if self.currentChar == self.EOL:
-			return ShotToken(type=ShotToken.typeEOL)
+	def get_token(self):
+		if self.current_char == self.EOL:
+			return ShotToken(type=TOKEN_TYPE_EOL)
 	
 		# gobble whitespace
-		while self.currentChar == " " or self.currentChar == "\t":
-			self.getNextChar()
+		while self.current_char == " " or self.current_char == "\t":
+			self.get_next_char()
 	
 		# alpha
-		if self.currentChar.isalpha() or self.currentChar == "_" or ((self.currentChar == "{" or self.currentChar == "[") and self.peekNextChar() == self.currentChar):
+		if self.current_char.isalpha() or self.current_char == "_" or ((self.current_char == "{" or self.current_char == "[") and self.peek_next_char() == self.current_char):
 			
-			t = ShotToken(type=ShotToken.typeAlpha)
+			t = ShotToken(type=TOKEN_TYPE_ALPHA)
 		
-			identifier = [self.currentChar]
+			identifier = [self.current_char]
 
 			templating = False
 			
-			if self.currentChar == "{" or self.currentChar == "[":
+			if self.current_char == "{" or self.current_char == "[":
 				templating = True
-				self.getNextChar()
-				identifier.append(self.currentChar)
+				self.get_next_char()
+				identifier.append(self.current_char)
 				
-			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or templating or ((self.currentChar == "}" or self.currentChar == "]") and self.peekNextChar() == self.currentChar) or ((self.currentChar == "{" or self.currentChar == "[") and self.peekNextChar() == self.currentChar):
-				identifier.append(self.currentChar)
-				if self.currentChar == "}" or self.currentChar == "]" or self.currentChar == "{" or self.currentChar == "[":
+			self.get_next_char()
+			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or templating or ((self.current_char == "}" or self.current_char == "]") and self.peek_next_char() == self.current_char) or ((self.current_char == "{" or self.current_char == "[") and self.peek_next_char() == self.current_char):
+				identifier.append(self.current_char)
+				if self.current_char == "}" or self.current_char == "]" or self.current_char == "{" or self.current_char == "[":
 					templating = not templating
-					self.getNextChar()
-					identifier.append(self.currentChar)
-				self.getNextChar()
+					self.get_next_char()
+					identifier.append(self.current_char)
+				self.get_next_char()
 
 			t.value = "".join(identifier)
 		
 		# number
-		elif self.currentChar.isdigit():
-			t = ShotToken(type=ShotToken.typeNumber)
+		elif self.current_char.isdigit():
+			t = ShotToken(type=TOKEN_TYPE_NUMBER)
 		
 			number = []
-			while self.currentChar.isdigit():
-				number.append(self.currentChar)
-				self.getNextChar()
+			while self.current_char.isdigit():
+				number.append(self.current_char)
+				self.get_next_char()
 		
 			t.value = "".join(number)
 
 		# quote
-		elif self.currentChar == "'" or self.currentChar == "\"":
-			t = ShotToken(type=ShotToken.typeQuote)
+		elif self.current_char == "'" or self.current_char == "\"":
+			t = ShotToken(type=TOKEN_TYPE_QUOTE)
 		
-			quoteChar = self.currentChar
-			quote = [quoteChar]
+			quote_char = self.current_char
+			quote = [quote_char]
 			
-			self.getNextChar()
-			while self.currentChar != quoteChar:
-				quote.append(self.currentChar)
-				self.getNextChar()
-				if self.currentChar == quoteChar:
+			self.get_next_char()
+			while self.current_char != quote_char:
+				quote.append(self.current_char)
+				self.get_next_char()
+				if self.current_char == quote_char:
 					if quote[-1] == "\\":
-						quote.append(self.currentChar)
-						self.getNextChar()
+						quote.append(self.current_char)
+						self.get_next_char()
 
-			self.getNextChar()
+			self.get_next_char()
 
-			quote.append(quoteChar)
+			quote.append(quote_char)
 			t.value = "".join(quote)
 
 		# text
-		elif self.currentChar == ":":
-			self.getNextChar()
-			if self.currentChar == ":":
-				self.getNextChar()
-				t = ShotToken(type=ShotToken.typeChildElemNext)
+		elif self.current_char == ":":
+			self.get_next_char()
+			if self.current_char == ":":
+				self.get_next_char()
+				t = ShotToken(type=TOKEN_TYPE_CHILD_ELEM_NEXT)
 			else:
-				t = ShotToken(type=ShotToken.typeText)
+				t = ShotToken(type=TOKEN_TYPE_TEXT)
 			
 				text = []
 			
-				if self.currentChar == self.EOL:
+				if self.current_char == self.EOL:
 					t.value = ""
 				else:
-					self.getNextChar()
-					while self.currentChar != self.EOL:
-						text.append(self.currentChar)
-						self.getNextChar()
+					self.get_next_char()
+					while self.current_char != self.EOL:
+						text.append(self.current_char)
+						self.get_next_char()
 			
 					t.value = "".join(text)
 		
 		# class
-		elif self.currentChar == ".":
-			t = ShotToken(type=ShotToken.typeClass)
+		elif self.current_char == ".":
+			t = ShotToken(type=TOKEN_TYPE_CLASS)
 		
-			className = []
+			class_name = []
 			
 			templating = False
 
-			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
-				className.append(self.currentChar)
-				if self.currentChar == "|":
+			self.get_next_char()
+			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or self.current_char == "|" or templating:
+				class_name.append(self.current_char)
+				if self.current_char == "|":
 					templating = not templating
-				self.getNextChar()
+				self.get_next_char()
 
-			t.value = "".join(className)
+			t.value = "".join(class_name)
 	
 		# id
-		elif self.currentChar == "#":
-			t = ShotToken(type=ShotToken.typeID)
+		elif self.current_char == "#":
+			t = ShotToken(type=TOKEN_TYPE_ID)
 			
 			id = []
 
 			templating = False
 
-			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
-				id.append(self.currentChar)
-				if self.currentChar == "|":
+			self.get_next_char()
+			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or self.current_char == "|" or templating:
+				id.append(self.current_char)
+				if self.current_char == "|":
 					templating = not templating
-				self.getNextChar()
+				self.get_next_char()
 
 			t.value = "".join(id)
 
 		# comments
-		elif self.currentChar == "!":
-			self.getNextChar()
+		elif self.current_char == "!":
+			self.get_next_char()
 
-			if self.currentChar == "!":
-				t = ShotToken(type=ShotToken.typeShotComment)
-				self.getNextChar()
+			if self.current_char == "!":
+				t = ShotToken(type=TOKEN_TYPE_SHOT_COMMENT)
+				self.get_next_char()
 			else:
-				t = ShotToken(type=ShotToken.typeHTMLComment)
+				t = ShotToken(type=TOKEN_TYPE_HTML_COMMENT)
 			
 			comment = []
 
-			self.getNextChar()
-			while self.currentChar != self.EOL:
-				comment.append(self.currentChar)
-				self.getNextChar()
+			self.get_next_char()
+			while self.current_char != self.EOL:
+				comment.append(self.current_char)
+				self.get_next_char()
 			
 			t.value = "".join(comment)
 
 		# equals (for attributes)
-		elif self.currentChar == "=":
-			t = ShotToken(type=ShotToken.typeEquals)
-			self.getNextChar()
+		elif self.current_char == "=":
+			t = ShotToken(type=TOKEN_TYPE_EQUALS)
+			self.get_next_char()
 
 		# array tokens (for audio and video src)
-		elif self.currentChar == "[":
-			t = ShotToken(type=ShotToken.typeArrayOpener)
-			self.getNextChar()
+		elif self.current_char == "[":
+			t = ShotToken(type=ShotToken.TOKEN_TYPE_ARRAY_OPENER)
+			self.get_next_char()
 			
-		elif self.currentChar == "]":
-			t = ShotToken(type=ShotToken.typeArrayCloser)
-			self.getNextChar()
+		elif self.current_char == "]":
+			t = ShotToken(type=TOKEN_TYPE_ARRAY_CLOSER)
+			self.get_next_char()
 			
-		elif self.currentChar == ",":
-			t = ShotToken(type=ShotToken.typeComma)
-			self.getNextChar()
+		elif self.current_char == ",":
+			t = ShotToken(type=TOKEN_TYPE_COMMA)
+			self.get_next_char()
 		
 		# unknown
 		else:
-			t = ShotToken(type=ShotToken.typeUnknown,value=self.currentChar)
-			self.getNextChar()
+			t = ShotToken(type=TOKEN_TYPE_UNKNOWN,value=self.current_char)
+			self.get_next_char()
 
 		return t
 
-	def getNextToken(self):
-		self.currentToken = self.getToken()
+	def get_next_token(self):
+		self.current_token = self.get_token()
 		
-	def tokenizeLine(self):
-		self.currentPosInLine = 0
+	def tokenize_line(self):
+		self.current_pos_in_line = 0
 
 		# find opening whitespace
-		self.getNextChar()
-		while self.currentChar == " " or self.currentChar == "\t":
-			self.getNextChar()
+		self.get_next_char()
+		while self.current_char == " " or self.current_char == "\t":
+			self.get_next_char()
 		
 		# TODO : should tabs and spaces count the same?
 		# should you be able to set the space width of a tab, and it would count that much?
 		
-		line = ShotLine(depth=self.currentPosInLine-1)
+		line = ShotLine(depth=self.current_pos_in_line-1)
 
-		self.getNextToken()
-		while self.currentToken.type != ShotToken.typeEOL:
-			line.tokens.append(self.currentToken)
-			self.getNextToken()
+		self.get_next_token()
+		while self.current_token.type != TOKEN_TYPE_EOL:
+			line.tokens.append(self.current_token)
+			self.get_next_token()
 		
 		return line
 		
 	def tokenize(self):
 		for line in open(self.filename,"r"):
-			self.currentLineNum += 1
+			self.current_line_num += 1
 			if not re.match(r"^\s*$",line):
-				self.currentLine = line
-				self.currentLineLen = len(line)
-				self.lines.append(self.tokenizeLine())
+				self.current_line = line
+				self.current_line_len = len(line)
+				self.lines.append(self.tokenize_line())
