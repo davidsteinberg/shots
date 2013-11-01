@@ -620,7 +620,11 @@ class ShotParser:
 				if self.lookingForHead:
 					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
 					self.currentNode.children.append(head)
-
+					
+					self.lookingForHead = False
+				elif self.currentNode.tag == "head":
+					self.currentNode = self.currentNode.parent
+				
 				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
 
