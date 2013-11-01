@@ -44,7 +44,10 @@ class ShotParser:
 		self.log("finished making " + tag)
 			
 	def parse_error(self,string):
-		exit("Parse Error on line " + str(self.current_line_num+1) + ", token " + str(self.current_token_num) + " : " + string)
+		line = []
+		for t in self.tokenizer.lines[self.current_line_num].tokens:
+			line.append(t.value)
+		exit("Parse Error on line " + str(self.current_line_num+1) + " : " + " ".join(line) + "\n" + string)
 
 	def reached_EOF(self):
 		return self.current_line_num >= len(self.tokenizer.lines)
@@ -80,7 +83,7 @@ class ShotParser:
 		if file_ext != type:
 			filename += "." + type
 
-		if filename[0] != "/" and (len(filename) < 4 or filename[:4] != "http"):
+		if filename[0] != "/" and filename[0] != "." and (len(filename) < 4 or filename[:4] != "http"):
 			filename = get_static_path(filename)
 		
 		filename = quote_char + filename + quote_char
@@ -489,6 +492,11 @@ class ShotParser:
 							elif attr.name == "src":
 								if self.current_node.tag == "img":
 									filename = self.current_token.value[1:-1]
+
+									if filename[0] == "/" or filename[0] == "." or (len(filename) > 4 and filename[:4] == "http"):
+										attr.value = self.current_token.value
+										self.current_node.attributes.append(attr)
+
 									file_ext = filename.split(".")[-1]
 
 									if file_ext not in _img_extensions:
@@ -526,32 +534,35 @@ class ShotParser:
 										sourced = False
 									
 										filename = s[1:-1]
-										file_ext = filename.split(".")[-1]
-										if file_ext == "mp3":
-											file_ext = "mpeg"
-
-										elif file_ext != "wav" and file_ext != "ogg":
-											exts = None
-
-											if self.current_node.tag == "audio":
-												exts = ["mp3","wav","ogg"]
-											else:
-												exts = ["mp4","webm","ogg"]
-
-											for ext in exts:
-												path = get_static_path(filename + "." + ext)
-												if path != filename + "." + ext:
-													source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-													src = ShotAttribute(name="src",value="\"" + path + "\"")
-													source.attributes.append(src)
-									
-													type = ShotAttribute(name="type")
-													type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
-													source.attributes.append(type)
-									
-													self.current_node.children.append(source)
 										
-											sourced = True
+										if filename[0] != "/" and filename[0] != "." and (len(filename) < 4 or filename[:4] != "http"):
+											file_ext = filename.split(".")[-1]
+
+											if file_ext == "mp3":
+												file_ext = "mpeg"
+
+											elif file_ext != "wav" and file_ext != "ogg":
+												exts = None
+
+												if self.current_node.tag == "audio":
+													exts = ["mp3","wav","ogg"]
+												else:
+													exts = ["mp4","webm","ogg"]
+
+												for ext in exts:
+													path = get_static_path(filename + "." + ext)
+													if path != filename + "." + ext:
+														source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+														src = ShotAttribute(name="src",value="\"" + path + "\"")
+														source.attributes.append(src)
+									
+														type = ShotAttribute(name="type")
+														type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
+														source.attributes.append(type)
+									
+														self.current_node.children.append(source)
+										
+												sourced = True
 
 										if not sourced:
 											source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
@@ -635,7 +646,7 @@ class ShotParser:
 					self.current_node.multiline = False
 					self.current_node.depth -= 1
 
-					self.getNextNode()
+					self.get_next_node()
 
 					self.current_line_num -= 1
 					self.current_node = self.current_node.parent
