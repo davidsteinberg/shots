@@ -179,10 +179,13 @@ class ShotTokenizer:
 			templating = False
 
 			self.get_next_char()
-			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or self.current_char == "|" or templating:
+			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or templating or ((self.current_char == "{" or self.current_char == "[") and self.peek_next_char() == self.current_char):
 				class_name.append(self.current_char)
-				if self.current_char == "|":
+				if self.current_char == "}" or self.current_char == "]" or self.current_char == "{" or self.current_char == "[":
 					templating = not templating
+					self.get_next_char()
+					class_name.append(self.current_char)
+
 				self.get_next_char()
 
 			t.value = "".join(class_name)
@@ -196,10 +199,12 @@ class ShotTokenizer:
 			templating = False
 
 			self.get_next_char()
-			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or self.current_char == "|" or templating:
+			while self.current_char.isalnum() or self.current_char == "_" or self.current_char == "-" or templating or ((self.current_char == "{" or self.current_char == "[") and self.peek_next_char() == self.current_char):
 				id.append(self.current_char)
-				if self.current_char == "|":
+				if self.current_char == "}" or self.current_char == "]" or self.current_char == "{" or self.current_char == "[":
 					templating = not templating
+					self.get_next_char()
+					id.append(self.current_char)
 				self.get_next_char()
 
 			t.value = "".join(id)
