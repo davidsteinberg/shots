@@ -1,0 +1,8 @@
+css "http://google.com/style"
+css "http://google.com/style.css"
+css "http://google.com/style.js"
+
+js "http://google.com/style"
+js "http://google.com/style.js"
+js "http://google.com/style.css"
+

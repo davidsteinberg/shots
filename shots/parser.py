@@ -68,7 +68,7 @@ class ShotParser:
 	def getNextToken(self):
 		self.currentToken = self.getToken()
 
-	def includeFile(self,fetch=False):
+	def includeFile(self,type=""):
 		self.getNextToken()
 		
 		filename = self.currentToken.value
@@ -76,13 +76,15 @@ class ShotParser:
 		filename = filename.replace(quoteChar,"")
 		
 		fileExt = filename.split(".")[-1]
+		if fileExt != type:
+			filename += "." + type
 
 		if filename[0] != "/" and (len(filename) < 4 or filename[:4] != "http"):
 			filename = getStaticPath(filename)
 		
 		filename = quoteChar + filename + quoteChar
 	
-		if fileExt == "css":
+		if type == "css":
 			node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
 
 			href = ShotAttribute(name="href")
@@ -94,7 +96,7 @@ class ShotParser:
 			node.attributes.append(rel)
 
 			return node
-		elif fileExt == "js":
+		elif type == "js":
 			node = ShotNode(tag="script",depth=self.getDepth(),parent=self.currentNode,multiline=False)
 		
 			src = ShotAttribute(name="src")
@@ -102,8 +104,6 @@ class ShotParser:
 			node.attributes.append(src)
 		
 			return node
-		else:
-			self.parseError("couldn't find file extension on " + ("fetch" if fetch else "includ") + "ed file")
 
 	def getFaviconElement(self):
 		node = ShotNode(tag="link",depth=self.getDepth(),parent=self.currentNode,selfClosing=True)
@@ -191,7 +191,7 @@ class ShotParser:
 		# link to file
 		elif self.currentToken.type == ShotToken.typeQuote:
 			self.currentTokenNum -= 1
-			return self.includeFile()
+			return self.includeFile(type="css")
 
 		# scoped and media
 		elif self.currentToken.type == ShotToken.typeAlpha:
@@ -239,7 +239,7 @@ class ShotParser:
 		# link to file
 		elif self.currentToken.type == ShotToken.typeQuote:
 			self.currentTokenNum -= 1
-			return self.includeFile()
+			return self.includeFile(type="js")
 
 		# async and defer
 		elif self.currentToken.type == ShotToken.typeAlpha:
