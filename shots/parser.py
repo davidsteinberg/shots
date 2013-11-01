@@ -6,6 +6,7 @@ from tokenizer import *
 _self_closers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 _tags_for_head = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 _directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
+_img_extensions = ["bmp", "gif", "jpeg", "jpg", "png"]
 
 class ShotParser:
 
@@ -481,67 +482,91 @@ class ShotParser:
 						else:
 							self.get_next_token()
 							
-							if (self.current_node.tag == "audio" or self.current_node.tag == "video") and attr.name == "src":
-								sources = []
+							if "[[" in self.current_token.value or "{{" in self.current_token.value:
+								attr.value = self.current_token.value
+								self.current_node.attributes.append(attr)
 							
-								if self.current_token.type == TOKEN_TYPE_ARRAY_OPENER:
-									self.get_next_token()
-
-									while self.current_token.type != TOKEN_TYPE_ARRAY_CLOSER:
-										if self.current_token.type == TOKEN_TYPE_QUOTE:
-											sources.append(self.current_token.value)
-
-										self.get_next_token()
-
-									self.get_next_token()
-									
-								elif self.current_token.type == TOKEN_TYPE_QUOTE:
-									sources.append(self.current_token.value)
-
-								else:
-									self.parse_error("expected quote or array after audio or video src")
-								
-								for s in sources:
-									sourced = False
-									
-									filename = s[1:-1]
+							elif attr.name == "src":
+								if self.current_node.tag == "img":
+									filename = self.current_token.value[1:-1]
 									file_ext = filename.split(".")[-1]
-									if file_ext == "mp3":
-										file_ext = "mpeg"
 
-									elif file_ext != "wav" and file_ext != "ogg":
-										exts = None
-
-										if self.current_node.tag == "audio":
-											exts = ["mp3","wav","ogg"]
-										else:
-											exts = ["mp4","webm","ogg"]
-
-										for ext in exts:
+									if file_ext not in _img_extensions:
+										for ext in _img_extensions:
 											path = get_static_path(filename + "." + ext)
 											if path != filename + "." + ext:
-												source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-												src = ShotAttribute(name="src",value="\"" + path + "\"")
-												source.attributes.append(src)
-									
-												type = ShotAttribute(name="type")
-												type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
-												source.attributes.append(type)
-									
-												self.current_node.children.append(source)
-										
-										sourced = True
+												attr.value = "\"" + path + "\""
+												self.current_node.attributes.append(attr)
+												break
+									else:
+										attr.value = self.current_token.value
+										self.current_node.attributes.append(attr)
+								
+								elif self.current_node.tag == "audio" or self.current_node.tag == "video":
+									sources = []
+							
+									if self.current_token.type == TOKEN_TYPE_ARRAY_OPENER:
+										self.get_next_token()
 
-									if not sourced:
-										source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-										src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
-										source.attributes.append(src)
+										while self.current_token.type != TOKEN_TYPE_ARRAY_CLOSER:
+											if self.current_token.type == TOKEN_TYPE_QUOTE:
+												sources.append(self.current_token.value)
+
+											self.get_next_token()
+
+										self.get_next_token()
 									
-										type = ShotAttribute(name="type")
-										type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
-										source.attributes.append(type)
+									elif self.current_token.type == TOKEN_TYPE_QUOTE:
+										sources.append(self.current_token.value)
+
+									else:
+										self.parse_error("expected quote or array after audio or video src")
+								
+									for s in sources:
+										sourced = False
 									
-										self.current_node.children.append(source)
+										filename = s[1:-1]
+										file_ext = filename.split(".")[-1]
+										if file_ext == "mp3":
+											file_ext = "mpeg"
+
+										elif file_ext != "wav" and file_ext != "ogg":
+											exts = None
+
+											if self.current_node.tag == "audio":
+												exts = ["mp3","wav","ogg"]
+											else:
+												exts = ["mp4","webm","ogg"]
+
+											for ext in exts:
+												path = get_static_path(filename + "." + ext)
+												if path != filename + "." + ext:
+													source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+													src = ShotAttribute(name="src",value="\"" + path + "\"")
+													source.attributes.append(src)
+									
+													type = ShotAttribute(name="type")
+													type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
+													source.attributes.append(type)
+									
+													self.current_node.children.append(source)
+										
+											sourced = True
+
+										if not sourced:
+											source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+											src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
+											source.attributes.append(src)
+									
+											type = ShotAttribute(name="type")
+											type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
+											source.attributes.append(type)
+									
+											self.current_node.children.append(source)
+								
+								else:
+									attr.value = self.current_token.value
+									self.current_node.attributes.append(attr)
 								
 							elif self.current_token.type == TOKEN_TYPE_QUOTE:
 								attr.value = self.current_token.value
