@@ -435,6 +435,9 @@ class ShotParser:
 						self.currentNode = bodyElement
 
 					self.bodyCreated = True
+			else:
+				if self.currentToken.value == "body":
+					self.bodyCreated = True
 					
 			# template directive check		
 			if self.currentToken.value in directiveOpeners:
@@ -636,8 +639,6 @@ class ShotParser:
 					self.currentNode.children.append(head)
 				elif self.fillingHead:
 					self.currentNode = self.currentNode.parent
-				else:
-					pass
 
 				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
 				self.currentNode.children.append(body)
@@ -691,8 +692,9 @@ class ShotParser:
 							node.children.append(k)
 						result += str(node)
 
-		# last minute regex for template delimiters
+		# last minute regex for template delimiters and == in directives
 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
+		result = re.sub(r"= =",r"==",result)
 		return result
 
 # at the bottom to avoid import loop
