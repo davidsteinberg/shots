@@ -80,7 +80,7 @@ class ShotNode:
 						else:
 							deleteSpaces = True
 					elif keyword == "for":
-						if not nextSibling or nextSibling.attributes[0].name != "else":
+						if not nextSibling or isinstance(nextSibling,ShotTextNode) or nextSibling.attributes[0].name != "else":
 							result += "{% endfor %}"
 						else:
 							deleteSpaces = True

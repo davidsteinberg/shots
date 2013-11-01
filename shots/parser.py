@@ -143,17 +143,22 @@ class ShotParser:
 		return node
 
 	def getRawScriptOrStyle(self):
-	
+		
 		body = []
 		
+		forcing = self.forceSpaceOneDeeper
+		self.forceSpaceOneDeeper = False
 		depth = self.getDepth()
-	
+		self.forceSpaceOneDeeper = forcing
+
 		self.currentLineNum += 1
 		if self.currentLineNum < len(self.tokenizer.lines):
 			line = self.tokenizer.lines[self.currentLineNum]
 	
 			while line.depth > depth:
 				for i in range(line.depth):
+					body.append("    ")
+				if forcing:
 					body.append("    ")
 				for token in line.tokens:
 					if token.type == ShotToken.typeText:
@@ -171,8 +176,10 @@ class ShotParser:
 				line = self.tokenizer.lines[self.currentLineNum]
 		
 			self.currentLineNum -= 1
+		
+		if len(body) > 0:
+			del body[-1] # get rid of last newline, was causing problems
 
-		del body[-1] # get rid of last newline, was causing problems
 		return ''.join(body)
 
 	def getStyleElement(self):
@@ -303,6 +310,7 @@ class ShotParser:
 			else:
 				text.append(self.currentToken.value)
 			self.getNextToken()
+
 		
 		keyword = text[0]
 		

@@ -1,8 +1,18 @@
-css "http://google.com/style"
-css "http://google.com/style.css"
-css "http://google.com/style.js"
+css
+	*              { font-family: sans-serif }
+	#brand_name    { font-size: 80px }
+	#slogan        { font-size: 40px }
+	.tickler       { font-size: 20px }
 
-js "http://google.com/style"
-js "http://google.com/style.js"
-js "http://google.com/style.css"
+#header
+	#brand_name : | brand_name or "Shots" |
+	#slogan : | slogan or "Distilled development for Flask apps." |
+
+br 4
+
+for i in range(0, 6)
+	set x = i * 40	
+	h| i + 1 |.tickler css="color : rgb(| x |,| x |,| x |)"
+		: Go ahead, give it a Shot.
+	br 2
 
