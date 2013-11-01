@@ -3,11 +3,11 @@ from fileHandler import getStaticPath, splitext
 from ast import *
 from tokenizer import *
 
-from shot import Shot
-
 selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 tagsForHead = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
+
+from shot import Shot
 
 class ShotParser:
 
@@ -693,9 +693,9 @@ class ShotParser:
 						result += str(node)
 
 		# last minute regex for template delimiters and == in directives
+		result = re.sub(r"\[\[",r"{{",result)
+		result = re.sub(r"\]\]",r"}}",result)
 # 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
-# 		result = re.sub(r"\[\[",r"{{",result)
-# 		result = re.sub(r"\]\]",r"}}",result)
 # 		result = re.sub(r"{ ",r"{{ ",result)
 # 		result = re.sub(r" }",r" }}",result)
 		result = re.sub(r"= =",r"==",result)

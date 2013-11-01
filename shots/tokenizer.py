@@ -76,6 +76,14 @@ class ShotTokenizer:
 	
 	def getNextChar(self):
 		self.currentChar = self.getChar()
+		
+	def peekNextChar(self):
+		if self.currentPosInLine >= self.currentLineLen:
+			return self.EOL
+		c = self.currentLine[self.currentPosInLine]
+		if c == "\n" or c == "\r":
+			return self.EOL
+		return c
 
 	def getToken(self):
 		if self.currentChar == self.EOL:
@@ -86,18 +94,26 @@ class ShotTokenizer:
 			self.getNextChar()
 	
 		# alpha
-		if self.currentChar.isalpha() or self.currentChar == "_" or self.currentChar == "|":
+		if self.currentChar.isalpha() or self.currentChar == "_" or (self.currentChar == "{" and self.peekNextChar() == "{") or (self.currentChar == "[" and self.peekNextChar() == "]"):
+			
 			t = ShotToken(type=ShotToken.typeAlpha)
 		
 			identifier = [self.currentChar]
 
-			templating = True if self.currentChar == "|" else False
-
-			self.getNextChar()
-			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or self.currentChar == "|" or templating:
+			templating = False
+			
+			if self.currentChar == "{" or self.currentChar == "[":
+				templating = True
+				self.getNextChar()
 				identifier.append(self.currentChar)
-				if self.currentChar == "|":
+				
+			self.getNextChar()
+			while self.currentChar.isalnum() or self.currentChar == "_" or self.currentChar == "-" or templating or (self.currentChar == "}" and self.peekNextChar() == "}") or (self.currentChar == "]" and self.peekNextChar() == "]"):
+				identifier.append(self.currentChar)
+				if self.currentChar == "}" or self.currentChar == "]":
 					templating = not templating
+					self.getNextChar()
+					identifier.append(self.currentChar)
 				self.getNextChar()
 
 			t.value = "".join(identifier)
