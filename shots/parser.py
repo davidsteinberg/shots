@@ -3,6 +3,8 @@ from fileHandler import getStaticPath, splitext
 from ast import *
 from tokenizer import *
 
+from shot import Shot
+
 selfClosers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 tagsForHead = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
 directiveOpeners = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
@@ -546,7 +548,11 @@ class ShotParser:
 				
 				if blockText:
 					elemBody = []
+					
+					forcing = self.forceSpaceOneDeeper
+					self.forceSpaceOneDeeper = False
 					elemDepth = self.getDepth()
+					self.forceSpaceOneDeeper = forcing
 		
 					self.currentLineNum += 1
 					if self.currentLineNum < len(self.tokenizer.lines):
@@ -554,6 +560,8 @@ class ShotParser:
 		
 						while line.depth > elemDepth:
 							for i in range(line.depth):
+								elemBody.append("    ")
+							if forcing:
 								elemBody.append("    ")
 							for token in line.tokens:
 								elemBody.append(token.value + " ")
@@ -565,8 +573,10 @@ class ShotParser:
 							line = self.tokenizer.lines[self.currentLineNum]
 			
 						self.currentLineNum -= 1
+			
+					if len(elemBody) > 0:					
+						del elemBody[-1] # get rid of last newline
 					
-					del elemBody[-1] # get rid of last newline
 					self.currentNode.children.append(''.join(elemBody))
 				
 				elif childElemNext:
@@ -683,10 +693,12 @@ class ShotParser:
 						result += str(node)
 
 		# last minute regex for template delimiters and == in directives
-		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
+# 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
+# 		result = re.sub(r"\[\[",r"{{",result)
+# 		result = re.sub(r"\]\]",r"}}",result)
+# 		result = re.sub(r"{ ",r"{{ ",result)
+# 		result = re.sub(r" }",r" }}",result)
 		result = re.sub(r"= =",r"==",result)
 		return result
 
 # at the bottom to avoid import loop
-
-from shot import Shot

@@ -1,0 +1,27 @@
+* {
+	font-family: sans-serif;
+}
+
+body {
+	margin: auto;
+	padding-left: 20px;
+	padding-right: 20px;
+	max-width: 800px;
+}
+
+#brand_name {
+	font-size: 80px;
+}
+
+#slogan {
+	font-size: 40px;
+	color: navy;
+}
+
+.tickler {
+	font-size: 20px;
+}
+
+.shots-link {
+	text-decoration: none;
+}

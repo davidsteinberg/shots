@@ -1,18 +1,23 @@
-css
-	*              { font-family: sans-serif }
-	#brand_name    { font-size: 80px }
-	#slogan        { font-size: 40px }
-	.tickler       { font-size: 20px }
+css "index"
+
+title : {{ brand_name or "Shots" }}
 
 #header
-	#brand_name : | brand_name or "Shots" |
-	#slogan : | slogan or "Distilled development for Flask apps." |
+	#brand_name : {{ brand_name or "Shots" }}
+	#slogan : {{ slogan or "Distilled development for Flask apps." }}
 
-br 4
+br 3
 
-for i in range(0, 6)
-	set x = i * 40	
-	h| i + 1 |.tickler css="color : rgb(| x |,| x |,| x |)"
-		: Go ahead, give it a Shot.
-	br 2
+for i in range(1, 7)
+
+	set x = 255 - (i * 35)
+	
+	link to="http://flaskshots.herokuapp.com/live"
+		.tickler css="color : rgb({{ x }},{{ x }},{{ x }})" :
+			Go ahead, give it a Shot.
+	
+	br 3
+
+js "http://code.jquery.com/jquery"
+js "index"
 

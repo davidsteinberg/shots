@@ -2,8 +2,6 @@ import sys
 
 from fileHandler import getTemplate, getTemplatePath, splitext
 
-from parser import ShotParser
-
 class Shot:
 	def __init__(self, filename, overwrite=True, included=False, logging=False):
 		filename, ext = splitext(filename)
@@ -68,3 +66,5 @@ def main():
 
 if __name__ == "__main__":
 	main()
+
+from parser import ShotParser
