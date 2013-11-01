@@ -1,7 +1,7 @@
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from os import sep, walk
-from os.path import abspath, dirname
+from os.path import abspath, dirname, splitext
 
 templateDir = sep + "templates"
 staticDir = sep + "static"

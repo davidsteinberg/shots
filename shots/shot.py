@@ -1,8 +1,6 @@
 import sys
 
-from os.path import splitext
-
-from locator import getTemplate, getTemplatePath
+from fileHandler import getTemplate, getTemplatePath, splitext
 
 from parser import ShotParser
 

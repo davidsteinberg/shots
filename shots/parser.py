@@ -1,6 +1,4 @@
-from os.path import splitext
-
-from locator import getStaticPath
+from fileHandler import getStaticPath, splitext
 
 from ast import *
 from tokenizer import *
