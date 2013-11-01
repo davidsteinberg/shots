@@ -1,0 +1,11 @@
+if not nav_items
+	set nav_items = ["YOUR", "ITEMS", "ARE", "MISSING"]
+
+#nav
+	for item in nav_items
+		.nav_item : [[ item ]]
+
+block content
+
+#footer : &copy 2013 Mark Page
+

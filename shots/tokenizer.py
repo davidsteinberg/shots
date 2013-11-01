@@ -235,7 +235,7 @@ class ShotTokenizer:
 
 		# array tokens (for audio and video src)
 		elif self.current_char == "[":
-			t = ShotToken(type=ShotToken.TOKEN_TYPE_ARRAY_OPENER)
+			t = ShotToken(type=TOKEN_TYPE_ARRAY_OPENER)
 			self.get_next_char()
 			
 		elif self.current_char == "]":

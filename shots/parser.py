@@ -423,7 +423,7 @@ class ShotParser:
 						
 						self.body_created = True
 			elif not self.body_created:
-				if self.current_token.value not in tags_for_head:
+				if self.current_token.value not in _tags_for_head:
 					self.current_node = self.current_node.parent if self.current_node.parent else self.root_node
 					if self.current_token.value == "body":
 						self.force_one_space_deeper = False
@@ -502,21 +502,46 @@ class ShotParser:
 									self.parse_error("expected quote or array after audio or video src")
 								
 								for s in sources:
-									source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-
+									sourced = False
+									
 									filename = s[1:-1]
 									file_ext = filename.split(".")[-1]
 									if file_ext == "mp3":
 										file_ext = "mpeg"
 
-									src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
-									source.attributes.append(src)
+									elif file_ext != "wav" and file_ext != "ogg":
+										exts = None
+
+										if self.current_node.tag == "audio":
+											exts = ["mp3","wav","ogg"]
+										else:
+											exts = ["mp4","webm","ogg"]
+
+										for ext in exts:
+											path = get_static_path(filename + "." + ext)
+											if path != filename + "." + ext:
+												source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+												src = ShotAttribute(name="src",value="\"" + path + "\"")
+												source.attributes.append(src)
 									
-									type = ShotAttribute(name="type")
-									type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
-									source.attributes.append(type)
+												type = ShotAttribute(name="type")
+												type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
+												source.attributes.append(type)
 									
-									self.current_node.children.append(source)
+												self.current_node.children.append(source)
+										
+										sourced = True
+
+									if not sourced:
+										source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+										src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
+										source.attributes.append(src)
+									
+										type = ShotAttribute(name="type")
+										type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
+										source.attributes.append(type)
+									
+										self.current_node.children.append(source)
 								
 							elif self.current_token.type == TOKEN_TYPE_QUOTE:
 								attr.value = self.current_token.value

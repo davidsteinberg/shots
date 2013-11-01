@@ -61,7 +61,7 @@ def get_template_path(filename):
 def get_static_path(filename):
 	path = _search_for_file_in_dir(_static_dir,filename)
 	if path:
-		return path
+		return path.replace(_dirpath,"")
 
 	print "Error: couldn't find static file " + filename
 	return filename

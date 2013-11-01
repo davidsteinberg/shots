@@ -1,0 +1,5 @@
+extends "extended"
+
+block content
+	include "included"
+

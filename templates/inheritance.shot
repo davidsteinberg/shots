@@ -1,5 +1,0 @@
-extends "inheritance_base"
-
-block content
-	: child text
-

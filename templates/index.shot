@@ -1,1 +1,4 @@
-include "shot.shot"
+audio src="song"
+
+video src="movie"
+

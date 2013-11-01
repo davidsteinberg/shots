@@ -75,12 +75,12 @@ class ShotNode:
 					delete_spaces = False
 
 					if keyword == "if" or keyword == "elif":
-						if not next_sibling or (next_sibling.attributes[0].name != "elif" and next_sibling.attributes[0].name != "else"):
+						if not next_sibling or isinstance(next_sibling,ShotTextNode) or len(next_sibling.attributes) == 0 or (next_sibling.attributes[0].name != "elif" and next_sibling.attributes[0].name != "else"):
 							result += "{% endif %}"
 						else:
 							delete_spaces = True
 					elif keyword == "for":
-						if not next_sibling or isinstance(next_sibling,ShotTextNode) or next_sibling.attributes[0].name != "else":
+						if not next_sibling or isinstance(next_sibling,ShotTextNode) or len(next_sibling.attributes) == 0 or next_sibling.attributes[0].name != "else":
 							result += "{% endfor %}"
 						else:
 							delete_spaces = True
