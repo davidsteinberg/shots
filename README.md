@@ -20,7 +20,7 @@ Here is one of the smallest Shots you can have:
 ```html
 title : A Little Shot
 
-a : This is a little Shot
+h1 : This is a little Shot
 ```
 
 ###app.py
