@@ -27,6 +27,7 @@ class ShotParser:
 		
 		self.lookingForHead = True
 		self.bodyCreated = False
+		self.forceSpaceOneDeeper = False
 
 	def log(self,message):
 		if self.logging:
@@ -46,6 +47,12 @@ class ShotParser:
 
 	def reachedEOF(self):
 		return self.currentLineNum >= len(self.tokenizer.lines)
+
+	def getDepth(self):
+		depth = self.tokenizer.lines[self.currentLineNum].depth
+		if self.forceSpaceOneDeeper:
+			depth += 1
+		return depth
 
 	def getToken(self):
 		if self.currentTokenNum >= len(self.tokenizer.lines[self.currentLineNum].tokens):
@@ -124,7 +131,7 @@ class ShotParser:
 		if fileExt == "ico":
 			type.value += "x-icon"
 		else:
-			type.value=fileExt
+			type.value = fileExt
 		
 		type.value += "\""
 
@@ -385,16 +392,17 @@ class ShotParser:
 				if self.currentToken.value == "head":
 					self.lookingForHead = False
 				elif self.currentToken.value != "doctype" and self.currentToken.value != "html":
-					headElement = ShotNode(tag="head",depth=-1,parent=self.currentNode)
+					headElement = ShotNode(tag="head",depth=0,parent=self.currentNode)
 					self.currentNode.children.append(headElement)
 					self.currentNode = headElement
 			
 					self.lookingForHead = False
+					self.forceSpaceOneDeeper = True
 				
 					if self.currentToken.value not in tagsForHead:
 						self.currentNode = self.currentNode.parent
 						if self.currentToken.value != "body":
-							bodyElement = ShotNode(tag="body",depth=-1,parent=self.currentNode)
+							bodyElement = ShotNode(tag="body",depth=0,parent=self.currentNode)
 							self.currentNode.children.append(bodyElement)
 							self.currentNode = bodyElement
 						
@@ -402,6 +410,8 @@ class ShotParser:
 
 			else:
 				if self.currentToken.value == "body":
+					self.forceSpaceOneDeeper = False
+					self.currentNode = self.currentNode.parent if self.currentNode.parent else self.rootNode
 					self.bodyCreated = True
 					
 			# template directive check		
@@ -555,15 +565,14 @@ class ShotParser:
 		if node:
 			self.currentNode.children.append(node)
 
-	def getDepth(self):
-		return self.tokenizer.lines[self.currentLineNum].depth
-
 	def getNode(self):
 		if self.reachedEOF():
 			return None
 
 		while self.getDepth() <= self.currentNode.depth:
 			self.logFinishedCreation(self.currentNode.tag)
+			if self.currentNode.tag == "body" or self.currentNode.tag == "head":
+				self.forceSpaceOneDeeper = False
 			self.currentNode = self.currentNode.parent
 
 		self.getNextToken()
@@ -595,15 +604,17 @@ class ShotParser:
 #
 			if not self.included and not self.bodyCreated:
 				if self.lookingForHead:
-					head = ShotNode(tag="head",depth=-1,parent=self.currentNode)
+					head = ShotNode(tag="head",depth=0,parent=self.currentNode)
 					self.currentNode.children.append(head)
 					
 					self.lookingForHead = False
 				elif self.currentNode.tag == "head":
 					self.currentNode = self.currentNode.parent
 				
-				body = ShotNode(tag="body",depth=-1,parent=self.currentNode)
+				body = ShotNode(tag="body",depth=0,parent=self.currentNode)
 				self.currentNode.children.append(body)
+
+				self.forceSpaceOneDeeper = True
 
 				self.currentNode = body
 				self.bodyCreated = True
