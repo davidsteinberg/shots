@@ -9,7 +9,7 @@ class Shot:
 		self.filename = get_template_path(shotify(filename))
 		self.logging = logging
 
-		if settings.overwrite or not isfile(htmlify(self.filename)):
+		if settings.developing or not isfile(htmlify(self.filename)):
 			self.log("parsing " + self.filename)
 			self.parser = ShotParser(self.filename, logging=self.logging)
 
@@ -20,7 +20,7 @@ class Shot:
 			print message
 
 	def generate_shot(self):
-		if settings.overwrite or not isfile(self.filename):
+		if settings.developing or not isfile(self.filename):
 			self.log("generating " + self.filename)
 			code = self.parser.generate_code()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")

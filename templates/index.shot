@@ -1,0 +1,2 @@
+div [[ some_attr ]]="this"
+
