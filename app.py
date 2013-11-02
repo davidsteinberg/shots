@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 @app.route('/<page>')
-def index(page=None):
+def router(page=None):
 	if page:
 		return Shot(page).render(page=page)
 	else:
