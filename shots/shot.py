@@ -1,16 +1,18 @@
 import sys
 
+from os.path import isfile
+
 from file_assistant import *
+from settings import settings
 from parser import ShotParser
 
 class Shot:
-	def __init__(self, filename, overwrite=True, included=False, logging=False):
+	def __init__(self, filename, included=False, logging=False):
 		self.filename = get_template_path(shotify(filename))
-		self.overwrite = overwrite
 		self.included = included
 		self.logging = logging
 
-		if self.overwrite or not isfile(self.filename):
+		if settings.overwrite or not isfile(self.filename):
 			self.parser = ShotParser(self.filename, included=self.included, logging=self.logging)
 
 		self.filename = htmlify(self.filename)
@@ -22,7 +24,7 @@ class Shot:
 	def generate_shot(self):
 		self.log("generating " + self.filename)
 	
-		if self.overwrite or not isfile(self.filename):
+		if settings.overwrite or not isfile(self.filename):
 			code = self.parser.generate_code()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
 			write_shot_to_file(self.filename,shot=code)
@@ -48,7 +50,7 @@ def main():
 		if "-j" in sys.argv:
 			before_jinja = True
 
-	s = Shot(sys.argv[1], overwrite=True, logging=logging)
+	s = Shot(sys.argv[1], logging=logging)
 
 	if before_jinja:
 		print s.parser.generate_code()

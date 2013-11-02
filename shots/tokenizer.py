@@ -228,6 +228,11 @@ class ShotTokenizer:
 			
 			t.value = "".join(comment)
 
+		# nested element
+		elif self.current_char == "-":
+			t = ShotToken(type=TOKEN_TYPE_CHILD_ELEM_NEXT)
+			self.get_next_char()
+
 		# equals (for attributes)
 		elif self.current_char == "=":
 			t = ShotToken(type=TOKEN_TYPE_EQUALS)

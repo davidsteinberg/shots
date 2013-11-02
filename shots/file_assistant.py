@@ -3,12 +3,17 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from os import makedirs, sep, walk
 from os.path import abspath, dirname, exists, splitext
 
+from settings import settings
+
 _environment = Environment(loader=FileSystemLoader(sep))
 
 _dirpath = dirname(dirname(abspath(__file__)))
 
 _template_dir = "templates"
 _static_dir = "static"
+
+if settings and settings.app:
+	pass
 
 _html_dir = _dirpath + sep + _template_dir + sep + "html"
 
