@@ -12,27 +12,27 @@ tag :
 
 ! comment
 
-- set var = "var"
-- set iable = "iable"
-- set variable = "variable"
+set var = "var"
+set iable = "iable"
+set variable = "variable"
 
-var| iable|
-| variable |
-|var |iable
+var[[ iable]]
+[[ variable ]]
+[[var ]]iable
 
-: text with | variable |
+: text with [[ variable ]]
 
-.var| iable|
-.| variable |
-.|var |iable
+.var[[ iable]]
+.[[ variable ]]
+.[[var ]]iable
 
-#var| iable|
-#| variable |
-#|var |iable
+#var[[ iable]]
+#[[ variable ]]
+#[[var ]]iable
 
-- if name
-	h1 : | name |
-- endif
+if name
+	h1 : [[ name ]]
+endif
 
--- if name
-	h1 : | run_this_function(5, "ducks") |
+if name
+	h1 : [[ run_this_function(5, "ducks") ]]

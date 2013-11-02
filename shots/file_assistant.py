@@ -1,12 +1,19 @@
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
-from os import sep, walk
-from os.path import abspath, dirname, splitext
+from os import makedirs, sep, walk
+from os.path import abspath, dirname, exists, splitext
+
+_environment = Environment(loader=FileSystemLoader(sep))
+
+_dirpath = dirname(dirname(abspath(__file__)))
 
 _template_dir = "templates"
 _static_dir = "static"
 
-_environment = Environment(loader=FileSystemLoader(sep))
+_html_dir = _dirpath + sep + _template_dir + sep + "html"
+
+if not exists(_html_dir):
+	makedirs(_html_dir)
 
 def shotify(filename):
 	filename, ext = splitext(filename)
@@ -15,10 +22,18 @@ def shotify(filename):
 	filename += ".shot"
 	return filename
 	
-def htmlify(filename):
+def htmlify(filename):	
+	path = _html_dir
+	
+	dir_chain = filename.replace(_dirpath + sep + _template_dir + sep,"").split("/")
+	for d in range(len(dir_chain)-1):
+		path += sep + dir_chain[d]
+		if not exists(path):
+			makedirs(path)
+
 	filename, ext = splitext(filename)
 	filename += ".html"
-	return filename
+	return filename.replace(_template_dir,_template_dir + sep + "html")
 
 def write_shot_to_file(filename,shot=""):
 	f = open(filename, "w")
@@ -27,8 +42,6 @@ def write_shot_to_file(filename,shot=""):
 
 def get_template(filename):
 	return _environment.get_template(filename)
-
-_dirpath = dirname(dirname(abspath(__file__)))
 
 def _search_for_file_in_dir(dir,filename=""):
 	if filename == "":
