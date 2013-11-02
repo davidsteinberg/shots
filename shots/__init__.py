@@ -1,4 +1,3 @@
 from shot import Shot
-
-__all__ = ["Shot"]
+from settings import settings
 

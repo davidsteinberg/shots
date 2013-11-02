@@ -1,22 +1,27 @@
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from os import makedirs, sep, walk
-from os.path import abspath, dirname, exists, splitext
+from os.path import abspath, dirname, exists, isfile, splitext
 
 from settings import settings
 
 _environment = Environment(loader=FileSystemLoader(sep))
 
+def get_template_dir():
+	template_dir = "templates"
+	if settings and settings.app:
+		template_dir = settings.app.template_folder
+	return template_dir
+
+def get_static_dir():
+	static_dir = "static"
+	if settings and settings.app:
+		static_dir = settings.app.static_folder
+	return static_dir	
+
 _dirpath = dirname(dirname(abspath(__file__)))
 
-_template_dir = "templates"
-_static_dir = "static"
-
-if settings and settings.app:
-	pass
-
-_html_dir = _dirpath + sep + _template_dir + sep + "html"
-
+_html_dir = _dirpath + sep + get_template_dir() + sep + "html"
 if not exists(_html_dir):
 	makedirs(_html_dir)
 
@@ -30,7 +35,9 @@ def shotify(filename):
 def htmlify(filename):	
 	path = _html_dir
 	
-	dir_chain = filename.replace(_dirpath + sep + _template_dir + sep,"").split("/")
+	template_dir = get_template_dir()
+	
+	dir_chain = filename.replace(_dirpath + sep + template_dir + sep,"").split("/")
 	for d in range(len(dir_chain)-1):
 		path += sep + dir_chain[d]
 		if not exists(path):
@@ -38,7 +45,7 @@ def htmlify(filename):
 
 	filename, ext = splitext(filename)
 	filename += ".html"
-	return filename.replace(_template_dir,_template_dir + sep + "html")
+	return filename.replace(template_dir,template_dir + sep + "html")
 
 def write_shot_to_file(filename,shot=""):
 	f = open(filename, "w")
@@ -70,14 +77,14 @@ def _search_for_file_in_dir(dir,filename=""):
 	return None
 
 def get_template_path(filename):
-	path = _search_for_file_in_dir(_template_dir,filename)
+	path = _search_for_file_in_dir(get_template_dir(),filename)
 	if path:
 		return path
 
 	raise TemplateNotFound(filename)
 
 def get_static_path(filename):
-	path = _search_for_file_in_dir(_static_dir,filename)
+	path = _search_for_file_in_dir(get_static_dir(),filename)
 	if path:
 		return path.replace(_dirpath,"")
 

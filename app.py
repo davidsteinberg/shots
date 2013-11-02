@@ -1,7 +1,10 @@
 from flask import Flask
-from shots import Shot
+from shots import Shot, settings
 
 app = Flask(__name__)
+
+settings.app = app
+settings.overwrite = True
 
 @app.route('/')
 @app.route('/<page>')

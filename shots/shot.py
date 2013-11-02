@@ -1,19 +1,17 @@
 import sys
 
-from os.path import isfile
-
 from file_assistant import *
 from settings import settings
 from parser import ShotParser
 
 class Shot:
-	def __init__(self, filename, included=False, logging=False):
+	def __init__(self, filename, logging=False):
 		self.filename = get_template_path(shotify(filename))
-		self.included = included
 		self.logging = logging
 
-		if settings.overwrite or not isfile(self.filename):
-			self.parser = ShotParser(self.filename, included=self.included, logging=self.logging)
+		if settings.overwrite or not isfile(htmlify(self.filename)):
+			self.log("parsing " + self.filename)
+			self.parser = ShotParser(self.filename, logging=self.logging)
 
 		self.filename = htmlify(self.filename)
 
@@ -22,13 +20,12 @@ class Shot:
 			print message
 
 	def generate_shot(self):
-		self.log("generating " + self.filename)
-	
 		if settings.overwrite or not isfile(self.filename):
+			self.log("generating " + self.filename)
 			code = self.parser.generate_code()
 			self.log("\nCODE\n\n"+code+"\n\nEND CODE\n")
 			write_shot_to_file(self.filename,shot=code)
-			
+
 	def render(self, **varArgs):
 		self.generate_shot()
 		template = get_template(self.filename)
