@@ -1,0 +1,70 @@
+meta charset="utf-8"
+meta http-equiv="X-UA-Compatible" content="IE=edge"
+meta name="viewport" content="width=device-width, initial-scale=1.0"
+meta name="description" content=""
+meta name="author" content=""
+
+favicon "http://getbootstrap.com/docs-assets/ico/favicon.png"
+
+title: Sticky Footer Navbar Template for Bootstrap
+
+! Bootstrap core CSS
+css "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+
+! Custom styles for this template
+css "http://getbootstrap.com/examples/sticky-footer-navbar/sticky-footer-navbar.css"
+
+! HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries
+! [if lt IE 9]><script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script><![endif]
+! [if lt IE 9]><script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script><![endif]
+
+! Wrap all page content here
+
+#wrap
+	.navbar.navbar-default.navbar-fixed-top
+		.container
+			.navbar-header
+				button.navbar-toggle type="button" data-toggle="collapse" data-target=".navbar-collapse"
+					for i in range(3)
+						span.icon-bar
+
+				link.navbar-brand to="#" : Project name
+
+			.navbar-collapse.collapse
+				ul.nav.navbar-nav
+					li.active :: link to="#" : Home
+					li :: link to="#about" : About
+					li :: link to="#contact" : Contact
+
+					li.dropdown
+						link.dropdown-toggle to="#" data-toggle="dropdown"
+							: Dropdown
+							b.caret
+
+						ul.dropdown-menu
+							li :: link to="#" : Action
+							li :: link to="#" : Another action
+							li :: link to="#" : Something else here
+							li.divider
+							li.dropdown-header : Nav header
+							li :: link to="#" : Separated link
+							li :: link to="#" : One more separated link
+	
+	! Begin page content
+
+	.container
+		.page-header
+			h1: Sticky footer with fixed navbar
+		
+		p.lead : Pin a fixed-height footer to the bottom of the viewport in desktop browsers with this custom HTML and CSS. A fixed navbar has been added within <code>#wrap</code> with <code>padding-top: 60px;</code> on the <code>.container</code>.
+		p : Back to <a href="http://getbootstrap.com/examples/sticky-footer">the default sticky footer</a> minus the navbar.
+
+#footer
+	.container
+		p.text-muted.credit : Example courtesy <a href="http://martinbean.co.uk">Martin Bean</a> and <a href="http://ryanfait.com/sticky-footer/">Ryan Fait</a>.
+
+! Bootstrap core JavaScript
+! Placed at the end of the document so the pages load faster
+
+js "http://code.jquery.com/jquery.js"
+js "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"
