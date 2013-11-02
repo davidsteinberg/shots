@@ -1,0 +1,68 @@
+meta charset="utf-8"
+meta http-equiv="X-UA-Compatible" content="IE=edge"
+meta name="viewport" content="width=device-width, initial-scale=1.0"
+meta name="description" content=""
+meta name="author" content=""
+
+favicon "http://getbootstrap.com/docs-assets/ico/favicon.png"
+
+title: Off Canvas Template for Bootstrap
+
+! Bootstrap core CSS
+css "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+
+! Custom styles for this template
+css "http://getbootstrap.com/examples/offcanvas/offcanvas.css"
+
+! HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries
+! [if lt IE 9]><script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script><![endif]
+! [if lt IE 9]><script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script><![endif]
+
+.navbar.navbar-fixed-top.navbar-inverse role="navigation"
+	.container
+		.navbar-header
+			button.navbar-toggle type="button" data-toggle="collapse" data-target=".navbar-collapse"
+				for i in range(3)
+					span.icon-bar
+			link.navbar-brand to="#" : Project name
+		
+		.collapse.navbar-collapse
+			ul.nav.navbar-nav
+				li.active :: link to="#" : Home
+				li :: link to="#about" : About
+				li :: link to="#contact" : Contact
+		
+.container
+	.row.row-offcanvas.row-offcanvas-right
+		.col-xs-12.col-sm-9
+			p.pull-right.visible-xs
+				button.btn.btn-primary.btn-xs type="button" data-toggle="offcanvas" : Toggle nav
+		
+			.jumbotron
+				h1: Hello, world!
+				p: This is an example to show the potential of an offcanvas layout pattern in Bootstrap. Try some responsive-range viewport sizes to see it in action.
+				
+			.row
+				for i in range(6)
+					.col-6.col-sm-6.col-lg-4
+						h2: Heading
+						p: Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+						p :: link.btn.btn-default to="#" role="button" : View details &raquo;
+
+		#sidebar.col-xs-6.col-sm-3.sidebar-offcanvas role="navigation"
+			.list-group
+				link.list-group-item.active to="#" : Link
+				for i in range(9)
+					link.list-group-item to="#" : Link
+	
+	hr
+
+	footer
+		p: &copy; Company 2013
+
+! Bootstrap core JavaScript
+! Placed at the end of the document so the pages load faster
+
+js "http://code.jquery.com/jquery.js"
+js "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"
+js "http://getbootstrap.com/examples/offcanvas/offcanvas.js"

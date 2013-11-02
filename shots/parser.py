@@ -120,7 +120,7 @@ class ShotParser:
 		self.get_next_token()
 		
 		url = ""
-		file_ext = ""
+		file_ext = self.current_token.value.split(".")[-1][:-1]
 		
 		if "[[" in self.current_token.value or "{{" in self.current_token.value:
 			url = self.current_token.value
@@ -132,8 +132,6 @@ class ShotParser:
 				url = self.current_token.value
 
 			else:
-				file_ext = filename.split(".")[-1]
-
 				if file_ext in _favicon_extensions:
 					url = self.current_token.value
 
@@ -141,11 +139,11 @@ class ShotParser:
 					for ext in _favicon_extensions:
 						path = get_static_path(filename + "." + ext)
 						if path != filename + "." + ext:
-							url = path
+							url = "\"" + path + "\""
 							break
 		
 		href = ShotAttribute(name="href")
-		href.value = "\"" + url + "\""
+		href.value = url
 		node.attributes.append(href)
 		
 		type = ShotAttribute(name="type")
@@ -154,7 +152,7 @@ class ShotParser:
 		if file_ext == "ico":
 			type.value += "x-icon"
 		else:
-			type.value = file_ext
+			type.value += file_ext
 		
 		type.value += "\""
 
@@ -494,7 +492,10 @@ class ShotParser:
 						attr = ShotAttribute(name=self.current_token.value)
 						self.get_next_token()
 						
-						if self.current_token.type != TOKEN_TYPE_EQUALS:
+						if self.current_token.type == TOKEN_TYPE_EOL:
+							break
+						
+						elif self.current_token.type != TOKEN_TYPE_EQUALS:
 							self.current_node.attributes.append(attr)
 							self.current_token_num -= 1
 

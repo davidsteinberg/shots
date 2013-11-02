@@ -35,7 +35,7 @@ TOKEN_TYPE_NUM_TO_NAME = [
 ]
 
 class ShotToken:
-	def __init__(self,value="",type="unknown"):
+	def __init__(self,value="",type=TOKEN_TYPE_UNKNOWN):
 		self.value = value
 		self.type = type
 	
