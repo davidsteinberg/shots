@@ -344,15 +344,15 @@ class ShotParser:
 	def get_block_comment(self,secret=False):
 		comment_body = []
 	
-		self.get_next_token()	
-		if self.current_token.type != TOKEN_TYPE.EOL:
-			comment_body.append(self.current_token.value)
-		
 		forcing = self.force_one_space_deeper
 		self.force_one_space_deeper = False
 		comment_depth = self.get_depth()
 		self.force_one_space_deeper = forcing
 		
+		self.get_next_token()
+		if self.current_token.type != TOKEN_TYPE.EOL:
+			comment_body.append(self.current_token.value + "\n")
+
 		self.current_line_num += 1
 		if self.current_line_num < len(self.tokenizer.lines):
 			line = self.tokenizer.lines[self.current_line_num]
@@ -376,7 +376,7 @@ class ShotParser:
 		if not secret:
 			if forcing:
 				text += "    "
-			text += "<!--\n" + "".join(comment_body)
+			text += "<!-- " + "".join(comment_body)
 			for i in range(line.depth):
 				text += "    "
 			if forcing:
