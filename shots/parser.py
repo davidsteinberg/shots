@@ -5,7 +5,6 @@ from tokenizer import *
 
 _self_closers = ["area", "base", "br", "col", "command", "doctype", "embed", "hr", "img", "input", "keygen", "meta", "param", "source", "track", "wbr"]
 _tags_for_head = ["base", "comment", "css", "favicon", "fetch", "js", "javascript", "meta", "noscript", "script", "style", "title"]
-_directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 _img_extensions = ["apng", "bmp", "gif", "jpeg", "jpg", "png", "svg"]
 _favicon_extensions = ["apng", "gif", "ico", "jpeg", "jpg", "png", "svg"]
 
@@ -304,34 +303,12 @@ class ShotParser:
 		self.current_node.children.append(node)
 
 	def get_directive(self):
-		self.log_creation("directive")
-	
 		node = ShotNode(tag="directive",depth=self.get_depth(),parent=self.current_node)
 		
-		text = []
+		text = self.current_token.value.split(" ")
 
-		while self.current_token.type != TOKEN_TYPE_EOL:
-			if self.current_token.type == TOKEN_TYPE_TEXT:
-				text.append(":" + self.current_token.value)
-			elif self.current_token.type == TOKEN_TYPE_CLASS:
-				text.append("." + self.current_token.value)
-			elif self.current_token.type == TOKEN_TYPE_ID:
-				text.append("#" + self.current_token.value)
-			elif self.current_token.type == TOKEN_TYPE_EQUALS:
-				text.append("=")
-			elif self.current_token.type == TOKEN_TYPE_ARRAY_OPENER:
-				text.append("[")
-			elif self.current_token.type == TOKEN_TYPE_ARRAY_CLOSER:
-				text.append("]")
-			elif self.current_token.type == TOKEN_TYPE_COMMA:
-				text.append(",")
-			else:
-				text.append(self.current_token.value)
-			self.get_next_token()
-
-		
 		keyword = text[0]
-		
+
 		if keyword == "extends" or keyword == "include" or keyword == "import":
 
 			if text[1][0] == "\"" or text[1][0] == "'":
@@ -357,13 +334,11 @@ class ShotParser:
 				del self.current_node.children[:]
 				node.parent = self.current_node
 
-		attr = ShotAttribute(name=keyword,value=' '.join(text))
+		attr = ShotAttribute(name=keyword,value=self.current_token.value)
 		node.attributes.append(attr)
 
 		self.current_node.children.append(node)
 		self.current_node = node
-	
-		self.log_finished_creation("directive")
 		
 	def get_comment(self):
 		node = ShotTextNode(text="<!-- " + self.current_token.value  +" -->", depth=self.get_depth())
@@ -407,7 +382,7 @@ class ShotParser:
 		if self.current_token.value == "comment":
 			node = self.get_block_comment()
 			
-		elif self.current_token.value == "disable" or self.current_token.value == "secret":
+		elif self.current_token.value == "secret":
 			node = self.get_block_comment(secret=True)
 
 		else:
@@ -451,14 +426,11 @@ class ShotParser:
 						self.current_node.children.append(body_element)
 						self.current_node = body_element
 					
-					self.body_created = True				
-					
-			# template directive check
-			if self.current_token.value in _directive_openers:
-				self.get_directive()
-				return
+					self.body_created = True
+
+			# special case certain tags
 	
-			elif self.current_token.value == "favicon":
+			if self.current_token.value == "favicon":
 				node = self.get_favicon_element()
 
 			elif self.current_token.value == "br":
@@ -697,12 +669,12 @@ class ShotParser:
 			self.current_token_num = 0
 			self.get_node_with_tag()
 
-		elif self.current_token.type == TOKEN_TYPE_HTML_COMMENT:
+		elif self.current_token.type == TOKEN_TYPE_HTML_LINE_COMMENT:
 			self.log_creation("line comment")
 			self.get_comment()
 			self.log_finished_creation("line comment")
 
-		elif self.current_token.type == TOKEN_TYPE_SHOT_COMMENT:
+		elif self.current_token.type == TOKEN_TYPE_SHOT_LINE_COMMENT:
 			return True
 
 		else:
@@ -730,6 +702,11 @@ class ShotParser:
 				self.log_creation("text")
 				self.get_text()
 				self.log_finished_creation("text")
+			
+			elif self.current_token.type == TOKEN_TYPE_DIRECTIVE:
+				self.log_creation("directive")
+				self.get_directive()
+				self.log_finished_creation("directive")
 		
 		return True
 

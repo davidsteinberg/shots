@@ -1,4 +1,4 @@
-class ShotSettings:
+class ShotsSettings:
 	def __init__(self):
 		self.developing = True
 		self.app = None
@@ -6,4 +6,4 @@ class ShotSettings:
 		self.static_dir = None
 		self.html_dir = None
 
-settings = ShotSettings()
+settings = ShotsSettings()

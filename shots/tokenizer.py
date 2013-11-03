@@ -3,28 +3,30 @@ import re
 TOKEN_TYPE_ALPHA = 0
 TOKEN_TYPE_ARRAY_CLOSER = 1
 TOKEN_TYPE_ARRAY_OPENER = 2
-TOKEN_TYPE_CLASS = 3
-TOKEN_TYPE_CHILD_ELEM_NEXT = 4
+TOKEN_TYPE_CHILD_ELEM_NEXT = 3
+TOKEN_TYPE_CLASS = 4
 TOKEN_TYPE_COMMA = 5
-TOKEN_TYPE_EQUALS = 6
+TOKEN_TYPE_DIRECTIVE = 6
 TOKEN_TYPE_EOL = 7
-TOKEN_TYPE_HTML_COMMENT = 8
-TOKEN_TYPE_ID = 9
-TOKEN_TYPE_NUMBER = 10
-TOKEN_TYPE_QUOTE = 11
-TOKEN_TYPE_SHOT_COMMENT = 12
-TOKEN_TYPE_TEXT = 13
-TOKEN_TYPE_UNKNOWN = 14
+TOKEN_TYPE_EQUALS = 8
+TOKEN_TYPE_HTML_LINE_COMMENT = 9
+TOKEN_TYPE_ID = 10
+TOKEN_TYPE_NUMBER = 11
+TOKEN_TYPE_QUOTE = 12
+TOKEN_TYPE_SHOT_LINE_COMMENT = 13
+TOKEN_TYPE_TEXT = 14
+TOKEN_TYPE_UNKNOWN = 15
 
 TOKEN_TYPE_NUM_TO_NAME = [
 	"alpha",
 	"array closer",
-	"array cpener",
-	"class",
+	"array opener",
 	"child elem next",
+	"class",
 	"comma",
-	"equals",
+	"directive",
 	"EOL",
+	"equals",
 	"html comment",
 	"id",
 	"number",
@@ -33,6 +35,8 @@ TOKEN_TYPE_NUM_TO_NAME = [
 	"text",
 	"unknown"
 ]
+
+_directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
 class ShotToken:
 	def __init__(self,value="",type=TOKEN_TYPE_UNKNOWN):
@@ -116,6 +120,26 @@ class ShotTokenizer:
 				self.get_next_char()
 
 			t.value = "".join(identifier)
+			
+			if t.value in _directive_openers:
+				directive = [t.value]
+				
+				while self.current_char != self.EOL:
+					directive.append(self.current_char)
+					self.get_next_char()
+				
+				t.type = TOKEN_TYPE_DIRECTIVE
+				t.value = "".join(directive)
+				
+			elif t.value == "comment" or t.value == "secret":
+				# eat til end of line and block
+				# should store each line with its depth and then the whole line as its sole token
+				pass
+				
+			elif t.value == "css" or t.value == "js":
+				# eat til end of block
+				# should store each line with its depth and then the whole line as its sole token
+				pass
 		
 		# number
 		elif self.current_char.isdigit():
@@ -214,10 +238,10 @@ class ShotTokenizer:
 			self.get_next_char()
 
 			if self.current_char == "!":
-				t = ShotToken(type=TOKEN_TYPE_SHOT_COMMENT)
+				t = ShotToken(type=TOKEN_TYPE_SHOT_LINE_COMMENT)
 				self.get_next_char()
 			else:
-				t = ShotToken(type=TOKEN_TYPE_HTML_COMMENT)
+				t = ShotToken(type=TOKEN_TYPE_HTML_LINE_COMMENT)
 			
 			comment = []
 
