@@ -156,9 +156,8 @@ class ShotParser:
 
 		return node
 
-	def get_raw_script_or_style(self):
-		
-		body = []
+	def get_content_block(self):
+		content = []
 		
 		forcing = self.force_one_space_deeper
 		self.force_one_space_deeper = False
@@ -168,26 +167,26 @@ class ShotParser:
 		self.current_line_num += 1
 		if self.current_line_num < len(self.tokenizer.lines):
 			line = self.tokenizer.lines[self.current_line_num]
-	
+
 			while line.depth > depth:
 				for i in range(line.depth):
-					body.append("    ")
+					content.append("    ")
 				if forcing:
-					body.append("    ")
-				body.append(line.tokens[0].value)
-				body.append("\n")
-		
+					content.append("    ")
+				content.append(line.tokens[0].value)
+				content.append("\n")
+
 				self.current_line_num += 1
 				if self.current_line_num >= len(self.tokenizer.lines):
 					break
 				line = self.tokenizer.lines[self.current_line_num]
-		
+
 			self.current_line_num -= 1
 		
-		if len(body) > 0:
-			del body[-1] # get rid of last newline, was causing problems
+		if len(content) > 0:
+			del content[-1] # get rid of last newline, was causing problems
 
-		return ''.join(body)
+		return ''.join(content)
 
 	def get_style_element(self):
 		self.get_next_token()
@@ -195,7 +194,7 @@ class ShotParser:
 		# raw css body
 		if self.current_token.type == TOKEN_TYPE.EOL:
 			node = ShotNode(tag="style",depth=self.get_depth(),parent=self.current_node)
-			node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
+			node.children.append(ShotTextNode(text=self.get_content_block()))
 
 		# single line body
 		elif self.current_token.type == TOKEN_TYPE.TEXT:
@@ -229,7 +228,7 @@ class ShotParser:
 			self.get_next_token()
 			
 			if self.current_token.type == TOKEN_TYPE.EOL:
-				node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
+				node.children.append(ShotTextNode(text=self.get_content_block()))
 				
 			else:
 				node.multiline=False
@@ -243,7 +242,7 @@ class ShotParser:
 		# raw js body
 		if self.current_token.type == TOKEN_TYPE.EOL:
 			node = ShotNode(tag="script",depth=self.get_depth(),parent=self.current_node)
-			node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
+			node.children.append(ShotTextNode(text=self.get_content_block()))
 
 		# single line body
 		elif self.current_token.type == TOKEN_TYPE.TEXT:
@@ -346,31 +345,14 @@ class ShotParser:
 		if self.current_token.type != TOKEN_TYPE.EOL:
 			comment_body.append(self.current_token.value + "\n")
 
-		self.current_line_num += 1
-		if self.current_line_num < len(self.tokenizer.lines):
-			line = self.tokenizer.lines[self.current_line_num]
-		
-			while line.depth > comment_depth:
-				for i in range(line.depth):
-					comment_body.append("    ")
-				if forcing:
-					comment_body.append("    ")
-				comment_body.append(line.tokens[0].value)
-				comment_body.append("\n")
-			
-				self.current_line_num += 1
-				if self.current_line_num >= len(self.tokenizer.lines):
-					break
-				line = self.tokenizer.lines[self.current_line_num]
-			
-			self.current_line_num -= 1
+		comment_body.append(self.get_content_block())
 
 		text = ""
 		if not secret:
 			if forcing:
 				text += "    "
-			text += "<!-- " + "".join(comment_body)
-			for i in range(line.depth):
+			text += "<!-- " + "".join(comment_body) + "\n"
+			for i in range(comment_depth):
 				text += "    "
 			if forcing:
 				text += "    "
@@ -597,36 +579,7 @@ class ShotParser:
 				self.get_next_token()
 			
 			if block_text:
-				elem_body = []
-				
-				forcing = self.force_one_space_deeper
-				self.force_one_space_deeper = False
-				elemDepth = self.get_depth()
-				self.force_one_space_deeper = forcing
-	
-				self.current_line_num += 1
-				if self.current_line_num < len(self.tokenizer.lines):
-					line = self.tokenizer.lines[self.current_line_num]
-	
-					while line.depth > elemDepth:
-						for i in range(line.depth):
-							elem_body.append("    ")
-						if forcing:
-							elem_body.append("    ")
-						elem_body.append(line.tokens[0].value)
-						elem_body.append("\n")
-		
-						self.current_line_num += 1
-						if self.current_line_num >= len(self.tokenizer.lines):
-							break
-						line = self.tokenizer.lines[self.current_line_num]
-		
-					self.current_line_num -= 1
-		
-				if len(elem_body) > 0:					
-					del elem_body[-1] # get rid of last newline
-				
-				self.current_node.children.append(''.join(elem_body))
+				self.current_node.children.append(self.get_content_block())
 			
 			elif child_elem_next:
 				self.current_node.multiline = False
