@@ -408,7 +408,9 @@ class ShotParser:
 				self.current_node = head_element
 		
 				self.looking_for_head = False
-				self.force_one_space_deeper = True
+				
+				if self.current_token.value != "body":
+					self.force_one_space_deeper = True
 			
 				if self.current_token.value not in _tags_for_head:
 					self.current_node = self.current_node.parent
