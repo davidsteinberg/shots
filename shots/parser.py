@@ -711,10 +711,15 @@ class ShotParser:
 						result += str(node)
 
 		# last minute regex for template delimiters and == in directives
-		result = re.sub(r"\[\[",r"{{",result)
-		result = re.sub(r"\]\]",r"}}",result)
-# 		result = re.sub(r"\|([^|]+)\|",r"{{ \1 }}",result)
-# 		result = re.sub(r"{ ",r"{{ ",result)
-# 		result = re.sub(r" }",r" }}",result)
+		result = re.sub(r"\[\[\[","__[__[__",result)
+		result = re.sub(r"\]\]\]","__]__]__",result)
+
+		result = re.sub(r"\[\[","{{",result)
+		result = re.sub(r"\]\]","}}",result)
+		
+		result = re.sub(r"__\[__\[__","[[",result)
+		result = re.sub(r"__\]__\]__","]]",result)		
+		
 		result = re.sub(r"= =",r"==",result)
+
 		return result

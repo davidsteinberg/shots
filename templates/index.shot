@@ -1,2 +1,11 @@
-css "style"
+div:
+    #nav 
+        link to="#intro" 
+            div.navitem : [[[ intro.name ]]]
 
+        for e in examples 
+
+            set n = e.name.lower().replace(" ","_") 
+
+            link to="#[[[ n ]]]"
+                div.navitem : [[[ e.name ]]]
