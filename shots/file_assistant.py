@@ -19,7 +19,7 @@ def get_template_dir():
 	return template_dir
 
 def get_static_dir():
-	static_dir = "templates"
+	static_dir = "static"
 	if settings:
 		if settings.app:
 			static_dir = settings.app.static_folder
