@@ -174,14 +174,7 @@ class ShotParser:
 					body.append("    ")
 				if forcing:
 					body.append("    ")
-				for token in line.tokens:
-					if token.type == TOKEN_TYPE.TEXT:
-						token.value = ":" + token.value
-					elif token.type == TOKEN_TYPE.CLASS:
-						token.value = "." + token.value
-					elif token.type == TOKEN_TYPE.ID:
-						token.value = "#" + token.value
-					body.append(token.value + " ")
+				body.append(line.tokens[0].value)
 				body.append("\n")
 		
 				self.current_line_num += 1
@@ -620,8 +613,7 @@ class ShotParser:
 							elem_body.append("    ")
 						if forcing:
 							elem_body.append("    ")
-						for token in line.tokens:
-							elem_body.append(token.value + " ")
+						elem_body.append(line.tokens[0].value)
 						elem_body.append("\n")
 		
 						self.current_line_num += 1

@@ -337,15 +337,102 @@ class ShotTokenizer:
 					return None
 				
 				elif self.current_token.value == "css" or self.current_token.value == "js":
-					# eat til end of block
-					# should store each line with its depth and then the whole line as its sole token
-
 					line.tokens.append(self.current_token)
+
 					self.get_next_token()
+
+					if self.current_token.type == TOKEN_TYPE.EOL:
+						self.lines.append(line)
+
+						line_depth = depth + 1
+
+						while line_depth > depth:
+							self.current_line_num += 1
+
+							if self.current_line_num >= len(self.file_lines):
+								break
+						
+							self.current_line = self.file_lines[self.current_line_num]
+
+							if not re.match(r"^\s*$",self.current_line):
+								self.current_line_len = len(self.current_line)
+
+								self.current_pos_in_line = 0
+
+								self.get_next_char()
+								while self.current_char == " " or self.current_char == "\t":
+									self.get_next_char()
+
+								line_depth = self.current_pos_in_line - 1
+								if line_depth <= depth:
+									self.current_line_num -= 1
+									break
+		
+								line = ShotLine(depth=line_depth)
+							
+								line_body = []
+
+								while self.current_char != self.EOL:
+									line_body.append(self.current_char)
+									self.get_next_char()
+							
+								t = ShotToken(type=TOKEN_TYPE.TEXT,value="".join(line_body))
+								line.tokens.append(t)
 				
+								self.lines.append(line)
+
+						return None
+
 				else:
 					line.tokens.append(self.current_token)
 					self.get_next_token()
+				
+			elif self.current_token.type == TOKEN_TYPE.TEXT:
+				line.tokens.append(self.current_token)
+
+				self.get_next_token()
+
+				if self.current_token.type == TOKEN_TYPE.EOL:
+					self.lines.append(line)
+
+					line_depth = depth + 1
+
+					while line_depth > depth:
+						self.current_line_num += 1
+
+						if self.current_line_num >= len(self.file_lines):
+							break
+					
+						self.current_line = self.file_lines[self.current_line_num]
+
+						if not re.match(r"^\s*$",self.current_line):
+							self.current_line_len = len(self.current_line)
+
+							self.current_pos_in_line = 0
+
+							self.get_next_char()
+							while self.current_char == " " or self.current_char == "\t":
+								self.get_next_char()
+
+							line_depth = self.current_pos_in_line - 1
+							if line_depth <= depth:
+								self.current_line_num -= 1
+								break
+	
+							line = ShotLine(depth=line_depth)
+						
+							line_body = []
+
+							while self.current_char != self.EOL:
+								line_body.append(self.current_char)
+								self.get_next_char()
+						
+							t = ShotToken(type=TOKEN_TYPE.TEXT,value="".join(line_body))
+							line.tokens.append(t)
+			
+							self.lines.append(line)
+
+					return None
 
 			else:
 				line.tokens.append(self.current_token)
