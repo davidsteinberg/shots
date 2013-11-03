@@ -1,45 +1,36 @@
 import re
 
-TOKEN_TYPE_ALPHA = 0
-TOKEN_TYPE_ARRAY_CLOSER = 1
-TOKEN_TYPE_ARRAY_OPENER = 2
-TOKEN_TYPE_CHILD_ELEM_NEXT = 3
-TOKEN_TYPE_CLASS = 4
-TOKEN_TYPE_COMMA = 5
-TOKEN_TYPE_DIRECTIVE = 6
-TOKEN_TYPE_EOL = 7
-TOKEN_TYPE_EQUALS = 8
-TOKEN_TYPE_HTML_LINE_COMMENT = 9
-TOKEN_TYPE_ID = 10
-TOKEN_TYPE_NUMBER = 11
-TOKEN_TYPE_QUOTE = 12
-TOKEN_TYPE_SHOT_LINE_COMMENT = 13
-TOKEN_TYPE_TEXT = 14
-TOKEN_TYPE_UNKNOWN = 15
+def _enumerate(*enums):
+	names_and_nums = zip(enums, range(len(enums)))
+	result = dict(names_and_nums)
+	result["NAMES"] = dict((value, key) for key, value in result.iteritems())
+	return type("Enum", (), result)
 
-TOKEN_TYPE_NUM_TO_NAME = [
-	"alpha",
-	"array closer",
-	"array opener",
-	"child elem next",
-	"class",
-	"comma",
-	"directive",
+TOKEN_TYPE = _enumerate(
+	"ALPHA",
+	"ARRAY_CLOSER",
+	"ARRAY_OPENER",
+	"CHILD_ELEM_NEXT",
+	"CLASS",
+	"COMMA",
+	"DIRECTIVE",
 	"EOL",
-	"equals",
-	"html comment",
-	"id",
-	"number",
-	"quote",
-	"shot comment",
-	"text",
-	"unknown"
-]
+	"EQUALS",
+	"HTML_LINE_COMMENT",
+	"HTML_BLOCK_COMMENT",
+	"ID",
+	"NUMBER",
+	"QUOTE",
+	"SHOT_LINE_COMMENT",
+	"SHOT_BLOCK_COMMENT",
+	"TEXT",
+	"UNKNOWN"
+)
 
 _directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
 class ShotToken:
-	def __init__(self,value="",type=TOKEN_TYPE_UNKNOWN):
+	def __init__(self,value="",type=TOKEN_TYPE.UNKNOWN):
 		self.value = value
 		self.type = type
 	
@@ -90,7 +81,7 @@ class ShotTokenizer:
 
 	def get_token(self):
 		if self.current_char == self.EOL:
-			return ShotToken(type=TOKEN_TYPE_EOL)
+			return ShotToken(type=TOKEN_TYPE.EOL)
 	
 		# gobble whitespace
 		while self.current_char == " " or self.current_char == "\t":
@@ -99,7 +90,7 @@ class ShotTokenizer:
 		# alpha
 		if self.current_char.isalpha() or self.current_char == "_" or ((self.current_char == "{" or self.current_char == "[") and self.peek_next_char() == self.current_char):
 			
-			t = ShotToken(type=TOKEN_TYPE_ALPHA)
+			t = ShotToken(type=TOKEN_TYPE.ALPHA)
 		
 			identifier = [self.current_char]
 
@@ -128,7 +119,7 @@ class ShotTokenizer:
 					directive.append(self.current_char)
 					self.get_next_char()
 				
-				t.type = TOKEN_TYPE_DIRECTIVE
+				t.type = TOKEN_TYPE.DIRECTIVE
 				t.value = "".join(directive)
 				
 			elif t.value == "comment" or t.value == "secret":
@@ -143,7 +134,7 @@ class ShotTokenizer:
 		
 		# number
 		elif self.current_char.isdigit():
-			t = ShotToken(type=TOKEN_TYPE_NUMBER)
+			t = ShotToken(type=TOKEN_TYPE.NUMBER)
 		
 			number = []
 			while self.current_char.isdigit():
@@ -154,7 +145,7 @@ class ShotTokenizer:
 
 		# quote
 		elif self.current_char == "'" or self.current_char == "\"":
-			t = ShotToken(type=TOKEN_TYPE_QUOTE)
+			t = ShotToken(type=TOKEN_TYPE.QUOTE)
 		
 			quote_char = self.current_char
 			quote = [quote_char]
@@ -178,9 +169,9 @@ class ShotTokenizer:
 			self.get_next_char()
 			if self.current_char == ":":
 				self.get_next_char()
-				t = ShotToken(type=TOKEN_TYPE_CHILD_ELEM_NEXT)
+				t = ShotToken(type=TOKEN_TYPE.CHILD_ELEM_NEXT)
 			else:
-				t = ShotToken(type=TOKEN_TYPE_TEXT)
+				t = ShotToken(type=TOKEN_TYPE.TEXT)
 			
 				text = []
 			
@@ -196,7 +187,7 @@ class ShotTokenizer:
 		
 		# class
 		elif self.current_char == ".":
-			t = ShotToken(type=TOKEN_TYPE_CLASS)
+			t = ShotToken(type=TOKEN_TYPE.CLASS)
 		
 			class_name = []
 			
@@ -216,7 +207,7 @@ class ShotTokenizer:
 	
 		# id
 		elif self.current_char == "#":
-			t = ShotToken(type=TOKEN_TYPE_ID)
+			t = ShotToken(type=TOKEN_TYPE.ID)
 			
 			id = []
 
@@ -238,10 +229,10 @@ class ShotTokenizer:
 			self.get_next_char()
 
 			if self.current_char == "!":
-				t = ShotToken(type=TOKEN_TYPE_SHOT_LINE_COMMENT)
+				t = ShotToken(type=TOKEN_TYPE.SHOT_LINE_COMMENT)
 				self.get_next_char()
 			else:
-				t = ShotToken(type=TOKEN_TYPE_HTML_LINE_COMMENT)
+				t = ShotToken(type=TOKEN_TYPE.HTML_LINE_COMMENT)
 			
 			comment = []
 
@@ -254,25 +245,25 @@ class ShotTokenizer:
 
 		# equals (for attributes)
 		elif self.current_char == "=":
-			t = ShotToken(type=TOKEN_TYPE_EQUALS)
+			t = ShotToken(type=TOKEN_TYPE.EQUALS)
 			self.get_next_char()
 
 		# array tokens (for audio and video src)
 		elif self.current_char == "[":
-			t = ShotToken(type=TOKEN_TYPE_ARRAY_OPENER)
+			t = ShotToken(type=TOKEN_TYPE.ARRAY_OPENER)
 			self.get_next_char()
 			
 		elif self.current_char == "]":
-			t = ShotToken(type=TOKEN_TYPE_ARRAY_CLOSER)
+			t = ShotToken(type=TOKEN_TYPE.ARRAY_CLOSER)
 			self.get_next_char()
 			
 		elif self.current_char == ",":
-			t = ShotToken(type=TOKEN_TYPE_COMMA)
+			t = ShotToken(type=TOKEN_TYPE.COMMA)
 			self.get_next_char()
 		
 		# unknown
 		else:
-			t = ShotToken(type=TOKEN_TYPE_UNKNOWN,value=self.current_char)
+			t = ShotToken(type=TOKEN_TYPE.UNKNOWN,value=self.current_char)
 			self.get_next_char()
 
 		return t
@@ -294,7 +285,7 @@ class ShotTokenizer:
 		line = ShotLine(depth=self.current_pos_in_line-1)
 
 		self.get_next_token()
-		while self.current_token.type != TOKEN_TYPE_EOL:
+		while self.current_token.type != TOKEN_TYPE.EOL:
 			line.tokens.append(self.current_token)
 			self.get_next_token()
 		

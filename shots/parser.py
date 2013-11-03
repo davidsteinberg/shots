@@ -20,7 +20,7 @@ class ShotParser:
 		self.current_token_num = 0
 
 		self.current_token = None
-		self.prev_token_type = TOKEN_TYPE_UNKNOWN
+		self.prev_token_type = TOKEN_TYPE.UNKNOWN
 
 		self.root_node = ShotNode(tag="",depth=-1)
 		self.current_node = self.root_node
@@ -34,14 +34,11 @@ class ShotParser:
 		if self.logging:
 			print message
 
-	def log_digestion(self,eaten):
-		self.log("    - eat " + eaten)
-
 	def log_creation(self,tag):
-		self.log("make " + tag)
+		self.log("    Make: " + tag)
 
 	def log_finished_creation(self,tag):
-		self.log("finished making " + tag)
+		self.log("    Finish: " + tag)
 			
 	def parse_error(self,string):
 		line = []
@@ -60,12 +57,12 @@ class ShotParser:
 
 	def get_token(self):
 		if self.current_token_num >= len(self.tokenizer.lines[self.current_line_num].tokens):
-			self.log_digestion("EOL")
-			return ShotToken(type=TOKEN_TYPE_EOL)
+			self.log("EOL")
+			return ShotToken(type=TOKEN_TYPE.EOL)
 		self.current_token_num += 1
 
 		token = self.tokenizer.lines[self.current_line_num].tokens[self.current_token_num-1]
-		self.log_digestion(TOKEN_TYPE_NUM_TO_NAME[token.type])
+		self.log("Token: " + TOKEN_TYPE.NAMES[token.type])
 
 		return token
 
@@ -178,11 +175,11 @@ class ShotParser:
 				if forcing:
 					body.append("    ")
 				for token in line.tokens:
-					if token.type == TOKEN_TYPE_TEXT:
+					if token.type == TOKEN_TYPE.TEXT:
 						token.value = ":" + token.value
-					elif token.type == TOKEN_TYPE_CLASS:
+					elif token.type == TOKEN_TYPE.CLASS:
 						token.value = "." + token.value
-					elif token.type == TOKEN_TYPE_ID:
+					elif token.type == TOKEN_TYPE.ID:
 						token.value = "#" + token.value
 					body.append(token.value + " ")
 				body.append("\n")
@@ -203,22 +200,22 @@ class ShotParser:
 		self.get_next_token()
 		
 		# raw css body
-		if self.current_token.type == TOKEN_TYPE_EOL:
+		if self.current_token.type == TOKEN_TYPE.EOL:
 			node = ShotNode(tag="style",depth=self.get_depth(),parent=self.current_node)
 			node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
 
 		# single line body
-		elif self.current_token.type == TOKEN_TYPE_TEXT:
+		elif self.current_token.type == TOKEN_TYPE.TEXT:
 			node = ShotNode(tag="style",depth=self.get_depth(),parent=self.current_node,multiline=False)
 			node.children.append(ShotTextNode(text=self.current_token.value))
 
 		# link to file
-		elif self.current_token.type == TOKEN_TYPE_QUOTE:
+		elif self.current_token.type == TOKEN_TYPE.QUOTE:
 			self.current_token_num -= 1
 			return self.include_file(type="css")
 
 		# scoped and media
-		elif self.current_token.type == TOKEN_TYPE_ALPHA:
+		elif self.current_token.type == TOKEN_TYPE.ALPHA:
 			node = ShotNode(tag="style",depth=self.get_depth(),parent=self.current_node)
 
 			if self.current_token.value == "scoped":
@@ -238,7 +235,7 @@ class ShotParser:
 
 			self.get_next_token()
 			
-			if self.current_token.type == TOKEN_TYPE_EOL:
+			if self.current_token.type == TOKEN_TYPE.EOL:
 				node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
 				
 			else:
@@ -251,22 +248,22 @@ class ShotParser:
 		self.get_next_token()
 		
 		# raw js body
-		if self.current_token.type == TOKEN_TYPE_EOL:
+		if self.current_token.type == TOKEN_TYPE.EOL:
 			node = ShotNode(tag="script",depth=self.get_depth(),parent=self.current_node)
 			node.children.append(ShotTextNode(text=self.get_raw_script_or_style()))
 
 		# single line body
-		elif self.current_token.type == TOKEN_TYPE_TEXT:
+		elif self.current_token.type == TOKEN_TYPE.TEXT:
 			node = ShotNode(tag="script",depth=self.get_depth(),parent=self.current_node,multiline=False)
 			node.children.append(ShotTextNode(text=self.current_token.value))
 
 		# link to file
-		elif self.current_token.type == TOKEN_TYPE_QUOTE:
+		elif self.current_token.type == TOKEN_TYPE.QUOTE:
 			self.current_token_num -= 1
 			return self.include_file(type="js")
 
 		# async and defer
-		elif self.current_token.type == TOKEN_TYPE_ALPHA:
+		elif self.current_token.type == TOKEN_TYPE.ALPHA:
 			node = ShotNode(tag="script",depth=self.get_depth(),parent=self.current_node,multiline=False)
 
 			if self.current_token.value == "async" or self.current_token.value == "defer":
@@ -287,7 +284,7 @@ class ShotParser:
 	def get_break_element(self):
 		self.get_next_token()
 	
-		if self.current_token.type == TOKEN_TYPE_NUMBER:
+		if self.current_token.type == TOKEN_TYPE.NUMBER:
 			node = ShotNode(tag="",depth=self.get_depth(),parent=self.current_node)
 			for i in range(int(self.current_token.value)):
 				node.children.append(ShotNode(tag="br",parent=self.current_node,self_closing=True))
@@ -348,7 +345,7 @@ class ShotParser:
 		comment_body = []
 		
 		self.get_next_token()
-		while self.current_token.type != TOKEN_TYPE_EOL:
+		while self.current_token.type != TOKEN_TYPE.EOL:
 			commentBody.append(self.current_token.value)
 			self.get_next_token()
 		
@@ -458,16 +455,16 @@ class ShotParser:
 				child_elem_next = False
 				
 				self.get_next_token()
-				while self.current_token.type != TOKEN_TYPE_EOL:
+				while self.current_token.type != TOKEN_TYPE.EOL:
 				
-					if self.current_token.type == TOKEN_TYPE_ALPHA:
+					if self.current_token.type == TOKEN_TYPE.ALPHA:
 						attr = ShotAttribute(name=self.current_token.value)
 						self.get_next_token()
 						
-						if self.current_token.type == TOKEN_TYPE_EOL:
+						if self.current_token.type == TOKEN_TYPE.EOL:
 							break
 						
-						elif self.current_token.type != TOKEN_TYPE_EQUALS:
+						elif self.current_token.type != TOKEN_TYPE.EQUALS:
 							self.current_node.attributes.append(attr)
 							self.current_token_num -= 1
 
@@ -502,18 +499,18 @@ class ShotParser:
 								elif self.current_node.tag == "audio" or self.current_node.tag == "video":
 									sources = []
 							
-									if self.current_token.type == TOKEN_TYPE_ARRAY_OPENER:
+									if self.current_token.type == TOKEN_TYPE.ARRAY_OPENER:
 										self.get_next_token()
 
-										while self.current_token.type != TOKEN_TYPE_ARRAY_CLOSER:
-											if self.current_token.type == TOKEN_TYPE_QUOTE:
+										while self.current_token.type != TOKEN_TYPE.ARRAY_CLOSER:
+											if self.current_token.type == TOKEN_TYPE.QUOTE:
 												sources.append(self.current_token.value)
 
 											self.get_next_token()
 
 										self.get_next_token()
 									
-									elif self.current_token.type == TOKEN_TYPE_QUOTE:
+									elif self.current_token.type == TOKEN_TYPE.QUOTE:
 										sources.append(self.current_token.value)
 
 									else:
@@ -568,20 +565,20 @@ class ShotParser:
 									attr.value = self.current_token.value
 									self.current_node.attributes.append(attr)
 								
-							elif self.current_token.type == TOKEN_TYPE_QUOTE:
+							elif self.current_token.type == TOKEN_TYPE.QUOTE:
 								attr.value = self.current_token.value
 								self.current_node.attributes.append(attr)
 
 							else:
 								self.parse_error("expected quote after attribute")
 					
-					elif self.current_token.type == TOKEN_TYPE_CLASS:
+					elif self.current_token.type == TOKEN_TYPE.CLASS:
 						self.current_node.classes.append(self.current_token.value)
 					
-					elif self.current_token.type == TOKEN_TYPE_ID:
+					elif self.current_token.type == TOKEN_TYPE.ID:
 						self.current_node.id = self.current_token.value
 					
-					elif self.current_token.type == TOKEN_TYPE_TEXT:
+					elif self.current_token.type == TOKEN_TYPE.TEXT:
 						if self.current_token.value == "":
 							block_text = True
 						else:
@@ -592,7 +589,7 @@ class ShotParser:
 								self.current_node.multiline = False
 						break
 						
-					elif self.current_token.type == TOKEN_TYPE_CHILD_ELEM_NEXT:
+					elif self.current_token.type == TOKEN_TYPE.CHILD_ELEM_NEXT:
 						child_elem_next = True
 						break
 				
@@ -656,25 +653,25 @@ class ShotParser:
 
 		self.get_next_token()
 
-		if self.current_token.type == TOKEN_TYPE_ALPHA:
+		if self.current_token.type == TOKEN_TYPE.ALPHA:
 			self.get_node_with_tag()
 
-		elif self.current_token.type == TOKEN_TYPE_CLASS:
+		elif self.current_token.type == TOKEN_TYPE.CLASS:
 			self.current_token = ShotToken(value="div")
 			self.current_token_num = 0
 			self.get_node_with_tag()
 
-		elif self.current_token.type == TOKEN_TYPE_ID:
+		elif self.current_token.type == TOKEN_TYPE.ID:
 			self.current_token = ShotToken(value="div")
 			self.current_token_num = 0
 			self.get_node_with_tag()
 
-		elif self.current_token.type == TOKEN_TYPE_HTML_LINE_COMMENT:
+		elif self.current_token.type == TOKEN_TYPE.HTML_LINE_COMMENT:
 			self.log_creation("line comment")
 			self.get_comment()
 			self.log_finished_creation("line comment")
 
-		elif self.current_token.type == TOKEN_TYPE_SHOT_LINE_COMMENT:
+		elif self.current_token.type == TOKEN_TYPE.SHOT_LINE_COMMENT:
 			return True
 
 		else:
@@ -698,12 +695,12 @@ class ShotParser:
 				self.current_node = body
 				self.body_created = True
 
-			if self.current_token.type == TOKEN_TYPE_TEXT:
+			if self.current_token.type == TOKEN_TYPE.TEXT:
 				self.log_creation("text")
 				self.get_text()
 				self.log_finished_creation("text")
 			
-			elif self.current_token.type == TOKEN_TYPE_DIRECTIVE:
+			elif self.current_token.type == TOKEN_TYPE.DIRECTIVE:
 				self.log_creation("directive")
 				self.get_directive()
 				self.log_finished_creation("directive")
