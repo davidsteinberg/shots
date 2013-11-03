@@ -337,19 +337,21 @@ class ShotParser:
 		self.current_node.children.append(node)
 		self.current_node = node
 		
-	def get_comment(self):
+	def get_line_comment(self):
 		node = ShotTextNode(text="<!-- " + self.current_token.value  +" -->", depth=self.get_depth())
 		self.current_node.children.append(node)
 
 	def get_block_comment(self,secret=False):
 		comment_body = []
+	
+		self.get_next_token()	
+		if self.current_token.type != TOKEN_TYPE.EOL:
+			comment_body.append(self.current_token.value)
 		
-		self.get_next_token()
-		while self.current_token.type != TOKEN_TYPE.EOL:
-			commentBody.append(self.current_token.value)
-			self.get_next_token()
-		
+		forcing = self.force_one_space_deeper
+		self.force_one_space_deeper = False
 		comment_depth = self.get_depth()
+		self.force_one_space_deeper = forcing
 		
 		self.current_line_num += 1
 		if self.current_line_num < len(self.tokenizer.lines):
@@ -358,8 +360,9 @@ class ShotParser:
 			while line.depth > comment_depth:
 				for i in range(line.depth):
 					comment_body.append("    ")
-				for token in line.tokens:
-					comment_body.append(token.value + " ")
+				if forcing:
+					comment_body.append("    ")
+				comment_body.append(line.tokens[0].value)
 				comment_body.append("\n")
 			
 				self.current_line_num += 1
@@ -369,275 +372,278 @@ class ShotParser:
 			
 			self.current_line_num -= 1
 
-		text = "" if secret else "<!--\n" + "".join(comment_body) + "-->"
-		return ShotTextNode(text=text,depth=comment_depth)
+		text = ""
+		if not secret:
+			if forcing:
+				text += "    "
+			text += "<!--\n" + "".join(comment_body)
+			for i in range(line.depth):
+				text += "    "
+			if forcing:
+				text += "    "
+			text += "-->"
+		
+		node = ShotTextNode(text=text,depth=comment_depth)
+		self.current_node.children.append(node)
 
 	def get_node_with_tag(self):
 		self.log_creation(self.current_token.value)
 		
-		# comment check
-		if self.current_token.value == "comment":
-			node = self.get_block_comment()
-			
-		elif self.current_token.value == "secret":
-			node = self.get_block_comment(secret=True)
-
-		else:
 #
-#			OPTIONAL HEAD AND BODY TAGS
+#		OPTIONAL HEAD AND BODY TAGS
 #
-			if self.included:
-				self.looking_for_head = False
-				self.body_created = True
+		if self.included:
+			self.looking_for_head = False
+			self.body_created = True
 
-			elif self.body_created:
+		elif self.body_created:
+			self.looking_for_head = False
+	
+		elif self.looking_for_head:
+			if self.current_token.value == "head":
 				self.looking_for_head = False
+			elif self.current_token.value != "doctype" and self.current_token.value != "html":
+				head_element = ShotNode(tag="head",depth=0,parent=self.current_node)
+				self.current_node.children.append(head_element)
+				self.current_node = head_element
 		
-			elif self.looking_for_head:
-				if self.current_token.value == "head":
-					self.looking_for_head = False
-				elif self.current_token.value != "doctype" and self.current_token.value != "html":
-					head_element = ShotNode(tag="head",depth=0,parent=self.current_node)
-					self.current_node.children.append(head_element)
-					self.current_node = head_element
+				self.looking_for_head = False
+				self.force_one_space_deeper = True
 			
-					self.looking_for_head = False
-					self.force_one_space_deeper = True
-				
-					if self.current_token.value not in _tags_for_head:
-						self.current_node = self.current_node.parent
-						if self.current_token.value != "body":
-							body_element = ShotNode(tag="body",depth=0,parent=self.current_node)
-							self.current_node.children.append(body_element)
-							self.current_node = body_element
-						
-						self.body_created = True
-			elif not self.body_created:
 				if self.current_token.value not in _tags_for_head:
-					self.current_node = self.current_node.parent if self.current_node.parent else self.root_node
-					if self.current_token.value == "body":
-						self.force_one_space_deeper = False
-					else:
+					self.current_node = self.current_node.parent
+					if self.current_token.value != "body":
 						body_element = ShotNode(tag="body",depth=0,parent=self.current_node)
-						self.force_one_space_deeper = True
 						self.current_node.children.append(body_element)
 						self.current_node = body_element
 					
 					self.body_created = True
+		elif not self.body_created:
+			if self.current_token.value not in _tags_for_head:
+				self.current_node = self.current_node.parent if self.current_node.parent else self.root_node
+				if self.current_token.value == "body":
+					self.force_one_space_deeper = False
+				else:
+					body_element = ShotNode(tag="body",depth=0,parent=self.current_node)
+					self.force_one_space_deeper = True
+					self.current_node.children.append(body_element)
+					self.current_node = body_element
+				
+				self.body_created = True
 
-			# special case certain tags
-	
-			if self.current_token.value == "favicon":
-				node = self.get_favicon_element()
+		# special case certain tags
 
-			elif self.current_token.value == "br":
-				node = self.get_break_element()
+		if self.current_token.value == "favicon":
+			node = self.get_favicon_element()
 
-			elif self.current_token.value == "style" or self.current_token.value == "css":
-				node = self.get_style_element()
+		elif self.current_token.value == "br":
+			node = self.get_break_element()
 
-			elif self.current_token.value == "script" or self.current_token.value == "js" or self.current_token.value == "javascript":
-				node = self.get_script_element()
+		elif self.current_token.value == "style" or self.current_token.value == "css":
+			node = self.get_style_element()
 
-			else:
-				if self.current_token.value == "link":
-					self.current_token.value = "shots-link"
+		elif self.current_token.value == "script" or self.current_token.value == "js" or self.current_token.value == "javascript":
+			node = self.get_script_element()
+
+		else:
+			if self.current_token.value == "link":
+				self.current_token.value = "shots-link"
+		
+			node = ShotNode(tag=self.current_token.value,depth=self.get_depth(),parent=self.current_node)
+			if node.tag in _self_closers:
+				node.self_closing = True
 			
-				node = ShotNode(tag=self.current_token.value,depth=self.get_depth(),parent=self.current_node)
-				if node.tag in _self_closers:
-					node.self_closing = True
-				
-				self.current_node.children.append(node)
-				self.current_node = node
-				node = None
-				
-				block_text = False
-				child_elem_next = False
-				
-				self.get_next_token()
-				while self.current_token.type != TOKEN_TYPE.EOL:
-				
-					if self.current_token.type == TOKEN_TYPE.ALPHA:
-						attr = ShotAttribute(name=self.current_token.value)
+			self.current_node.children.append(node)
+			self.current_node = node
+			node = None
+			
+			block_text = False
+			child_elem_next = False
+			
+			self.get_next_token()
+			while self.current_token.type != TOKEN_TYPE.EOL:
+			
+				if self.current_token.type == TOKEN_TYPE.ALPHA:
+					attr = ShotAttribute(name=self.current_token.value)
+					self.get_next_token()
+					
+					if self.current_token.type == TOKEN_TYPE.EOL:
+						break
+					
+					elif self.current_token.type != TOKEN_TYPE.EQUALS:
+						self.current_node.attributes.append(attr)
+						self.current_token_num -= 1
+
+					else:
 						self.get_next_token()
 						
-						if self.current_token.type == TOKEN_TYPE.EOL:
-							break
-						
-						elif self.current_token.type != TOKEN_TYPE.EQUALS:
+						if "[[" in self.current_token.value or "{{" in self.current_token.value:
+							attr.value = self.current_token.value
 							self.current_node.attributes.append(attr)
-							self.current_token_num -= 1
+						
+						elif attr.name == "src":
+							if self.current_node.tag == "img":
+								filename = self.current_token.value[1:-1]
 
-						else:
-							self.get_next_token()
-							
-							if "[[" in self.current_token.value or "{{" in self.current_token.value:
-								attr.value = self.current_token.value
-								self.current_node.attributes.append(attr)
-							
-							elif attr.name == "src":
-								if self.current_node.tag == "img":
-									filename = self.current_token.value[1:-1]
+								if filename[0] == "/" or filename[0] == "." or (len(filename) > 4 and filename[:4] == "http"):
+									attr.value = self.current_token.value
+									self.current_node.attributes.append(attr)
 
-									if filename[0] == "/" or filename[0] == "." or (len(filename) > 4 and filename[:4] == "http"):
-										attr.value = self.current_token.value
-										self.current_node.attributes.append(attr)
+								file_ext = filename.split(".")[-1]
 
-									file_ext = filename.split(".")[-1]
-
-									if file_ext not in _img_extensions:
-										for ext in _img_extensions:
-											path = get_static_path(filename + "." + ext)
-											if path != filename + "." + ext:
-												attr.value = "\"" + path + "\""
-												self.current_node.attributes.append(attr)
-												break
-									else:
-										attr.value = self.current_token.value
-										self.current_node.attributes.append(attr)
-								
-								elif self.current_node.tag == "audio" or self.current_node.tag == "video":
-									sources = []
-							
-									if self.current_token.type == TOKEN_TYPE.ARRAY_OPENER:
-										self.get_next_token()
-
-										while self.current_token.type != TOKEN_TYPE.ARRAY_CLOSER:
-											if self.current_token.type == TOKEN_TYPE.QUOTE:
-												sources.append(self.current_token.value)
-
-											self.get_next_token()
-
-										self.get_next_token()
-									
-									elif self.current_token.type == TOKEN_TYPE.QUOTE:
-										sources.append(self.current_token.value)
-
-									else:
-										self.parse_error("expected quote or array after audio or video src")
-								
-									for s in sources:
-										sourced = False
-									
-										filename = s[1:-1]
-										
-										if filename[0] != "/" and filename[0] != "." and (len(filename) < 4 or filename[:4] != "http"):
-											file_ext = filename.split(".")[-1]
-
-											if file_ext == "mp3":
-												file_ext = "mpeg"
-
-											elif file_ext != "wav" and file_ext != "ogg":
-												exts = None
-
-												if self.current_node.tag == "audio":
-													exts = ["mp3","wav","ogg"]
-												else:
-													exts = ["mp4","webm","ogg"]
-
-												for ext in exts:
-													path = get_static_path(filename + "." + ext)
-													if path != filename + "." + ext:
-														source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-														src = ShotAttribute(name="src",value="\"" + path + "\"")
-														source.attributes.append(src)
-									
-														type = ShotAttribute(name="type")
-														type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
-														source.attributes.append(type)
-									
-														self.current_node.children.append(source)
-										
-												sourced = True
-
-										if not sourced:
-											source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
-											src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
-											source.attributes.append(src)
-									
-											type = ShotAttribute(name="type")
-											type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
-											source.attributes.append(type)
-									
-											self.current_node.children.append(source)
-								
+								if file_ext not in _img_extensions:
+									for ext in _img_extensions:
+										path = get_static_path(filename + "." + ext)
+										if path != filename + "." + ext:
+											attr.value = "\"" + path + "\""
+											self.current_node.attributes.append(attr)
+											break
 								else:
 									attr.value = self.current_token.value
 									self.current_node.attributes.append(attr)
+							
+							elif self.current_node.tag == "audio" or self.current_node.tag == "video":
+								sources = []
+						
+								if self.current_token.type == TOKEN_TYPE.ARRAY_OPENER:
+									self.get_next_token()
+
+									while self.current_token.type != TOKEN_TYPE.ARRAY_CLOSER:
+										if self.current_token.type == TOKEN_TYPE.QUOTE:
+											sources.append(self.current_token.value)
+
+										self.get_next_token()
+
+									self.get_next_token()
 								
-							elif self.current_token.type == TOKEN_TYPE.QUOTE:
+								elif self.current_token.type == TOKEN_TYPE.QUOTE:
+									sources.append(self.current_token.value)
+
+								else:
+									self.parse_error("expected quote or array after audio or video src")
+							
+								for s in sources:
+									sourced = False
+								
+									filename = s[1:-1]
+									
+									if filename[0] != "/" and filename[0] != "." and (len(filename) < 4 or filename[:4] != "http"):
+										file_ext = filename.split(".")[-1]
+
+										if file_ext == "mp3":
+											file_ext = "mpeg"
+
+										elif file_ext != "wav" and file_ext != "ogg":
+											exts = None
+
+											if self.current_node.tag == "audio":
+												exts = ["mp3","wav","ogg"]
+											else:
+												exts = ["mp4","webm","ogg"]
+
+											for ext in exts:
+												path = get_static_path(filename + "." + ext)
+												if path != filename + "." + ext:
+													source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+													src = ShotAttribute(name="src",value="\"" + path + "\"")
+													source.attributes.append(src)
+								
+													type = ShotAttribute(name="type")
+													type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + (ext if ext != "mp3" else"mpeg") + "\""
+													source.attributes.append(type)
+								
+													self.current_node.children.append(source)
+									
+											sourced = True
+
+									if not sourced:
+										source = ShotNode(tag="source",depth=self.get_depth()+1,parent=self.current_node,self_closing=True)
+										src = ShotAttribute(name="src",value="\"" + get_static_path(filename) + "\"")
+										source.attributes.append(src)
+								
+										type = ShotAttribute(name="type")
+										type.value = "\""+("audio" if self.current_node.tag == "audio" else "video") + "/" + file_ext + "\""
+										source.attributes.append(type)
+								
+										self.current_node.children.append(source)
+							
+							else:
 								attr.value = self.current_token.value
 								self.current_node.attributes.append(attr)
+							
+						elif self.current_token.type == TOKEN_TYPE.QUOTE:
+							attr.value = self.current_token.value
+							self.current_node.attributes.append(attr)
 
-							else:
-								self.parse_error("expected quote after attribute")
-					
-					elif self.current_token.type == TOKEN_TYPE.CLASS:
-						self.current_node.classes.append(self.current_token.value)
-					
-					elif self.current_token.type == TOKEN_TYPE.ID:
-						self.current_node.id = self.current_token.value
-					
-					elif self.current_token.type == TOKEN_TYPE.TEXT:
-						if self.current_token.value == "":
-							block_text = True
 						else:
-							if self.current_node.tag == "audio" or self.current_node.tag == "video":
-								self.current_node.children.append(ShotTextNode(text=self.current_token.value,depth=self.get_depth()+1))
-							else:
-								self.current_node.children.append(ShotTextNode(text=self.current_token.value))
-								self.current_node.multiline = False
-						break
-						
-					elif self.current_token.type == TOKEN_TYPE.CHILD_ELEM_NEXT:
-						child_elem_next = True
-						break
+							self.parse_error("expected quote after attribute")
 				
-					self.get_next_token()
+				elif self.current_token.type == TOKEN_TYPE.CLASS:
+					self.current_node.classes.append(self.current_token.value)
 				
-				if block_text:
-					elem_body = []
+				elif self.current_token.type == TOKEN_TYPE.ID:
+					self.current_node.id = self.current_token.value
+				
+				elif self.current_token.type == TOKEN_TYPE.TEXT:
+					if self.current_token.value == "":
+						block_text = True
+					else:
+						if self.current_node.tag == "audio" or self.current_node.tag == "video":
+							self.current_node.children.append(ShotTextNode(text=self.current_token.value,depth=self.get_depth()+1))
+						else:
+							self.current_node.children.append(ShotTextNode(text=self.current_token.value))
+							self.current_node.multiline = False
+					break
 					
-					forcing = self.force_one_space_deeper
-					self.force_one_space_deeper = False
-					elemDepth = self.get_depth()
-					self.force_one_space_deeper = forcing
+				elif self.current_token.type == TOKEN_TYPE.CHILD_ELEM_NEXT:
+					child_elem_next = True
+					break
+			
+				self.get_next_token()
+			
+			if block_text:
+				elem_body = []
+				
+				forcing = self.force_one_space_deeper
+				self.force_one_space_deeper = False
+				elemDepth = self.get_depth()
+				self.force_one_space_deeper = forcing
+	
+				self.current_line_num += 1
+				if self.current_line_num < len(self.tokenizer.lines):
+					line = self.tokenizer.lines[self.current_line_num]
+	
+					while line.depth > elemDepth:
+						for i in range(line.depth):
+							elem_body.append("    ")
+						if forcing:
+							elem_body.append("    ")
+						for token in line.tokens:
+							elem_body.append(token.value + " ")
+						elem_body.append("\n")
 		
-					self.current_line_num += 1
-					if self.current_line_num < len(self.tokenizer.lines):
+						self.current_line_num += 1
+						if self.current_line_num >= len(self.tokenizer.lines):
+							break
 						line = self.tokenizer.lines[self.current_line_num]
 		
-						while line.depth > elemDepth:
-							for i in range(line.depth):
-								elem_body.append("    ")
-							if forcing:
-								elem_body.append("    ")
-							for token in line.tokens:
-								elem_body.append(token.value + " ")
-							elem_body.append("\n")
-			
-							self.current_line_num += 1
-							if self.current_line_num >= len(self.tokenizer.lines):
-								break
-							line = self.tokenizer.lines[self.current_line_num]
-			
-						self.current_line_num -= 1
-			
-					if len(elem_body) > 0:					
-						del elem_body[-1] # get rid of last newline
-					
-					self.current_node.children.append(''.join(elem_body))
-				
-				elif child_elem_next:
-					self.current_node.multiline = False
-					self.current_node.depth -= 1
-
-					self.get_next_node()
-
 					self.current_line_num -= 1
-					self.current_node = self.current_node.parent
-					self.current_node.depth += 1
 		
+				if len(elem_body) > 0:					
+					del elem_body[-1] # get rid of last newline
+				
+				self.current_node.children.append(''.join(elem_body))
+			
+			elif child_elem_next:
+				self.current_node.multiline = False
+				self.current_node.depth -= 1
+
+				self.get_next_node()
+
+				self.current_line_num -= 1
+				self.current_node = self.current_node.parent
+				self.current_node.depth += 1
+	
 		if node:
 			self.current_node.children.append(node)
 
@@ -668,11 +674,27 @@ class ShotParser:
 
 		elif self.current_token.type == TOKEN_TYPE.HTML_LINE_COMMENT:
 			self.log_creation("line comment")
-			self.get_comment()
+			self.get_line_comment()
 			self.log_finished_creation("line comment")
 
 		elif self.current_token.type == TOKEN_TYPE.SHOT_LINE_COMMENT:
+			self.log("shot line comment")
 			return True
+		
+		elif self.current_token.type == TOKEN_TYPE.HTML_BLOCK_COMMENT:
+			self.log_creation("block comment")
+			self.get_block_comment()
+			self.log_finished_creation("block comment")
+
+		elif self.current_token.type == TOKEN_TYPE.SHOT_BLOCK_COMMENT:
+			self.log("shot block comment")
+			self.get_block_comment(secret=True)
+			return True
+			
+		elif self.current_token.type == TOKEN_TYPE.DIRECTIVE:
+			self.log_creation("directive")
+			self.get_directive()
+			self.log_finished_creation("directive")
 
 		else:
 #
@@ -699,11 +721,6 @@ class ShotParser:
 				self.log_creation("text")
 				self.get_text()
 				self.log_finished_creation("text")
-			
-			elif self.current_token.type == TOKEN_TYPE.DIRECTIVE:
-				self.log_creation("directive")
-				self.get_directive()
-				self.log_finished_creation("directive")
 		
 		return True
 
@@ -712,16 +729,13 @@ class ShotParser:
 		self.current_line_num += 1
 		self.current_token_num = 0
 
-	def tokenize(self):
-		self.tokenizer.tokenize()
-
 	def parse(self):
 		self.get_next_node()
 		while self.next_node:
 			self.get_next_node()
 
 	def generate_code(self):
-		self.tokenize()
+		self.tokenizer.tokenize()
 		self.parse()
 	
 		result = ""

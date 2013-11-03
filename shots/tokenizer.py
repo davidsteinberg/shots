@@ -1,9 +1,8 @@
 import re
 
 def _enumerate(*enums):
-	names_and_nums = zip(enums, range(len(enums)))
-	result = dict(names_and_nums)
-	result["NAMES"] = dict((value, key) for key, value in result.iteritems())
+	result = dict(zip(enums, range(len(enums))))
+	result["NAMES"] = dict((num, name) for name, num in result.iteritems())
 	return type("Enum", (), result)
 
 TOKEN_TYPE = _enumerate(
@@ -58,13 +57,12 @@ class ShotTokenizer:
 		self.current_line_len = 0
 
 		self.lines = []
+		self.file_lines = []
 		
 	def get_char(self):
 		if self.current_pos_in_line >= self.current_line_len:
 			return self.EOL
 		c = self.current_line[self.current_pos_in_line]
-		if c == "\n" or c == "\r":
-			return self.EOL
 		self.current_pos_in_line += 1
 		return c
 	
@@ -74,10 +72,7 @@ class ShotTokenizer:
 	def peek_next_char(self):
 		if self.current_pos_in_line >= self.current_line_len:
 			return self.EOL
-		c = self.current_line[self.current_pos_in_line]
-		if c == "\n" or c == "\r":
-			return self.EOL
-		return c
+		return self.current_line[self.current_pos_in_line]
 
 	def get_token(self):
 		if self.current_char == self.EOL:
@@ -111,26 +106,6 @@ class ShotTokenizer:
 				self.get_next_char()
 
 			t.value = "".join(identifier)
-			
-			if t.value in _directive_openers:
-				directive = [t.value]
-				
-				while self.current_char != self.EOL:
-					directive.append(self.current_char)
-					self.get_next_char()
-				
-				t.type = TOKEN_TYPE.DIRECTIVE
-				t.value = "".join(directive)
-				
-			elif t.value == "comment" or t.value == "secret":
-				# eat til end of line and block
-				# should store each line with its depth and then the whole line as its sole token
-				pass
-				
-			elif t.value == "css" or t.value == "js":
-				# eat til end of block
-				# should store each line with its depth and then the whole line as its sole token
-				pass
 		
 		# number
 		elif self.current_char.isdigit():
@@ -272,7 +247,6 @@ class ShotTokenizer:
 		self.current_token = self.get_token()
 		
 	def tokenize_line(self):
-		self.current_pos_in_line = 0
 
 		# find opening whitespace
 		self.get_next_char()
@@ -282,19 +256,116 @@ class ShotTokenizer:
 		# TODO : should tabs and spaces count the same?
 		# should you be able to set the space width of a tab, and it would count that much?
 		
-		line = ShotLine(depth=self.current_pos_in_line-1)
+		depth = self.current_pos_in_line-1
+		
+		line = ShotLine(depth=depth)
 
 		self.get_next_token()
 		while self.current_token.type != TOKEN_TYPE.EOL:
-			line.tokens.append(self.current_token)
-			self.get_next_token()
+		
+			if self.current_token.type == TOKEN_TYPE.ALPHA:
+				if self.current_token.value in _directive_openers:
+					directive = [self.current_token.value]
+				
+					while self.current_char != self.EOL:
+						directive.append(self.current_char)
+						self.get_next_char()
+				
+					self.current_token.type = TOKEN_TYPE.DIRECTIVE
+					self.current_token.value = "".join(directive)
+					
+					line.tokens.append(self.current_token)
+					break
+
+				elif self.current_token.value == "comment" or self.current_token.value == "secret":
+
+					if self.current_token.value == "comment":
+						line.tokens.append(ShotToken(type=TOKEN_TYPE.HTML_BLOCK_COMMENT))
+
+					elif self.current_token.value == "secret":
+						line.tokens.append(ShotToken(type=TOKEN_TYPE.SHOT_BLOCK_COMMENT))
+				
+					comment_body = []
+
+					self.get_next_char()
+					while self.current_char != self.EOL:
+						comment_body.append(self.current_char)
+						self.get_next_char()
+						
+					t = ShotToken(type=TOKEN_TYPE.TEXT,value="".join(comment_body))
+					line.tokens.append(t)
+					
+					self.lines.append(line)
+
+					line_depth = depth + 1
+
+					while line_depth > depth:
+						self.current_line_num += 1
+
+						if self.current_line_num >= len(self.file_lines):
+							break
+						
+						self.current_line = self.file_lines[self.current_line_num]
+
+						if not re.match(r"^\s*$",self.current_line):
+							self.current_line_len = len(self.current_line)
+
+							self.current_pos_in_line = 0
+
+							self.get_next_char()
+							while self.current_char == " " or self.current_char == "\t":
+								self.get_next_char()
+
+							line_depth = self.current_pos_in_line - 1
+							if line_depth <= depth:
+								self.current_line_num -= 1
+								break
+		
+							line = ShotLine(depth=line_depth)
+							
+							line_body = []
+
+							while self.current_char != self.EOL:
+								line_body.append(self.current_char)
+								self.get_next_char()
+							
+							t = ShotToken(type=TOKEN_TYPE.TEXT,value="".join(line_body))
+							line.tokens.append(t)
+				
+							self.lines.append(line)
+
+					return None
+				
+				elif self.current_token.value == "css" or self.current_token.value == "js":
+					# eat til end of block
+					# should store each line with its depth and then the whole line as its sole token
+
+					line.tokens.append(self.current_token)
+					self.get_next_token()
+				
+				else:
+					line.tokens.append(self.current_token)
+					self.get_next_token()
+
+			else:
+				line.tokens.append(self.current_token)
+				self.get_next_token()
 		
 		return line
 		
 	def tokenize(self):
-		for line in open(self.filename,"r"):
+		self.file_lines = [line.rstrip('\n') for line in open(self.filename)]
+
+		while self.current_line_num < len(self.file_lines):
+			self.current_line = self.file_lines[self.current_line_num]
+
+			if not re.match(r"^\s*$",self.current_line):
+				self.current_line_len = len(self.current_line)
+
+				self.current_pos_in_line = 0
+
+				next_line = self.tokenize_line()
+				if next_line:
+					self.lines.append(next_line)
+
 			self.current_line_num += 1
-			if not re.match(r"^\s*$",line):
-				self.current_line = line
-				self.current_line_len = len(line)
-				self.lines.append(self.tokenize_line())

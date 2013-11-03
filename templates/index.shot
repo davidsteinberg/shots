@@ -1,2 +1,10 @@
-div :: a : this
+body
+	div : that
+
+	comment
+		this is a comment
+		this is inside
+		and so is this
+
+	div : this
 
