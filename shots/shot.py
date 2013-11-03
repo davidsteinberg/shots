@@ -21,7 +21,7 @@ class Shot:
 
 	def generate_shot(self):
 		if settings.developing or not isfile(self.filename):
-			self.log("generating " + self.filename)
+			self.log("generating " + self.filename + "\n")
 			code = self.parser.generate_code()
 			self.log("\n    -- BEGIN GENERATED CODE --\n\n"+code+"\n\n    -- END GENERATED CODE --\n")
 			write_shot_to_file(self.filename,shot=code)

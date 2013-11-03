@@ -312,6 +312,7 @@ class ShotParser:
 				write_shot_to_file(filename,shot=code)
 			
 				text[1] = "\"" + filename + "\""
+				self.current_token.value = " ".join(text)
 			
 			if keyword == "extends":
 				self.extending = True
@@ -445,6 +446,7 @@ class ShotParser:
 					self.get_next_token()
 					
 					if self.current_token.type == TOKEN_TYPE.EOL:
+						self.current_node.attributes.append(attr)
 						break
 					
 					elif self.current_token.type != TOKEN_TYPE.EQUALS:
@@ -637,11 +639,6 @@ class ShotParser:
 			self.log("shot block comment")
 			self.get_block_comment(secret=True)
 			return True
-			
-		elif self.current_token.type == TOKEN_TYPE.DIRECTIVE:
-			self.log_creation("directive")
-			self.get_directive()
-			self.log_finished_creation("directive")
 
 		else:
 #
@@ -668,6 +665,12 @@ class ShotParser:
 				self.log_creation("text")
 				self.get_text()
 				self.log_finished_creation("text")
+				
+			
+			elif self.current_token.type == TOKEN_TYPE.DIRECTIVE:
+				self.log_creation("directive")
+				self.get_directive()
+				self.log_finished_creation("directive")
 		
 		return True
 
