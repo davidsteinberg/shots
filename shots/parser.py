@@ -52,7 +52,7 @@ class ShotParser:
 	def get_depth(self):
 		depth = self.tokenizer.lines[self.current_line_num].depth
 		if self.force_one_space_deeper:
-			depth += 1
+			depth += 4
 		return depth
 
 	def get_token(self):

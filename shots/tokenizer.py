@@ -1,5 +1,7 @@
 import re
 
+from settings import settings
+
 def _enumerate(*enums):
 	result = dict(zip(enums, range(len(enums))))
 	result["NAMES"] = dict((num, name) for name, num in result.iteritems())
@@ -259,11 +261,15 @@ class ShotTokenizer:
 
 				self.current_pos_in_line = 0
 
+				additional_depth = 0
+
 				self.get_next_char()
 				while self.current_char == " " or self.current_char == "\t":
+					if self.current_char == "\t":
+						additional_depth += settings.tab_width - 1					
 					self.get_next_char()
 
-				line_depth = self.current_pos_in_line - 1
+				line_depth = self.current_pos_in_line - 1 + additional_depth
 				if line_depth <= depth:
 					self.current_line_num -= 1
 					break
@@ -287,21 +293,26 @@ class ShotTokenizer:
 	def peek_next_token(self):
 		current_pos = self.current_pos_in_line
 		next_token = self.get_token()
-		self.current_pos_in_line = current_pos - 1
+		self.current_pos_in_line = current_pos
+
+		if next_token.type != TOKEN_TYPE.EOL:
+			self.current_pos_in_line -= 1
 		self.get_next_char()
+
 		return next_token
 		
 	def tokenize_line(self):
 
+		additional_depth = 0
+
 		# find opening whitespace
 		self.get_next_char()
 		while self.current_char == " " or self.current_char == "\t":
+			if self.current_char == "\t":
+				additional_depth += settings.tab_width - 1
 			self.get_next_char()
 		
-		# TODO : should tabs and spaces count the same?
-		# should you be able to set the space width of a tab, and it would count that much?
-		
-		depth = self.current_pos_in_line-1
+		depth = self.current_pos_in_line - 1 + additional_depth
 		
 		line = ShotLine(depth=depth)
 
@@ -309,7 +320,7 @@ class ShotTokenizer:
 		while self.current_token.type != TOKEN_TYPE.EOL:
 		
 			if self.current_token.type == TOKEN_TYPE.ALPHA:
-				if self.current_token.value in _directive_openers:
+				if self.current_token.value in _directive_openers and len(line.tokens) == 0:
 					if self.current_token.value == "def":
 						self.current_token.value = "macro"
 				

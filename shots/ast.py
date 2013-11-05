@@ -19,7 +19,7 @@ class ShotTextNode:
 	def __str__(self):
 		result = ""
 		for d in range(self.depth):
-			result += "    "
+			result += " "
 		result += self.text
 		return result
 
@@ -42,7 +42,7 @@ class ShotNode:
 		result = ""
 		
 		for d in range(self.depth):
-			result += "    "
+			result += " "
 		
 		if self.tag == "":
 			for c in self.children:
@@ -63,7 +63,7 @@ class ShotNode:
 						result += kid
 					result += "\n"			
 					for d in range(self.depth):
-						result += "    "
+						result += " "
 
 				if keyword in _close_directives:
 					result += "{% end" + keyword + " %}"
@@ -124,7 +124,7 @@ class ShotNode:
 						result += str(c)
 					result += "\n"
 					for d in range(self.depth):
-						result += "    "
+						result += " "
 				else:
 					for c in self.children:
 						result += str(c).strip()
