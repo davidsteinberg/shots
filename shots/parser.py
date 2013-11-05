@@ -298,7 +298,7 @@ class ShotParser:
 
 		self.get_next_token()
 		
-		if keyword == "extends" or keyword == "include" or keyword == "import":
+		if keyword == "extends" or keyword == "include" or keyword == "import" or keyword == "from":
 
 			text = self.current_token.value.split(" ")
 
@@ -712,7 +712,8 @@ class ShotParser:
 							node.children.append(k)
 						result += str(node)
 
-		# last minute regex for template delimiters and == in directives
+		# last minute regex for variables delimiters
+		
 		result = re.sub(r"\[\[\[","__[__[__",result)
 		result = re.sub(r"\]\]\]","__]__]__",result)
 
@@ -720,8 +721,6 @@ class ShotParser:
 		result = re.sub(r"\]\]","}}",result)
 		
 		result = re.sub(r"__\[__\[__","[[",result)
-		result = re.sub(r"__\]__\]__","]]",result)		
-		
-		result = re.sub(r"= =",r"==",result)
+		result = re.sub(r"__\]__\]__","]]",result)
 
 		return result
