@@ -10,21 +10,17 @@ _environment = Environment(loader=FileSystemLoader("/"))
 _dirpath = dirname(dirname(abspath(__file__)))
 
 def get_template_dir():
-	template_dir = "templates"
-	if settings:
-		if settings.app:
-			template_dir = settings.app.template_folder
-		elif settings.template_dir:
-			template_dir = settings.template_dir
+	if settings.app:
+		template_dir = settings.app.template_folder
+	elif settings.template_dir:
+		template_dir = settings.template_dir
 	return template_dir
 
 def get_static_dir():
-	static_dir = "static"
-	if settings:
-		if settings.app:
-			static_dir = settings.app.static_folder
-		elif settings.static_dir:
-			static_dir = settings.static_dir
+	if settings.app:
+		static_dir = settings.app.static_folder
+	elif settings.static_dir:
+		static_dir = settings.static_dir
 	return static_dir
 
 def shotify(filename):
@@ -35,7 +31,7 @@ def shotify(filename):
 	return filename
 	
 def htmlify(filename):
-	html_dir = _dirpath + sep + get_template_dir() + sep + (settings.html_dir if settings and settings.html_dir else "html")
+	html_dir = _dirpath + sep + get_template_dir() + sep + (settings.html_dir)
 	if not exists(html_dir):
 		makedirs(html_dir)
 
