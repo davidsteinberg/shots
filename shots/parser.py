@@ -293,12 +293,14 @@ class ShotParser:
 
 	def get_directive(self):
 		node = ShotNode(tag="directive",depth=self.get_depth(),parent=self.current_node)
+
+		keyword = self.current_token.value
+
+		self.get_next_token()
 		
-		text = self.current_token.value.split(" ")
-
-		keyword = text[0]
-
 		if keyword == "extends" or keyword == "include" or keyword == "import":
+
+			text = self.current_token.value.split(" ")
 
 			if text[1][0] == "\"" or text[1][0] == "'":
 				filename = text[1][1:-1]

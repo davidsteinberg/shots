@@ -26,7 +26,7 @@ TOKEN_TYPE = _enumerate(
 	"UNKNOWN"
 )
 
-_directive_openers = ["block", "call", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
+_directive_openers = ["block", "call", "def", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
 
 class ShotToken:
 	def __init__(self,value="",type=TOKEN_TYPE.UNKNOWN):
@@ -284,6 +284,13 @@ class ShotTokenizer:
 	def get_next_token(self):
 		self.current_token = self.get_token()
 		
+	def peek_next_token(self):
+		current_pos = self.current_pos_in_line
+		next_token = self.get_token()
+		self.current_pos_in_line = current_pos - 1
+		self.get_next_char()
+		return next_token
+		
 	def tokenize_line(self):
 
 		# find opening whitespace
@@ -303,16 +310,22 @@ class ShotTokenizer:
 		
 			if self.current_token.type == TOKEN_TYPE.ALPHA:
 				if self.current_token.value in _directive_openers:
+					if self.current_token.value == "def":
+						self.current_token.value = "macro"
+				
+					self.current_token.type = TOKEN_TYPE.DIRECTIVE
+				
+					line.tokens.append(self.current_token)
+				
 					directive = [self.current_token.value]
 				
 					while self.current_char != self.EOL:
 						directive.append(self.current_char)
 						self.get_next_char()
 				
-					self.current_token.type = TOKEN_TYPE.DIRECTIVE
-					self.current_token.value = "".join(directive)
-					
-					line.tokens.append(self.current_token)
+					t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+					line.tokens.append(t)
+
 					break
 
 				elif self.current_token.value == "comment" or self.current_token.value == "secret":
@@ -347,6 +360,39 @@ class ShotTokenizer:
 						self.get_content_block(depth)
 						return None
 
+				elif len(line.tokens) == 0:
+					next_token = self.peek_next_token()
+					
+					if next_token.type == TOKEN_TYPE.EQUALS:
+						t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="set")
+						line.tokens.append(t)
+						
+						directive = ["set ", self.current_token.value]
+				
+						while self.current_char != self.EOL:
+							directive.append(self.current_char)
+							self.get_next_char()
+				
+						t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+						line.tokens.append(t)
+						
+					elif next_token.value == "(":
+						t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="call")
+						line.tokens.append(t)
+						
+						directive = ["call ", self.current_token.value]
+				
+						while self.current_char != self.EOL:
+							directive.append(self.current_char)
+							self.get_next_char()
+				
+						t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+						line.tokens.append(t)
+					
+					else:
+						line.tokens.append(self.current_token)
+						self.get_next_token()
+					
 				else:
 					line.tokens.append(self.current_token)
 					self.get_next_token()

@@ -1,11 +1,19 @@
-div:
-    #nav 
-        link to="#intro" 
-            div.navitem : [[[ intro.name ]]]
+x = 10
 
-        for e in examples 
+for i in range(x):
+	div: [[ i ]]
 
-            set n = e.name.lower().replace(" ","_") 
+def foo(caller=None):
+	: hello, world
 
-            link to="#[[[ n ]]]"
-                div.navitem : [[[ e.name ]]]
+foo()
+
+br
+
+def input(id, type="text", caller=None):
+	input #"[[ id ]]" type="[[ type ]]"
+
+.login
+	input("username")
+	input("password","password")
+
