@@ -322,8 +322,13 @@ class ShotTokenizer:
 					while self.current_char != self.EOL:
 						directive.append(self.current_char)
 						self.get_next_char()
+						
+					text = "".join(directive)
+					
+					if directive[0] == "macro":
+						text = re.sub(r"\(, ", "(", re.sub(r"\)([^)]*)$", r", caller=None)\1", text))
 				
-					t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+					t = ShotToken(type=TOKEN_TYPE.TEXT, value=text)
 					line.tokens.append(t)
 
 					break

@@ -1,19 +1,13 @@
-x = 10
+def foo():
+	: Hello, world.
 
-for i in range(x):
-	div: [[ i ]]
+def bar():
+	: Hello, moon.
 
-def foo(caller=None):
-	: hello, world
+hour = 15
 
-foo()
-
-br
-
-def input(id, type="text", caller=None):
-	input #"[[ id ]]" type="[[ type ]]"
-
-.login
-	input("username")
-	input("password","password")
+if hour > 22:
+	bar()
+else:
+	foo()
 
