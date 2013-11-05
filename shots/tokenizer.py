@@ -161,6 +161,22 @@ class ShotTokenizer:
 						self.get_next_char()
 			
 					t.value = "".join(text)
+					
+		# other text
+		elif self.current_char == "|":
+			t = ShotToken(type=TOKEN_TYPE.TEXT)
+		
+			text = []
+		
+			if self.current_char == self.EOL:
+				t.value = ""
+			else:
+				self.get_next_char()
+				while self.current_char != self.EOL:
+					text.append(self.current_char)
+					self.get_next_char()
+		
+				t.value = "".join(text)
 		
 		# class
 		elif self.current_char == ".":

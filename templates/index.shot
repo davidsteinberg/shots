@@ -1,0 +1,28 @@
+!! This is Python code
+
+secret
+	def print_one_per_line(items):
+		for item in items:
+			print item
+
+	names = ["geoff", "david", "nancy"]
+	print_one_per_line(names)
+
+
+!! This is Shots code
+
+def print_one_per_line(items):
+	for item in items:
+		: <div>{{ item }}</div>
+
+names = ["geoff", "david", "nancy"]
+print_one_per_line(names)
+
+!! Note: only one line (the third) of the code changes from Python to Shots
+
+for i in range(10):
+	for x in range(i):
+		| <div>
+		| 	<a>hi [[ x ]]</a>
+		| <div>
+
