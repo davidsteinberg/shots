@@ -1,0 +1,33 @@
+size = 40
+
+css
+	.box {
+		height: [[ size ]]px;
+		width: [[ size ]]px;
+		float: left;
+	}
+	.clear { clear: both }
+
+non_white = "black"
+
+num = 10
+
+for i in range(num+2):
+	.box css="background-color: [[ non_white ]]"
+.clear
+
+for i in range(num):
+	.box css="background-color: [[ non_white ]]"
+	for j in range(num):
+		color = "white"
+		if 0 == (range(2) | random):
+			color = non_white
+
+		.box css="background-color: [[ color ]]"
+	.box css="background-color: [[ non_white ]]"
+	.clear
+
+for i in range(num+2):
+	.box css="background-color: [[ non_white ]]"
+.clear
+

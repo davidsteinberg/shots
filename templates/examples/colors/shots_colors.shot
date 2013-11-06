@@ -1,0 +1,38 @@
+num_rows = 5
+num_cols = 5
+
+side = 100
+
+css
+	body {
+		width: [[ num_rows * side ]]px;
+		margin: auto;
+		margin-top: 10px;		
+	}
+	.box {
+		height: [[ side ]]px;
+		width: [[ side ]]px;
+		border: none;
+		margin: 0;
+		float: left;
+	}
+	.clear { clear: both }
+
+for row in range(num_rows):
+
+	for col in range(num_cols):
+
+		coin = range(2) | random
+
+		if coin == 0:
+			r = range(256) | random
+			g = range(256) | random
+			b = range(256) | random
+
+			.box css="background-color: rgb([[ r ]],[[ g ]],[[ b ]])"
+
+		else:
+			.box css="background-color: white"
+
+	.clear
+

@@ -157,7 +157,14 @@ class ShotTokenizer:
 					t.value = ""
 				else:
 					self.get_next_char()
-					while self.current_char != self.EOL:
+					while self.current_char != self.EOL:					
+						if not peeking:
+							if self.current_char == "+":
+								if text[-1] == "\\":
+									text[-1] = "+"
+								else:
+									break
+					
 						text.append(self.current_char)
 						self.get_next_char()
 			
@@ -183,8 +190,7 @@ class ShotTokenizer:
 							else:
 								break
 
-					text.append(self.current_char)
-					
+					text.append(self.current_char)					
 					self.get_next_char()
 		
 				t.value = "".join(text)

@@ -40,9 +40,7 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 						li > link to="#contact" | Contact
 
 						li.dropdown
-							link.dropdown-toggle to="#" data-toggle="dropdown"
-								| Dropdown
-								b.caret
+							link.dropdown-toggle to="#" data-toggle="dropdown" > | Dropdown + b.caret
 
 							ul.dropdown-menu
 								li > link to="#" | Action
@@ -131,8 +129,7 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	.row.featurette
 		.col-md-7
 			h2.featurette-heading
-				| First featurette heading.&nbsp;
-				span.text-muted | It'll blow your mind.
+				| First featurette heading.&nbsp; +  span.text-muted| It'll blow your mind.
 			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 		
 		.col-md-5
@@ -146,8 +143,7 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 
 		.col-md-7
 			h2.featurette-heading
-				| Oh yeah, it's that good.&nbsp;
-				span.text-muted | See for yourself.
+				| Oh yeah, it's that good.&nbsp; + span.text-muted| See for yourself.
 			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 
 	hr.featurette-divider
@@ -155,8 +151,7 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	.row.featurette
 		.col-md-7
 			h2.featurette-heading
-				| And lastly, this one.&nbsp;
-				span.text-muted | Checkmate.
+				| And lastly, this one.&nbsp; + span.text-muted| Checkmate.
 			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 		
 		.col-md-5
