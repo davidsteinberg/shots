@@ -177,7 +177,12 @@ class ShotTokenizer:
 					self.get_next_char()
 		
 				t.value = "".join(text)
-		
+
+		# child element next
+		elif self.current_char == ">":
+			t = ShotToken(type=TOKEN_TYPE.CHILD_ELEM_NEXT)
+			self.get_next_char()
+
 		# class
 		elif self.current_char == ".":
 			t = ShotToken(type=TOKEN_TYPE.CLASS)
