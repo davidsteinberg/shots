@@ -94,7 +94,7 @@ class ShotNode:
 					if delete_spaces:
 						count = -1
 						for d in range(self.depth):
-							count -= 4
+							count -= 1
 						result = result[:count]
 
 		else:
