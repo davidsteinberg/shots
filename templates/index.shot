@@ -1,2 +1,10 @@
-| this is valid + | and so is this
+def foo():
+	|
+		<div>bunches of html</div>
+		<br><br>
+		<a href="http://flaskshots.herokuapp.com">Shots</a>
+		<br>
+		<img src="some_image.png">
+
+foo()
 

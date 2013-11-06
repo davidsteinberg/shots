@@ -40,9 +40,12 @@ class ShotNode:
 
 	def __str__(self):
 		result = ""
-		
-		for d in range(self.depth):
-			result += " "
+
+		if self.tag == "block_text":
+			self.tag = ""
+		else:
+			for d in range(self.depth):
+				result += " "
 		
 		if self.tag == "":
 			for c in self.children:

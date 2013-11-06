@@ -288,12 +288,19 @@ class ShotParser:
 		return node
 
 	def get_text(self):
-		node = ShotTextNode(self.current_token.value,depth=self.get_depth())
-		self.current_node.children.append(node)
+		if self.current_token.value == "":
+			node = ShotNode(tag="block_text",depth=self.get_depth(),parent=self.current_node)
+			node.children.append(self.get_content_block())
+			self.current_node.children.append(node)
+			self.current_node = node
+
+		else:
+			node = ShotTextNode(self.current_token.value,depth=self.get_depth())
+			self.current_node.children.append(node)
 		
-		self.get_next_token()
-		if self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
-			self.get_next_node()
+			self.get_next_token()
+			if self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
+				self.get_next_node()
 
 	def get_directive(self):
 		node = ShotNode(tag="directive",depth=self.get_depth(),parent=self.current_node)

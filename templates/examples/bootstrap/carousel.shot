@@ -171,10 +171,7 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	footer
 		p.pull-right > link to="#" | Back to top
 		p
-			| &copy; 2013 Company, Inc. &middot;
-			link to="#" | Privacy
-			| &middot;
-			link to="#" | Terms
+			| &copy; 2013 Company, Inc. &middot; + link to="#" | Privacy + | &middot; + link to="#" | Terms
 
 !--------------------------
 ! Bootstrap core JavaScript
