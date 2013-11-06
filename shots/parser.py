@@ -290,6 +290,10 @@ class ShotParser:
 	def get_text(self):
 		node = ShotTextNode(self.current_token.value,depth=self.get_depth())
 		self.current_node.children.append(node)
+		
+		self.get_next_token()
+		if self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
+			self.get_next_node()
 
 	def get_directive(self):
 		node = ShotNode(tag="directive",depth=self.get_depth(),parent=self.current_node)
@@ -439,6 +443,7 @@ class ShotParser:
 			
 			block_text = False
 			child_elem_next = False
+			sibling_elem_next = False
 			
 			self.get_next_token()
 			while self.current_token.type != TOKEN_TYPE.EOL:
@@ -574,10 +579,19 @@ class ShotParser:
 						else:
 							self.current_node.children.append(ShotTextNode(text=self.current_token.value))
 							self.current_node.multiline = False
+					
+					self.get_next_token()
+					if self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
+						sibling_elem_next = True
+					
 					break
 					
 				elif self.current_token.type == TOKEN_TYPE.CHILD_ELEM_NEXT:
 					child_elem_next = True
+					break
+					
+				elif self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
+					sibling_elem_next = True
 					break
 			
 				self.get_next_token()
@@ -594,6 +608,17 @@ class ShotParser:
 				self.current_line_num -= 1
 				self.current_node = self.current_node.parent
 				self.current_node.depth += 1
+			
+			elif sibling_elem_next:
+				node = self.current_node
+				self.current_node = self.current_node.parent
+
+				self.get_next_node()
+
+				self.current_node = node
+				node = None
+				
+				self.current_line_num -= 1
 	
 		if node:
 			self.current_node.children.append(node)

@@ -6,7 +6,7 @@ meta name="author" content=""
 
 favicon "http://getbootstrap.com/docs-assets/ico/favicon.png"
 
-title : Carousel Template for Bootstrap
+title | Carousel Template for Bootstrap
 
 ! Bootstrap core CSS
 css "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
@@ -31,27 +31,27 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 						for i in range(3)
 							span.icon-bar
 
-					link.navbar-brand to="#" : Project name
+					link.navbar-brand to="#" | Project name
 
 				.navbar-collapse.collapse
 					ul.nav.navbar-nav
-						li.active :: link to="#" : Home
-						li :: link to="#about" : About
-						li :: link to="#contact" : Contact
+						li.active > link to="#" | Home
+						li > link to="#about" | About
+						li > link to="#contact" | Contact
 
 						li.dropdown
 							link.dropdown-toggle to="#" data-toggle="dropdown"
-								: Dropdown
+								| Dropdown
 								b.caret
 
 							ul.dropdown-menu
-								li :: link to="#" : Action
-								li :: link to="#" : Another action
-								li :: link to="#" : Something else here
+								li > link to="#" | Action
+								li > link to="#" | Another action
+								li > link to="#" | Something else here
 								li.divider
-								li.dropdown-header : Nav header
-								li :: link to="#" : Separated link
-								li :: link to="#" : One more separated link
+								li.dropdown-header | Nav header
+								li > link to="#" | Separated link
+								li > link to="#" | One more separated link
 
 !--------------------------
 ! Carousel
@@ -71,30 +71,30 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 
 			.container
 				.carousel-caption
-					h1 : Example headline.
-					p : Note: If you're viewing this page via a <code>file://</code> URL, the "next" and "previous" Glyphicon buttons on the left and right might not load/display properly due to web browser security rules.
-					p :: link.btn.btn-lg.btn-primary to="#" role="button" : Sign up today
+					h1 | Example headline.
+					p | Note: If you're viewing this page via a <code>file://</code> URL, the "next" and "previous" Glyphicon buttons on the left and right might not load/display properly due to web browser security rules.
+					p > link.btn.btn-lg.btn-primary to="#" role="button" | Sign up today
 
 		.item
 			img data-src="holder.js/900x500/auto/#666:#6a6a6a/text:Second slide" alt="Second slide"
 
 			.container
 				.carousel-caption
-					h1 : Another example headline.
-					p : Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
-					p :: link.btn.btn-lg.btn-primary to="#" role="button" : Learn more
+					h1 | Another example headline.
+					p | Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
+					p > link.btn.btn-lg.btn-primary to="#" role="button" | Learn more
 
 		.item
 			img data-src="holder.js/900x500/auto/#555:#5a5a5a/text:Third slide" alt="Third slide"
 
 			.container
 				.carousel-caption
-					h1 : One more for good measure.
-					p : Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
-					p :: link.btn.btn-lg.btn-primary to="#" role="button" : Browse gallery
+					h1 | One more for good measure.
+					p | Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.
+					p > link.btn.btn-lg.btn-primary to="#" role="button" | Browse gallery
 
-	link.left.carousel-control to="#myCarousel" data-slide="prev" :: span.glyphicon.glyphicon-chevron-left
-	link.right.carousel-control to="#myCarousel" data-slide="next" :: span.glyphicon.glyphicon-chevron-right
+	link.left.carousel-control to="#myCarousel" data-slide="prev" > span.glyphicon.glyphicon-chevron-left
+	link.right.carousel-control to="#myCarousel" data-slide="next" > span.glyphicon.glyphicon-chevron-right
 
 !--------------------------
 ! Marketing messaging and featurettes
@@ -108,21 +108,21 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	.row
 		.col-lg-4
   			img.img-circle data-src="holder.js/140x140" alt="Generic placeholder image"
-  			h2 : Heading
-  			p : Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.
-  			p :: link.btn.btn-default to="#" role="button" : View details &raquo;
+  			h2 | Heading
+  			p | Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.
+  			p > link.btn.btn-default to="#" role="button" | View details &raquo;
 
 		.col-lg-4
   			img.img-circle data-src="holder.js/140x140" alt="Generic placeholder image"
-  			h2 : Heading
-  			p : Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.
-  			p :: link.btn.btn-default to="#" role="button" : View details &raquo;
+  			h2 | Heading
+  			p | Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.
+  			p > link.btn.btn-default to="#" role="button" | View details &raquo;
 
 		.col-lg-4
   			img.img-circle data-src="holder.js/140x140" alt="Generic placeholder image"
-  			h2 : Heading
-  			p : Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-  			p :: link.btn.btn-default to="#" role="button" : View details &raquo;
+  			h2 | Heading
+  			p | Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+  			p > link.btn.btn-default to="#" role="button" | View details &raquo;
 
 	! START THE FEATURETTES
 
@@ -131,9 +131,9 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	.row.featurette
 		.col-md-7
 			h2.featurette-heading
-				: First featurette heading.&nbsp;
-				span.text-muted : It'll blow your mind.
-			p.lead : Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
+				| First featurette heading.&nbsp;
+				span.text-muted | It'll blow your mind.
+			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 		
 		.col-md-5
 			img.featurette-image.img-responsive data-src="holder.js/500x500/auto" alt="Generic placeholder image"
@@ -146,18 +146,18 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 
 		.col-md-7
 			h2.featurette-heading
-				: Oh yeah, it's that good.&nbsp;
-				span.text-muted : See for yourself.
-			p.lead : Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
+				| Oh yeah, it's that good.&nbsp;
+				span.text-muted | See for yourself.
+			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 
 	hr.featurette-divider
 
 	.row.featurette
 		.col-md-7
 			h2.featurette-heading
-				: And lastly, this one.&nbsp;
-				span.text-muted : Checkmate.
-			p.lead : Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
+				| And lastly, this one.&nbsp;
+				span.text-muted | Checkmate.
+			p.lead | Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.
 		
 		.col-md-5
 			img.featurette-image.img-responsive data-src="holder.js/500x500/auto" alt="Generic placeholder image"
@@ -169,12 +169,12 @@ css "http://getbootstrap.com/examples/carousel/carousel.css"
 	! FOOTER
   
 	footer
-		p.pull-right :: link to="#" : Back to top
+		p.pull-right > link to="#" | Back to top
 		p
-			: &copy; 2013 Company, Inc. &middot;
-			link to="#" : Privacy
-			: &middot;
-			link to="#" : Terms
+			| &copy; 2013 Company, Inc. &middot;
+			link to="#" | Privacy
+			| &middot;
+			link to="#" | Terms
 
 !--------------------------
 ! Bootstrap core JavaScript

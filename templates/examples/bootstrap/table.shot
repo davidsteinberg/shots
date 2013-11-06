@@ -1,0 +1,26 @@
+meta name="viewport" content="width=device-width, initial-scale=1.0"
+
+css "http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+css
+	body { padding: 20px }
+	#submit { margin-left: 20px }
+	td { padding: 30px }
+
+def rating_buttons(language):
+	tr
+		td: [[ language ]]
+		for i in range(1,6):
+			td
+				input type="radio" name="[[ language ]]" value="[[ i ]]"
+				: [[ i ]]
+
+languages = ["Python", "Node.js", "Ruby", "PHP", "Perl", "ASP"]
+
+form
+	table
+		for language in languages:
+			rating_buttons(language)
+
+	br
+
+	input #submit type="submit"

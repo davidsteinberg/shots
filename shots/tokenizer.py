@@ -24,6 +24,7 @@ TOKEN_TYPE = _enumerate(
 	"QUOTE",
 	"SHOT_LINE_COMMENT",
 	"SHOT_BLOCK_COMMENT",
+	"SIBLING_ELEM_NEXT",
 	"TEXT",
 	"UNKNOWN"
 )
@@ -76,7 +77,7 @@ class ShotTokenizer:
 			return self.EOL
 		return self.current_line[self.current_pos_in_line]
 
-	def get_token(self):
+	def get_token(self, peeking=False):
 		if self.current_char == self.EOL:
 			return ShotToken(type=TOKEN_TYPE.EOL)
 	
@@ -168,12 +169,22 @@ class ShotTokenizer:
 		
 			text = []
 		
+			self.get_next_char()
+		
 			if self.current_char == self.EOL:
 				t.value = ""
 			else:
 				self.get_next_char()
 				while self.current_char != self.EOL:
+					if not peeking:
+						if self.current_char == "+":
+							if text[-1] == "\\":
+								text[-1] = "+"
+							else:
+								break
+
 					text.append(self.current_char)
+					
 					self.get_next_char()
 		
 				t.value = "".join(text)
@@ -181,6 +192,11 @@ class ShotTokenizer:
 		# child element next
 		elif self.current_char == ">":
 			t = ShotToken(type=TOKEN_TYPE.CHILD_ELEM_NEXT)
+			self.get_next_char()
+			
+		# sibling element next
+		elif self.current_char == "+":
+			t = ShotToken(type=TOKEN_TYPE.SIBLING_ELEM_NEXT)
 			self.get_next_char()
 
 		# class
@@ -313,7 +329,7 @@ class ShotTokenizer:
 		
 	def peek_next_token(self):
 		current_pos = self.current_pos_in_line
-		next_token = self.get_token()
+		next_token = self.get_token(peeking=True)
 		self.current_pos_in_line = current_pos
 
 		if next_token.type != TOKEN_TYPE.EOL:
@@ -438,11 +454,14 @@ class ShotTokenizer:
 				line.tokens.append(self.current_token)
 
 				self.get_next_token()
-
+				
 				if self.current_token.type == TOKEN_TYPE.EOL:
 					self.lines.append(line)
 					self.get_content_block(depth)
 					return None
+				else:
+					line.tokens.append(self.current_token)
+					self.get_next_token()
 
 			else:
 				line.tokens.append(self.current_token)
