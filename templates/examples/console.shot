@@ -1,0 +1,8 @@
+css: h1, h2, h3, h4, h5, h6 { float: left }
+
+for i in range(48):
+	x = (i % 6) + 1
+	h[[ x ]]: [[ i ]]
+
+	js: console.log([[ x ]])
+

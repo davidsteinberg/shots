@@ -18,7 +18,7 @@ def get_template_dir():
 
 def get_static_dir():
 	if settings.app:
-		static_dir = settings.app.static_folder
+		static_dir = settings.app.static_folder.replace(_dirpath + sep,"")
 	elif settings.static_dir:
 		static_dir = settings.static_dir
 	return static_dir
@@ -31,13 +31,13 @@ def shotify(filename):
 	return filename
 	
 def htmlify(filename):
-	html_dir = _dirpath + sep + get_template_dir() + sep + (settings.html_dir)
+	template_dir = get_template_dir()
+
+	html_dir = _dirpath + sep + template_dir + sep + (settings.html_dir)
 	if not exists(html_dir):
 		makedirs(html_dir)
 
 	path = html_dir
-	
-	template_dir = get_template_dir()
 	
 	dir_chain = filename.replace(_dirpath + sep + template_dir + sep,"").split("/")
 	for d in range(len(dir_chain)-1):
@@ -45,6 +45,7 @@ def htmlify(filename):
 		if not exists(path):
 			makedirs(path)
 
+	# this is safe, because we have definitely added the ".shot" ending at this point
 	filename, ext = splitext(filename)
 	filename += ".html"
 	return filename.replace(template_dir,template_dir + sep + "html")
@@ -62,19 +63,14 @@ def _search_for_file_in_dir(dir,filename=""):
 		print "Error: searching for a blank filename"
 		return
 
-	found = False
-
 	for dirpath, dirs, files in walk(_dirpath + sep + dir):
 		if filename in files:
 			return dirpath + sep + filename
-			found = True
-			break
 
-		if not found:
-			for d in dirs:
-				path = _search_for_file_in_dir(dir + sep + d,filename)
-				if path:
-					return path
+		for d in dirs:
+			path = _search_for_file_in_dir(dir + sep + d,filename)
+			if path:
+				return path
 
 	return None
 
@@ -91,4 +87,13 @@ def get_static_path(filename):
 		return path.replace(_dirpath,"")
 
 	print "Error: couldn't find static file " + filename
+	return filename
+
+def get_lib_path(filename):
+	lib_dir = get_template_dir() + sep + (settings.lib_dir)
+	path = _search_for_file_in_dir(lib_dir,filename)
+	if path:
+		return path
+
+	print "Error: couldn't find lib " + filename
 	return filename

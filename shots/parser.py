@@ -375,7 +375,136 @@ class ShotParser:
 		node = ShotTextNode(text=text,depth=comment_depth)
 		self.current_node.children.append(node)
 
+	def get_lib(self):
+		self.get_next_token()
+
+		if self.current_token.type != TOKEN_TYPE.QUOTE:
+			self.parse_error("expected quote after lib keyword, but did not find one")
+		
+		lib_name = self.current_token.value[1:-1]
+		
+		# add .lib ending if needed
+		
+		file_ext = lib_name.split(".")[-1]
+		if file_ext != "lib":
+			lib_name += "." + "lib"
+		
+		file_path = get_lib_path(lib_name)
+		
+		if file_path == lib_name: # TODO: None should be returned
+			return
+		
+		tokenizer = ShotTokenizer(file_path)
+		tokenizer.tokenize()
+		
+		pre_css_lines = []
+		css_lines = []
+		pre_js_lines = []
+		js_lines = []
+		post_js_lines = []
+		
+		css_found = False
+		js_found = False
+		
+		css_tags = ["css", "style"]
+		js_tags = ["js", "javascript", "script"]
+		
+		for l in tokenizer.lines:
+			tag = l.tokens[0].value
+			if tag in css_tags:
+				if not css_found:
+					css_found = True
+				css_lines.append(l)
+
+			elif tag in js_tags:
+				if not js_found:
+					js_found = True
+				js_lines.append(l)
+
+			elif not css_found:
+				pre_css_lines.append(l)
+
+			elif not js_found:
+				pre_js_lines.append(l)
+
+			else:
+				post_js_lines.append(l)
+				
+		optional_openers = ["doctype", "html", "head"]
+
+		for i in range(self.current_line_num,len(self.tokenizer.lines)):
+			line = self.tokenizer.lines[i]
+
+			if line.tokens[0].value not in optional_openers:
+				
+				new_line_num = i + 1 # again, check on this
+				
+				for l in pre_css_lines:
+					l.depth = line.depth
+					self.tokenizer.lines.insert(new_line_num, l)
+					new_line_num += 1
+
+				for l in css_lines:
+					l.depth = line.depth
+					self.tokenizer.lines.insert(new_line_num, l)
+					new_line_num += 1
+
+				break
+
+		for i in reversed(range(len(self.tokenizer.lines))):
+			line = self.tokenizer.lines[i]
+
+			if line.depth == 0 and line.tokens[0].value not in js_tags:
+				if line.tokens[0].value == "body":
+					depth = self.tokenizer.lines[i+1].depth
+				
+					for j in reversed(range(len(self.tokenizer.lines))):
+						line = self.tokenizer.lines[j]
+						
+						if line.depth == depth and line.tokens[0].value not in js_tags:
+							new_line_num = i + 1 # TODO: this + 1 doesn't seem right
+					
+							for l in pre_js_lines:
+								l.depth = line.depth
+								self.tokenizer.lines.insert(new_line_num, l)
+								new_line_num += 1
+					
+							for l in js_lines:
+								l.depth = line.depth
+								self.tokenizer.lines.insert(new_line_num, l)
+								new_line_num += 1
+
+							for l in post_js_lines:
+								l.depth = line.depth
+								self.tokenizer.lines.insert(new_line_num, l)
+								new_line_num += 1
+							
+							break
+				else:
+					new_line_num = i + 1 # TODO: this + 1 doesn't seem right
+					
+					for l in pre_js_lines:
+						l.depth = line.depth
+						self.tokenizer.lines.insert(new_line_num, l)
+						new_line_num += 1
+					
+					for l in js_lines:
+						l.depth = line.depth
+						self.tokenizer.lines.insert(new_line_num, l)
+						new_line_num += 1
+
+					for l in post_js_lines:
+						l.depth = line.depth
+						self.tokenizer.lines.insert(new_line_num, l)
+						new_line_num += 1
+
+					break
+
 	def get_node_with_tag(self):
+		if self.current_token.value == "use":
+			self.get_lib()
+			return
+	
 		self.log_creation(self.current_token.value)
 		
 #

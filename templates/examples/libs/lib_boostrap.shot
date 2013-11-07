@@ -1,0 +1,6 @@
+use "bootstrap"
+
+h1 css="margin-left: 30px": Hello, world.
+
+js: $("h1").click(function(){ alert($(this).html()) })
+
