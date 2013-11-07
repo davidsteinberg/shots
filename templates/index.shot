@@ -1,36 +1,8 @@
-use "bootstrap"
+from "boxes" import box_css, box
 
-.row
-	.col-lg-2
-	.col-lg-8 css="border-left: 1px solid lightgray; border-right: 1px solid lightgray;"
-		br 2
+box_css()
 
-		.well: Lassie
-		
-		br 2
-		
-		button.btn.btn-default: Click me
-		button.btn.btn-default.pull-right: No, click me
-		
-		br 4
-		
-		tunes = ["Blue Monday", "Burning Down The House", "Just Can't Get Enough"]
-		for tune in tunes:
-			span.glyphicon.glyphicon-music + a: [[ tune ]]
-			br
-
-		br 3
-
-		.progress :: .progress-bar.progress-bar-success role="progressbar" css="width: 40%"
-
-		br 2
-		
-		for i in range(5,20):
-			side = i * i
-			img data-src="holder.js/[[ side ]]x[[ side ]]"
-				
-		br 5
-	.col-lg-2
-
-js "http://getbootstrap.com/docs-assets/js/holder.js"
-
+for i in range(100):
+	box(side=20)
+		: hi
+	

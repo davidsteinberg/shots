@@ -8,4 +8,5 @@ def box_css():
 
 def box(side=10):
 	.box css="height:[[ side ]]px; width:[[ side ]]px;"
+		caller()
 

@@ -439,7 +439,7 @@ class ShotTokenizer:
 						t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="call")
 						line.tokens.append(t)
 						
-						directive = ["call ", self.current_token.value]
+						directive = ["call(caller=None) ", self.current_token.value]
 				
 						while self.current_char != self.EOL:
 							directive.append(self.current_char)
