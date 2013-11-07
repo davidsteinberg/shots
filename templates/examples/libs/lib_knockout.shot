@@ -1,0 +1,22 @@
+use "knockout"
+
+: My name is + a data-bind="text: name"
+br
+: I am + a data-bind="text: age" + : years old
+br 2
+button #bday: Have a birthday
+
+js
+	var person = {
+		name: ko.observable("Banana Mae"),
+		age: ko.observable(22)
+	}
+	
+	ko.applyBindings(person)
+
+	bday = document.getElementById("bday")
+	bday.onclick = function(){
+		age = person.age()
+		person.age(age + 1)
+	}
+

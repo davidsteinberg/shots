@@ -1,0 +1,6 @@
+use "jquery_mobile"
+
+form
+	div data-role="rangeslider"
+		input type="range" name="range-1a" min="0" max="100" value="40" #range-1a
+		input type="range" name="range-1b" min="0" max="100" value="80" #range-1b
