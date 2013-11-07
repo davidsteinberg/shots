@@ -776,12 +776,12 @@ class ShotParser:
 
 		elif self.current_token.type == TOKEN_TYPE.CLASS:
 			self.current_token = ShotToken(value="div")
-			self.current_token_num = 0
+			self.current_token_num -= 1
 			self.get_node_with_tag()
 
 		elif self.current_token.type == TOKEN_TYPE.ID:
 			self.current_token = ShotToken(value="div")
-			self.current_token_num = 0
+			self.current_token_num -= 1
 			self.get_node_with_tag()
 
 		elif self.current_token.type == TOKEN_TYPE.HTML_LINE_COMMENT:
