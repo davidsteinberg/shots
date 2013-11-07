@@ -23,7 +23,7 @@ class Shot:
 		if settings.developing or not isfile(self.filename):
 			self.log("generating " + self.filename + "\n")
 			code = self.parser.generate_code()
-			self.log("\n    -- BEGIN GENERATED CODE --\n\n"+code+"\n\n    -- END GENERATED CODE --\n")
+			self.log("\n    -- BEGIN PRE-JINJA CODE --\n\n"+code+"\n\n    -- END PRE-JINJA CODE --\n")
 			write_shot_to_file(self.filename,shot=code)
 
 	def render(self, **varArgs):

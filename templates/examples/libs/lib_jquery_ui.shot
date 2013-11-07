@@ -1,0 +1,6 @@
+use "jquery_ui"
+
+| Date: + input type="text" #datepicker
+
+js: $(function(){ $("#datepicker").datepicker(); });
+

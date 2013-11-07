@@ -39,12 +39,9 @@ class ShotParser:
 
 	def log_finished_creation(self,tag):
 		self.log("    Finish: " + tag)
-			
+
 	def parse_error(self,string):
-		line = []
-		for t in self.tokenizer.lines[self.current_line_num].tokens:
-			line.append(t.value)
-		exit("Parse Error on line " + str(self.current_line_num+1) + " : " + " ".join(line) + "\n" + string)
+		exit("Parse Error on line " + str(self.current_line_num+1) + " : " + " ".join(self.tokenizer.lines[self.current_line_num].tokens) + "\n" + string)
 
 	def reached_EOF(self):
 		return self.current_line_num >= len(self.tokenizer.lines)
@@ -301,6 +298,7 @@ class ShotParser:
 			self.get_next_token()
 			if self.current_token.type == TOKEN_TYPE.SIBLING_ELEM_NEXT:
 				self.get_next_node()
+				self.current_line_num -= 1
 
 	def get_directive(self):
 		node = ShotNode(tag="directive",depth=self.get_depth(),parent=self.current_node)
@@ -379,7 +377,7 @@ class ShotParser:
 		self.get_next_token()
 
 		if self.current_token.type != TOKEN_TYPE.QUOTE:
-			self.parse_error("expected quote after lib keyword, but did not find one")
+			self.parse_error("expected quote after use keyword, but did not find one")
 		
 		lib_name = self.current_token.value[1:-1]
 		
@@ -462,7 +460,7 @@ class ShotParser:
 						line = self.tokenizer.lines[j]
 						
 						if line.depth == depth and line.tokens[0].value not in js_tags:
-							new_line_num = i + 1 # TODO: this + 1 doesn't seem right
+							new_line_num = i + 1
 					
 							for l in pre_js_lines:
 								l.depth = line.depth
@@ -481,7 +479,7 @@ class ShotParser:
 							
 							break
 				else:
-					new_line_num = i + 1 # TODO: this + 1 doesn't seem right
+					new_line_num = i + 1
 					
 					for l in pre_js_lines:
 						l.depth = line.depth
@@ -490,7 +488,7 @@ class ShotParser:
 					
 					for l in js_lines:
 						l.depth = line.depth
-						self.tokenizer.lines.insert(new_line_num, l)
+						self.tokenizer.lines.insert(new_line_num, l)						
 						new_line_num += 1
 
 					for l in post_js_lines:

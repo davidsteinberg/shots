@@ -1,8 +1,8 @@
-from "boxes" import box_css, box
+| Date: + input type="text" #datepicker
+div
+	a: this is inside
+div
+	: this
+	br
+	link
 
-box_css()
-
-for i in range(100):
-	box(side=20)
-		: hi
-	

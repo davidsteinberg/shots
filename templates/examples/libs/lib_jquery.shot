@@ -1,0 +1,15 @@
+from "boxes" import box_css, box
+
+box_css()
+
+for i in range(100):
+	box(side=20)
+		: [[ i ]]
+	
+use "jquery"
+js
+	$(".box").mouseenter(function(){
+		var num = parseInt($(this).html());
+		if (num > 0)
+			$(this).html(num - 1)
+	});
