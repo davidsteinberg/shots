@@ -162,6 +162,7 @@ class ShotTokenizer:
 							if self.current_char == "+":
 								if text[-1] == "\\":
 									text[-1] = "+"
+									self.current_char = ""
 								else:
 									break
 					
@@ -187,6 +188,7 @@ class ShotTokenizer:
 						if self.current_char == "+":
 							if text[-1] == "\\":
 								text[-1] = "+"
+								self.current_char = ""
 							else:
 								break
 

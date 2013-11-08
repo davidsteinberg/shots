@@ -1,7 +1,8 @@
 def foo():
-	user = "this"
-	caller(user)
+	d = "this"
+	c = "that"
+	caller(d,c)
 
-foo() => user
-	div: [[ user ]]
+foo() => user, johnson, hithere, pio
+	div: [[ user \+ ", " \+ johnson ]]
 
