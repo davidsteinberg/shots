@@ -36,3 +36,4 @@ js
 			$(this).attr("clicked","yes");
 		});
 	});
+

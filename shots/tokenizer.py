@@ -436,17 +436,56 @@ class ShotTokenizer:
 						line.tokens.append(t)
 						
 					elif next_token.value == "(":
-						t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="call")
-						line.tokens.append(t)
+						if self.current_token.value == "caller":
+							t = ShotToken(type=TOKEN_TYPE.TEXT)
+							text = ["[[ caller"]
+							
+							while self.current_char != self.EOL:
+								text.append(self.current_char)
+								self.get_next_char()
 						
-						directive = ["call(caller=None) ", self.current_token.value]
+							text.append(" ]]")
+						
+							t.value = "".join(text)
+							line.tokens.append(t)
+						
+						else:
+							t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="call")
+							line.tokens.append(t)
+
+							directive = ["call(", self.current_token.value]
 				
-						while self.current_char != self.EOL:
-							directive.append(self.current_char)
-							self.get_next_char()
+							returns_vars = False
 				
-						t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
-						line.tokens.append(t)
+							while self.current_char != self.EOL:
+								directive.append(self.current_char)
+
+								self.get_next_char()
+							
+								if self.current_char == "=" and self.peek_next_char() == ">":
+									self.get_next_char()
+									self.get_next_char()
+									returns_vars = True
+									break
+						
+							returned_vars = []
+						
+							if returns_vars:
+								self.get_next_token()
+								while self.current_token.type != TOKEN_TYPE.EOL:
+									if self.current_token.type == TOKEN_TYPE.ALPHA:
+										returned_vars.append(self.current_token.value)
+									self.get_next_token()
+				
+							for v in range(len(returned_vars)):
+								if v > 0:
+									directive[0] += ", "
+								directive[0] += returned_vars[v]
+						
+							directive[0] += ") "
+				
+							t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+							line.tokens.append(t)
 					
 					else:
 						line.tokens.append(self.current_token)

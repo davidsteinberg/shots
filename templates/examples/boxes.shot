@@ -6,7 +6,7 @@ def box_css():
 			margin: 3px;
 		}
 
-def box(side=10):
-	.box css="height:[[ side ]]px; width:[[ side ]]px;"
+def box(id="",side=10):
+	.box #[[ id ]] css="height:[[ side ]]px; width:[[ side ]]px;"
 		caller()
 

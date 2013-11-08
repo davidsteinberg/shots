@@ -1,0 +1,7 @@
+def foo():
+	user = "this"
+	caller(user)
+
+foo() => user
+	div: [[ user ]]
+
