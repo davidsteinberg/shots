@@ -309,7 +309,7 @@ class ShotParser:
 		
 		if keyword == "extends" or keyword == "include" or keyword == "import" or keyword == "from":
 
-			text = self.current_token.value.split(" ")
+			text = self.current_token.value.split(" ")				
 
 			if text[1][0] == "\"" or text[1][0] == "'":
 				filename = text[1][1:-1]
@@ -323,6 +323,24 @@ class ShotParser:
 				write_shot_to_file(filename,shot=code)
 			
 				text[1] = "\"" + filename + "\""
+				self.current_token.value = " ".join(text)
+			
+			elif keyword == "import" or keyword == "from":
+				filename = text[1]
+				filename = get_template_path(shotify(filename))
+
+				parser = ShotParser(filename, logging=self.logging)
+				
+				filename = htmlify(filename)
+		
+				code = parser.generate_code()
+				write_shot_to_file(filename,shot=code)
+
+				text.append("as")
+				text.append(text[1])
+			
+				text[1] = "\"" + filename + "\""
+
 				self.current_token.value = " ".join(text)
 			
 			if keyword == "extends":

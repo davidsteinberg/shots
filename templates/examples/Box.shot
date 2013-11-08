@@ -6,7 +6,6 @@ def css():
 			padding: 10px;
 			border-radius: 10px;
 			box-shadow: 1px 1px 1px gray;
-			text-shadow: -1px 0px gray;
 		}
 
 def new(id=None,height=None,width=None,sides=None,color="gray"):

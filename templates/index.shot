@@ -6,8 +6,8 @@ css
 		margin-top: 20px;
 	}
 
-import "Box" as Box
-import "String" as String
+import Box
+import String
 
 Box.css()
 String.css()
@@ -21,4 +21,9 @@ br 2
 
 Box.new(height=200, width=400,color="green")
 	String.new("goodbye, moon",color="black")
+
+br 2
+
+Box.new(height=100, width=200,color="blue")
+	String.new("still got my money",color="navy")
 

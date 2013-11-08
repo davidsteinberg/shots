@@ -3,6 +3,7 @@ def css():
 		.string {
 			font-family: sans-serif;
 			font-size: 30px;
+			text-shadow: -1px 0px gray;
 		}
 
 def new(s,color="gray"):
