@@ -21,6 +21,7 @@ TOKEN_TYPE = _enumerate(
 	"HTML_BLOCK_COMMENT",
 	"ID",
 	"NUMBER",
+	"OPEN_PAREN",
 	"QUOTE",
 	"SHOT_LINE_COMMENT",
 	"SHOT_BLOCK_COMMENT",
@@ -29,7 +30,7 @@ TOKEN_TYPE = _enumerate(
 	"UNKNOWN"
 )
 
-_directive_openers = ["block", "call", "def", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "set"]
+_directive_openers = ["block", "call", "def", "elif", "else", "extends", "filter", "for", "from", "if", "import", "include", "macro", "raw", "return", "set"]
 
 class ShotToken:
 	def __init__(self,value="",type=TOKEN_TYPE.UNKNOWN):
@@ -156,15 +157,29 @@ class ShotTokenizer:
 				if self.current_char == self.EOL:
 					t.value = ""
 				else:
+					templating = False
+				
 					self.get_next_char()
 					while self.current_char != self.EOL:					
 						if not peeking:
-							if self.current_char == "+":
+							if not templating and self.current_char == "+":
 								if text[-1] == "\\":
 									text[-1] = "+"
 									self.current_char = ""
 								else:
 									break
+							elif self.current_char == "[":
+								if len(text) > 0 and text[-1] == "[":
+									templating = True
+							elif self.current_char == "]":
+								if text[-1] == "]":
+									templating = False
+							elif self.current_char == "{":
+								if len(text) > 0 and text[-1] == "{":
+									templating = True
+							elif self.current_char == "}":
+								if text[-1] == "}":
+									templating = False
 					
 						text.append(self.current_char)
 						self.get_next_char()
@@ -182,15 +197,29 @@ class ShotTokenizer:
 			if self.current_char == self.EOL:
 				t.value = ""
 			else:
+				templating = False
+
 				self.get_next_char()
 				while self.current_char != self.EOL:
 					if not peeking:
-						if self.current_char == "+":
+						if not templating and self.current_char == "+":
 							if text[-1] == "\\":
 								text[-1] = "+"
 								self.current_char = ""
 							else:
 								break
+						elif self.current_char == "[":
+							if len(text) > 0 and text[-1] == "[":
+								templating = True
+						elif self.current_char == "]":
+							if text[-1] == "]":
+								templating = False
+						elif self.current_char == "{":
+							if len(text) > 0 and text[-1] == "{":
+								templating = True
+						elif self.current_char == "}":
+							if text[-1] == "}":
+								templating = False
 
 					text.append(self.current_char)					
 					self.get_next_char()
@@ -282,6 +311,10 @@ class ShotTokenizer:
 		elif self.current_char == ",":
 			t = ShotToken(type=TOKEN_TYPE.COMMA)
 			self.get_next_char()
+
+		elif self.current_char == "(":
+			t = ShotToken(type=TOKEN_TYPE.OPEN_PAREN)
+			self.get_next_char()
 		
 		# unknown
 		else:
@@ -363,29 +396,46 @@ class ShotTokenizer:
 
 		self.get_next_token()
 		while self.current_token.type != TOKEN_TYPE.EOL:
-		
+
 			if self.current_token.type == TOKEN_TYPE.ALPHA:
+
 				if self.current_token.value in _directive_openers and len(line.tokens) == 0:
-					if self.current_token.value == "def":
-						self.current_token.value = "macro"
-				
-					self.current_token.type = TOKEN_TYPE.DIRECTIVE
-				
-					line.tokens.append(self.current_token)
-				
-					directive = [self.current_token.value]
-				
-					while self.current_char != self.EOL:
-						directive.append(self.current_char)
-						self.get_next_char()
-						
-					text = "".join(directive)
+
+					if self.current_token.value == "return":
+						t = ShotToken(type=TOKEN_TYPE.TEXT)
+						text = ["[[ caller("]
 					
-					if directive[0] == "macro":
-						text = re.sub(r"\(, ", "(", re.sub(r"\)([^)]*)$", r", caller=None)\1", text))
+						self.get_next_char()
+						while self.current_char != self.EOL:
+							text.append(self.current_char)
+							self.get_next_char()
 				
-					t = ShotToken(type=TOKEN_TYPE.TEXT, value=text)
-					line.tokens.append(t)
+						text.append(") ]]")
+				
+						t.value = "".join(text)
+						line.tokens.append(t)
+				
+					else:
+						if self.current_token.value == "def":
+							self.current_token.value = "macro"
+					
+						self.current_token.type = TOKEN_TYPE.DIRECTIVE
+				
+						line.tokens.append(self.current_token)
+				
+						directive = [self.current_token.value]
+				
+						while self.current_char != self.EOL:
+							directive.append(self.current_char)
+							self.get_next_char()
+						
+						text = "".join(directive)
+					
+						if directive[0] == "macro":
+							text = re.sub(r"\(, ", "(", re.sub(r"\)([^)]*)$", r", caller=None)\1", text))
+				
+						t = ShotToken(type=TOKEN_TYPE.TEXT, value=text)
+						line.tokens.append(t)
 
 					break
 
@@ -509,6 +559,56 @@ class ShotTokenizer:
 				else:
 					line.tokens.append(self.current_token)
 					self.get_next_token()
+			
+			elif self.current_token.type == TOKEN_TYPE.OPEN_PAREN:
+				macro_name = []
+
+				for t in line.tokens:
+					if t.type == TOKEN_TYPE.CLASS:
+						macro_name.append(".")
+					macro_name.append(t.value)
+
+				del line.tokens[:]
+
+				t = ShotToken(type=TOKEN_TYPE.DIRECTIVE, value="call")
+				line.tokens.append(t)
+
+				directive = ["call(", "".join(macro_name)+"("]
+	
+				returns_vars = False
+	
+				while self.current_char != self.EOL:
+					directive.append(self.current_char)
+
+					self.get_next_char()
+				
+					if self.current_char == "=" and self.peek_next_char() == ">":
+						self.get_next_char()
+						self.get_next_char()
+						returns_vars = True
+						break
+			
+				returned_vars = []
+			
+				if returns_vars:
+					self.get_next_token()
+					while self.current_token.type != TOKEN_TYPE.EOL:
+						if self.current_token.type == TOKEN_TYPE.ALPHA:
+							returned_vars.append(self.current_token.value)
+						self.get_next_token()
+	
+				for v in range(len(returned_vars)):
+					if v > 0:
+						directive[0] += ", "
+					directive[0] += returned_vars[v]
+			
+				directive[0] += ") "
+	
+				t = ShotToken(type=TOKEN_TYPE.TEXT, value="".join(directive))
+				line.tokens.append(t)
+
+			
+				self.get_next_token()
 
 			else:
 				line.tokens.append(self.current_token)

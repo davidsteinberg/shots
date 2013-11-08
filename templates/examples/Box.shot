@@ -1,0 +1,21 @@
+def css():
+	css
+		.box {
+			float: left;
+			margin: 3px;
+			padding: 10px;
+			border-radius: 10px;
+			box-shadow: 1px 1px 1px gray;
+			text-shadow: -1px 0px gray;
+		}
+
+def new(id=None,height=None,width=None,sides=None,color="gray"):
+	height = "height: " + (height if height else (sides if sides else 20)) | string + "px;"
+	width = "width: " + (width if width else (sides if sides else 20)) | string + "px;"
+
+	bg = "background-color: light" + color + ";"
+	border = "border: 1px solid " + color + ";"
+	
+	.box [[ "#" + id if id else "" ]] css="[[ height ]] [[ width ]] [[ bg ]] [[ border ]]"
+		return
+

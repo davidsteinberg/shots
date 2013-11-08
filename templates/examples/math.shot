@@ -1,0 +1,6 @@
+def add(x=0, y=0):
+	return x + y
+
+add(3, 4) => z
+	div: [[ z ]]
+

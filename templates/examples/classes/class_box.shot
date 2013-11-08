@@ -1,0 +1,7 @@
+import Box
+
+Box.setup()
+
+Box.new(id="my_box",sides="200")
+	css: #[[ id ]] { color: blue }
+	

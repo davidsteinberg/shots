@@ -1,8 +1,24 @@
-def foo():
-	d = "this"
-	c = "that"
-	caller(d,c)
+css
+	body {
+		max-width: 1000px;
+		padding: 20px;
+		margin: auto;
+		margin-top: 20px;
+	}
 
-foo() => user, johnson, hithere, pio
-	div: [[ user \+ ", " \+ johnson ]]
+import "Box" as Box
+import "String" as String
+
+Box.css()
+String.css()
+
+br 2
+
+Box.new(sides=300)
+	String.new("hello, world")
+
+br 2
+
+Box.new(height=200, width=400,color="green")
+	String.new("goodbye, moon",color="black")
 
