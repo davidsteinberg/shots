@@ -1,0 +1,14 @@
+import Box
+import String
+
+def foo():
+	name = "david"
+	age = 25
+	return name, age
+
+Box.new(size=200, color="red")
+	foo() => n, a
+		String.new(n, color="blue")
+		br
+		String.new(a, color="green")
+

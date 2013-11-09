@@ -1,0 +1,49 @@
+def new(links=[],looping=True,size=None):
+	if size:
+		if size == "large":
+			size = "lg"
+		elif size == "small":
+			size = "sm"
+		size = "pagination-" + size
+
+	ul class="pagination [[ size if size ]]"
+		if (links|length) > 0:
+			urls = []
+			
+			for l in range(links|length):
+				if links[l].active:
+					if l == 0 and not looping:
+						do urls.append(None)
+					else:
+						do urls.append(links[l-1].url)
+
+					if l < (links|length) - 1:
+						do urls.append(links[l+1].url)
+					elif looping:
+						do urls.append(links[0].url)
+					else:
+						do urls.append(None)
+
+					break
+
+			if (urls|length) == 0:
+				do urls.append(links[-1].url)
+				do urls.append(links[0].url)
+
+			if urls[0]:
+				li > link to="[[ urls[0] ]]": &laquo;
+			else:
+				li.disabled > span: &laquo;
+
+			for l in range(links|length):
+				if links[l].active:
+					li.active > link to="[[ links[l].url ]]": [[ l+1 ]]
+				elif links[l].disabled:
+					li.disabled > link: [[ l+1 ]]
+				else:
+					li > link to="[[ links[l].url ]]": [[ l+1 ]]
+
+			if urls[1]:
+				li > link to="[[ urls[1] ]]": &raquo;
+			else:
+				li.disabled > span: &raquo;

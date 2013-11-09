@@ -1,0 +1,7 @@
+def new(links=[]):
+	ol.breadcrumb
+		for link in links:
+			if link.active:
+				li.active: [[ link.name ]]
+			else
+				li > link to="[[ link.url if link.url else (link.name|lower|replace(' ','_')) ]]": [[ link.name ]]

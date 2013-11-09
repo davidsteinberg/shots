@@ -1,0 +1,5 @@
+def new(type=None,percent=0,striped=False,animated=False):
+	type = "progress-bar-" + type if type else ""
+	div class="progress [[ 'progress-striped' if striped ]] [[ 'active' if animated ]]"
+		div class="progress-bar [[ type ]]" role="progressbar" aria-valuenow="[[ percent ]]" aria-valuemin="0" aria-valuemax="100" style="width: [[ percent ]]%;"
+			span.sr-only: [[ percent ]]% Complete

@@ -1,0 +1,9 @@
+def foo():
+	name = "david"
+	age = 25
+	return name, age
+
+foo() => n, a
+	div: [[ n ]]
+	div: [[ a ]]
+

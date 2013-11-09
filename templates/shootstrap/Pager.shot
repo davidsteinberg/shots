@@ -1,0 +1,31 @@
+def new(prev=None,next=None,aligned=False,arrows=False):
+	p_name = prev.name
+	n_name = next.name
+
+	if arrows:
+		p_name = "&larr; " + p_name
+		n_name = n_name + " &rarr;"
+
+	ul.pager
+		if aligned:
+			if prev.disabled:
+				li.previous.disabled > link to="[[ prev.url ]]": [[ p_name ]]
+			else:
+				li.previous > link to="[[ prev.url ]]": [[ p_name ]]
+						
+			if next.disabled:
+				li.next.disabled > link to="[[ next.url ]]": [[ n_name ]]
+			else:
+				li.next > link to="[[ next.url ]]": [[ n_name ]]
+				
+		else:
+			if prev.disabled:
+				li.disabled > link to="[[ prev.url ]]": [[ p_name ]]
+			else:
+				li > link to="[[ prev.url ]]": [[ p_name ]]
+
+			if next.disabled:
+				li.disabled > link to="[[ next.url ]]": [[ n_name ]]
+			else:
+				li > link to="[[ next.url ]]": [[ n_name ]]
+

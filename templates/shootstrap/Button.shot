@@ -1,0 +1,11 @@
+def new(text="Button",type="default",size=None,is_block=False,disabled=False):
+	if type == "close":
+		button type="button" class="close" aria-hidden="true": &times;
+	
+	else:
+		sizes = dict(xsmall="xs", small="sm", large="lg")
+		size = "btn-" + sizes[size] if size else ""
+		is_block = "btn-block" if is_block else ""
+		disabled = "disabled='disabled'" if disabled else ""
+
+		button type="button" class="btn btn-[[ type ]] [[ size ]] [[ is_block ]]" [[ disabled ]] : [[ text ]]

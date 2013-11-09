@@ -1,0 +1,23 @@
+def css():
+	css
+		.box {
+			float: left;
+			box-shadow: 1px 1px 1px gray;
+		}
+
+def new(id=None,height=None,width=None,size=None,margin=0,padding=0,color="gray",radius=0):
+	height = "height: " + (height if height else (size if size else 20)) | string + "px;"
+	width = "width: " + (width if width else (size if size else 20)) | string + "px;"
+
+	margin = "margin: " + (margin | string) + "px;"
+	padding = "margin: " + (padding | string) + "px;"
+
+	bg = "background-color: light" + color + ";"
+	border = "border: 1px solid " + color + ";"
+	radius = "border-radius: " + (radius | string) + "px;"
+
+	! make a box with the specified style and return inside of the box
+	
+	.box [[ "#" + id if id else "" ]] css="[[ height ]] [[ width ]] [[ margin ]] [[ padding ]] [[ bg ]] [[ border ]] [[ radius ]]"
+		return
+

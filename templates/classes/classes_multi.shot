@@ -1,0 +1,49 @@
+css
+    body {
+        max-width: 1000px;
+        padding: 20px;
+        margin: auto;
+    }
+    .clear {
+        clear: both;
+    }
+
+import Box
+import String
+
+Box.css()
+String.css()
+
+br 2
+
+Box.new(sides=300)
+    String.new("hello, world")
+
+Box.new(height=200, width=400,color="green")
+    String.new("goodbye, moon",color="black")
+
+Box.new(height=100, width=200,color="blue")
+    String.new("still got my money",color="navy")
+
+.clear
+
+br 2
+
+colors = ["red","orange","purple","brown","black"]
+for color in colors:
+    Box.new(sides=100,color=color)
+        String.new(color,color=color)
+
+.clear
+
+br 2
+
+Box.new(sides=300)
+    String.new("hello, world")
+
+Box.new(height=200, width=400,color="green")
+    String.new("goodbye, moon",color="black")
+
+.clear
+
+br 4

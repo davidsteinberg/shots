@@ -1,0 +1,5 @@
+def new(links=[],style="tabs",stacked=False,justified=False):
+	ul class="nav nav-[[ style ]] [[ 'nav-stacked' if stacked ]] [[ 'nav-justified' if justified ]]"
+		for link in links:
+			li class="[[ 'active' if link.active ]] [[ 'disabled' if link.disabled ]]"
+				link to="[[ link.url if link.url else (link.name|lower|replace(' ','_')) ]]": [[ link.name ]]

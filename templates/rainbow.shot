@@ -1,0 +1,10 @@
+from String import css, new
+
+css()
+
+colors = ["red","orange","yellow","green","blue","indigo","violet"]
+
+for color in colors:
+	new(color,color=color)
+	br
+

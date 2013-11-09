@@ -1,0 +1,5 @@
+def css():
+    css: a.string { text-shadow: -1px 0px gray }
+
+def new(s,color="gray",family="sans-serif",size="30px"):
+    a.string css="color: [[ color ]]; font-family: [[ family ]]; font-size: [[ size ]];": [[ s ]]
