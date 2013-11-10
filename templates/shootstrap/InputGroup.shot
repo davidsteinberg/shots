@@ -1,0 +1,14 @@
+def new(pre=None,placeholder="",post=None,size=None):
+	if size:
+		if size == "large":
+			size = "lg"
+		elif size == "small":
+			size = "sm"
+		size = "input-group-" + size
+
+	div class="input-group [[ size ]]"
+		if pre:
+			span.input-group-addon: [[ pre ]]
+		input.form-control type="text" placeholder="[[ placeholder ]]"
+		if post:
+			span.input-group-addon: [[ post ]]

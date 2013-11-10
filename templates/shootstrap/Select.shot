@@ -1,0 +1,5 @@
+def new(name="",options=[],multiple=False):
+	select.form-control name="[[ name ]]" [[ "multiple" if multiple ]]
+		for option in options:
+			value = "value='" + option.value + "'" if option.value else ""
+			option [[ value ]]: [[ option.text ]]

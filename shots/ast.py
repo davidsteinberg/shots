@@ -111,6 +111,12 @@ class ShotNode:
                         del self.attributes[self.attributes.index(attr)]
                         break
         
+            for attr in self.attributes:
+                if attr.name == "class":
+                    quote_char = attr.value[-1]
+                    attr.value = attr.value[:-1] + " " + " ".join(self.classes) + quote_char
+                    del self.classes[:]
+        
             result += "<" + self.tag
             if self.id:
                 result += " id=\"" + self.id + "\""

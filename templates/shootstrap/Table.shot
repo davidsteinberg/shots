@@ -1,0 +1,8 @@
+def new(striped=False,bordered=False,hover=False,condensed=False):
+	striped = "table-striped" if striped
+	bordered = "table-bordered" if bordered
+	hover = "table-hover" if hover
+	condensed = "table-condensed" if condensed
+	
+	table class="table [[ striped ]] [[ bordered ]] [[ hover ]] [[ condensed ]]"
+		return

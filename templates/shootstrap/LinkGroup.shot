@@ -1,0 +1,4 @@
+def new(items=[]):
+	div.list-group
+		for item in items:
+			link to="[[ item.url ]]" class="list-group-item [[ 'active' if item.active ]]": [[ item.text ]]

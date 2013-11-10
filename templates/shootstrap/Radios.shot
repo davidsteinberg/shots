@@ -1,0 +1,5 @@
+def new(name="",list=[],inline=False):
+	for item in list:
+		div class="radio[[ '-inline' if inline ]]"
+			input type="radio" name="[[ name ]]" value="[[ item.value ]]" [[ "checked" if item.checked ]]
+			: [[ item.text ]]

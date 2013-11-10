@@ -1,0 +1,4 @@
+def new(items=[]):
+	ul.list-group
+		for item in items:
+			li.list-group-item: [[ item ]]

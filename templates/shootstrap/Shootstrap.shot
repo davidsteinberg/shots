@@ -1,8 +1,20 @@
+import Alert
+alert = Alert.new
+
 import Breadcrumbs
 breadcrumbs = Breadcrumbs.new
 
 import Button
 button = Button.new
+
+import ButtonDropdown
+button_dropdown = ButtonDropdown.new
+
+import ButtonDropup
+button_dropup = ButtonDropup.new
+
+import Checkboxes
+checkboxes = Checkboxes.new
 
 import Column
 column = Column.new
@@ -13,8 +25,17 @@ glyphicon = Glyphicon.new
 import Image
 image = Image.new
 
+import InputGroup
+input_group = InputGroup.new
+
 import Label
 label = Label.new
+
+import LinkGroup
+link_group = LinkGroup.new
+
+import ListGroup
+list_group = ListGroup.new
 
 import Nav
 nav = Nav.new
@@ -28,8 +49,23 @@ pager = Pager.new
 import Pagination
 pagination = Pagination.new
 
+import Panel
+panel = Panel.new
+
 import ProgressBar
 progress_bar = ProgressBar.new
 
+import Radios
+radios = Radios.new
+
 import Row
 row = Row.new
+
+import Select
+select = Select.new
+
+import Table
+table = Table.new
+
+import Well
+well = Well.new

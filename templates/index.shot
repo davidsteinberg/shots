@@ -1,0 +1,11 @@
+use "bootstrap"
+
+from Shootstrap import row, column
+
+row()
+	column(width=2)
+	column(width=8)
+		
+		
+		
+	column(width=2)

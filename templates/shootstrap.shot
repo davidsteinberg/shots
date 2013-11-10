@@ -1,0 +1,182 @@
+use "bootstrap"
+
+css: body { padding-bottom: 70px }
+
+from Shootstrap import alert, breadcrumbs, button, button_dropdown, button_dropup
+from Shootstrap import checkboxes, column, glyphicon, image, input_group
+from Shootstrap import label, link_group, list_group, nav, nav_bar
+from Shootstrap import pager, pagination, panel, progress_bar, radios
+from Shootstrap import row, select, table, well
+
+about = dict(name="Docs",active=True)
+try_it = dict(name="Give it a Shot", url="try_it")
+
+nav_bar(id="nav_bar",site_name="Shots",links=[about, try_it],fixed="bottom",inverted=True)
+
+home = dict(name="Home")
+about = dict(name="About")
+info = dict(name="Info",active=True)
+
+breadcrumbs([home,about,info])
+
+row()
+	column(width=3)
+	column(width=6)
+
+		br
+
+		button()
+		button(type="primary")
+		button(type="success")
+		button(type="info")
+		button(type="warning")
+		button(type="danger")
+		button(type="link")
+		button(type="close")
+
+		br 3
+
+		progress_bar(percent=60)
+		br
+		progress_bar(percent=20,type="success",striped=True,animated=True)
+		br
+		progress_bar(percent=40,type="danger")
+
+		br
+
+		image(style="thumbnail")
+		image(style="rounded")
+		image(style="circle")
+
+		br 2
+
+		glyphicon("search")
+		glyphicon("star")
+		glyphicon("music")
+		glyphicon("cloud")
+		glyphicon("bullhorn")
+		glyphicon("bookmark")		
+
+		br 2
+
+		a = dict(url="page_1",active=True)
+		b = dict(url="page_2")
+		c = dict(url="page_3")
+		d = dict(url="page_4")
+		e = dict(url="page_5")
+
+		pagination([a, b, c, d, e],looping=False)
+
+		br 2
+
+		goods = dict(name="Good Times",active=True)
+		bads = dict(name="Bad Times",disabled=True)
+		nav([goods, bads])
+
+		br 2
+		
+		label()
+		label(type="primary")
+		label(type="success")
+		label(type="info")
+		label(type="warning")
+		label(type="danger")
+
+		br 2
+		
+		table(striped=True,bordered=True,hover=True)
+			tr
+				th: Ranking
+				th: Name
+		
+			names = ["John","Tom","Nancy","Luke","Mary"]
+			for i in range(names|length):
+				tr
+					td: [[ i+1 ]]
+					td: [[ names[i] ]]
+
+		br
+		
+		item1 = dict(value="blue",text="I love the color blue.")
+		item2 = dict(value="red",text="I simply adore red.")
+		item3 = dict(value="green",text="Pretty little flowers.",checked=True)
+		item4 = dict(value="yellow",text="I dig yellow.")
+		
+		radios("colors",[item1, item2, item3, item4])
+
+		br
+
+		c1 = dict(value="che",text="Cheese",checked=True)
+		c2 = dict(value="win",id="wineNot",text="Wine",checked=True)
+		c3 = dict(value="ost",text="Other Stuff")
+
+		checkboxes([c1, c2, c3],inline=True)
+
+		br 3
+
+		select(options=[{"text":"Harry"},{"text":"Dick"},{"text":"Tom"}])
+
+		br 2
+		
+		m = dict(text="Monkey",value="mon")
+		t = dict(text="Turtle",value="tur")
+		k = dict(text="Kangaroo",value="kan")
+		l = dict(text="Lobster",value="lob")
+		p = dict(text="Penguin",value="pen")
+		s = dict(text="Sheep",value="she")
+		o = dict(text="Octopus",value="oct")
+
+		select("creatures",[m,t,k,l,p,s,o],multiple=True)
+
+		br 2
+
+		a = dict(text="Amazon",url="http://amazon.com")
+		a2 = dict(text="Apple",url="http://apple.com")
+		g = dict(text="Google",url="http://google.com")
+		y = dict(text="Yahoo",url="http://yahoo.com")
+	
+		button_dropdown("Sites",[a, a2, g, y],"info",split=True)
+		button_dropdown("Tech companies",[a, a2, g, y],)
+		button_dropup("Leaders of the industry",[a, a2, g, y],"primary",size="large",split=True)
+
+		br 3
+
+		input_group("@","Username")
+		br		
+		input_group("$","",".00")
+
+		br 2
+		
+		alert(type="success")
+			strong: This is strong text
+			: and this isn't
+
+		br
+
+		panel(type="primary",head="Here is a panel",body="This is some information in the panel")
+
+		br
+
+		well("Lassie's in this time!",size="large")
+
+		br 2
+
+		list_group(["Michelangelo","Donatello","Leonardo","Raphael"])
+
+		br 2
+
+		a2 = dict(text="Apple",url="http://apple.com",active=True)
+
+		link_group([a,a2,g,y])
+
+		br 2
+
+		prev = dict(name="Previous",url="#")
+		next = dict(name="Next",url="#")
+
+		pager(prev,next,aligned=True,arrows=True)
+
+		br 2
+	column(width=3)
+
+js "http://getbootstrap.com/docs-assets/js/holder.js"

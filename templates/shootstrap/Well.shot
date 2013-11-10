@@ -1,0 +1,12 @@
+def new(text=None,size=None):
+	if size:
+		if size == "large":
+			size = "lg"
+		elif size == "small":
+			size = "sm"
+		size = "well-" + size
+
+	div class="well [[ size ]]"
+		if text:
+			: [[ text ]]
+		return

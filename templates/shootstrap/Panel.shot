@@ -1,0 +1,12 @@
+def new(type="default",head=None,body=None,foot=None):
+	div class="panel panel-[[ type ]]"
+		if head:
+			.panel-heading: [[ head ]]
+
+		if body:
+			.panel-body: [[ body ]]
+
+		return
+		
+		if foot:
+			.panel-footer: [[ foot ]]

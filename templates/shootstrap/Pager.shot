@@ -28,4 +28,3 @@ def new(prev=None,next=None,aligned=False,arrows=False):
 				li.disabled > link to="[[ next.url ]]": [[ n_name ]]
 			else:
 				li > link to="[[ next.url ]]": [[ n_name ]]
-

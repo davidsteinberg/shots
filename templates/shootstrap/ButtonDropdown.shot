@@ -1,0 +1,24 @@
+def new(text="Button",items=[],type="default",split=False,size=None,is_block=False,disabled=False):
+	sizes = dict(xsmall="xs", small="sm", large="lg")
+	size = "btn-" + sizes[size] if size else ""
+	is_block = "btn-block" if is_block else ""
+	disabled = "disabled='disabled'" if disabled else ""
+
+	.btn-group
+		if split:
+			button type="button" class="btn btn-[[ type ]] [[ size ]]" [[ disabled ]]: [[ text ]]
+			button type="button" class="btn btn-[[ type ]] [[ size ]] dropdown-toggle" [[ disabled ]] data-toggle="dropdown"
+				span.caret
+				span.sr-only: Toggle Dropdown
+
+			ul.dropdown-menu role="menu"
+				for item in items:
+					li > link to="[[ item.url ]]": [[ item.text ]]
+
+		else:
+			button type="button" class="btn btn-[[ type ]] [[ size ]] [[ is_block ]] dropdown-toggle" [[ disabled ]] data-toggle="dropdown"
+				: [[ text ]] + span.caret
+
+		ul.dropdown-menu role="menu"
+			for item in items:
+				li > link to="[[ item.url ]]": [[ item.text ]]

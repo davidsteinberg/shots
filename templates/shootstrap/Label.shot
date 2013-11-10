@@ -1,3 +1,2 @@
 def new(text="Label",type="default"):
 	span class="label label-[[ type ]]": [[ text ]]
-

@@ -1,0 +1,7 @@
+def new(list=[],inline=False):
+	for item in list:
+		div class="checkbox[[ '-inline' if inline ]]"
+			id = "id='" + item.id + "'" if item.id else ""
+			name = "name='" + item.name + "'" if item.name else ""
+			input type="checkbox" [[ id ]] [[ name ]] value="[[ item.value ]]" [[ "checked" if item.checked ]]
+			: [[ item.text ]]
