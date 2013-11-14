@@ -1,0 +1,71 @@
+import ShootstrapAlert
+alert = ShootstrapAlert.new
+
+import ShootstrapBreadcrumbs
+breadcrumbs = ShootstrapBreadcrumbs.new
+
+import ShootstrapButton
+button = ShootstrapButton.new
+
+import ShootstrapButtonDropdown
+button_dropdown = ShootstrapButtonDropdown.new
+
+import ShootstrapButtonDropup
+button_dropup = ShootstrapButtonDropup.new
+
+import ShootstrapCheckboxes
+checkboxes = ShootstrapCheckboxes.new
+
+import ShootstrapColumn
+column = ShootstrapColumn.new
+
+import ShootstrapGlyphicon
+glyphicon = ShootstrapGlyphicon.new
+
+import ShootstrapImage
+image = ShootstrapImage.new
+
+import ShootstrapInputGroup
+input_group = ShootstrapInputGroup.new
+
+import ShootstrapLabel
+label = ShootstrapLabel.new
+
+import ShootstrapLinkGroup
+link_group = ShootstrapLinkGroup.new
+
+import ShootstrapListGroup
+list_group = ShootstrapListGroup.new
+
+import ShootstrapNav
+nav = ShootstrapNav.new
+
+import ShootstrapNavBar
+nav_bar = ShootstrapNavBar.new
+
+import ShootstrapPager
+pager = ShootstrapPager.new
+
+import ShootstrapPagination
+pagination = ShootstrapPagination.new
+
+import ShootstrapPanel
+panel = ShootstrapPanel.new
+
+import ShootstrapProgressBar
+progress_bar = ShootstrapProgressBar.new
+
+import ShootstrapRadios
+radios = ShootstrapRadios.new
+
+import ShootstrapRow
+row = ShootstrapRow.new
+
+import ShootstrapSelect
+select = ShootstrapSelect.new
+
+import ShootstrapTable
+table = ShootstrapTable.new
+
+import ShootstrapWell
+well = ShootstrapWell.new

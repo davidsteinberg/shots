@@ -1,11 +1,93 @@
 use "bootstrap"
 
-from Shootstrap import row, column
+css "index"
+
+from Shootstrap import row, column, button, glyphicon, nav_bar
+
+yellow = "rgb(235, 189, 51)"
+other_yellow = "rgb(229, 185, 50)"
+light_yellow = "rgb(240, 222, 135)"
 
 row()
-	column(width=2)
-	column(width=8)
+	column(1)
+	column(10)
+	
+		row()
+			column(6,size="xsmall")
+				img.logo src="logo"
+				
+			column(6,size="xsmall")
+				row()
+					column(6)
+					column(6)
+						.btn-group.pull-right
+							button("F")
+							button("T")
+							button("I")
+
+						br 3
+						
+						.input-group
+							input.form-control type="text" placeholder="Search" css="border-color: [[ yellow ]]"
+							span.input-group-addon css="background-color: [[ yellow ]];border-color: [[ yellow ]];cursor: pointer"
+								glyphicon("search")
+
+		br
+
+		row()
+			column(12)
+				home = dict(text="Home",url="#",active=True)
+				project = dict(text="Projects")
+				media = dict(text="Media")
+				about = dict(text="About")
+				contact = dict(text="Contact")
 		
+				nav_bar("main_nav",links=[home, project, media, about, contact],inverted=True)
+
+		row()
+			column(12)
+				#carousel
+					img src="hell_teaser"
+					!! img src="sta_teaser"
 		
+		br
 		
-	column(width=2)
+		div css="height: 200px;padding: 5px;"
+			h3: Who is KSUIF
+			em: Kent State University Independent Films is an organization that creates and develops media productions.  We provide skilled members to do everything required to design and produce your audiovisual concept.  Our diversity ranges from feature-length narrative films to corporate video, commercials and everything in between.
+		
+		br
+		
+		titles = ["Narrative Film", "Music Video", "Documentary"]
+
+		for title in titles:
+			row()
+				column(1)
+				column(10)
+					h3: [[ title ]]
+				column(1)
+
+			br
+		
+			row()
+				column(1)
+				.col-md-5.left_content
+					.content_box
+						h4.text-center: Content
+				column(5)
+					.content_box
+						h4.text-center: Content
+				column(1)
+				
+			br
+		
+			row()
+				column(1)
+				column(10)
+					.picture_box
+						h3.text-center: Pictures
+				column(1)
+		
+			br 4
+				
+	column(1)

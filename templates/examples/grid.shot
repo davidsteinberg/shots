@@ -4,4 +4,4 @@ Box.css()
 
 for i in (range(129)|reverse):
 	c = (i * 2)|string
-	Box.new(sides=100, color="rgb(" + c + "," + c + "," + c + ")")
+	Box.new(size=100, color="rgb(" + c + "," + c + "," + c + ")")

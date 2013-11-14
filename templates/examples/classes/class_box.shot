@@ -1,7 +1,7 @@
 import Box
 
-Box.setup()
+Box.css()
 
-Box.new(id="my_box",sides="200")
+Box.new(id="my_box",size="200")
 	css: #[[ id ]] { color: blue }
 	

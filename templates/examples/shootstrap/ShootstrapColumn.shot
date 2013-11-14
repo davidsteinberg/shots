@@ -1,4 +1,4 @@
-def new(size="medium",width=12)
+def new(width=12,size="medium")
 	sizes = dict(xsmall="xs", small="sm", medium="md", large="lg")
 	div class="col-[[ sizes[size] ]]-[[ width ]]"
 		return

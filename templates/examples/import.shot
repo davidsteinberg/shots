@@ -1,10 +1,10 @@
-from "boxes" import box_css, box
+from Box import css, new
 
-box_css()
+css()
 
 for i in range(10):
 	for j in range(10):
-		box(side=(i * j))
+		new(size=(i * j))
 
 use "jquery"
 js

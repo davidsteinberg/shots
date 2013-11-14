@@ -16,7 +16,7 @@ String.css()
 
 br 2
 
-Box.new(sides=300)
+Box.new(size=300)
     String.new("hello, world")
 
 Box.new(height=200, width=400,color="green")
@@ -31,14 +31,14 @@ br 2
 
 colors = ["red","orange","purple","brown","black"]
 for color in colors:
-    Box.new(sides=100,color=color)
+    Box.new(size=100,color=color)
         String.new(color,color=color)
 
 .clear
 
 br 2
 
-Box.new(sides=300)
+Box.new(size=300)
     String.new("hello, world")
 
 Box.new(height=200, width=400,color="green")

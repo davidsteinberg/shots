@@ -8,11 +8,6 @@ from Shootstrap import label, link_group, list_group, nav, nav_bar
 from Shootstrap import pager, pagination, panel, progress_bar, radios
 from Shootstrap import row, select, table, well
 
-about = dict(name="Docs",active=True)
-try_it = dict(name="Give it a Shot", url="try_it")
-
-nav_bar(id="nav_bar",site_name="Shots",links=[about, try_it],fixed="bottom",inverted=True)
-
 home = dict(name="Home")
 about = dict(name="About")
 info = dict(name="Info",active=True)
@@ -178,5 +173,10 @@ row()
 
 		br 2
 	column(width=3)
+
+about = dict(text="Docs",active=True)
+try_it = dict(text="Give it a Shot", url="try_it")
+
+nav_bar(id="nav_bar",site_name="Shots",links=[about, try_it],fixed="bottom",inverted=True)
 
 js "http://getbootstrap.com/docs-assets/js/holder.js"

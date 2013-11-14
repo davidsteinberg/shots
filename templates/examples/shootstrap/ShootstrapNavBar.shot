@@ -1,4 +1,4 @@
-def new(id=None,site_name="Site Name",links=[],inverted=False,fixed="static"):
+def new(id=None,site_name=None,links=[],inverted=False,fixed="static"):
 	if id:
 		theme = "inverse" if inverted else "default"
 		position = "static-top" if fixed == "static" else ("fixed-top" if fixed == "top" else "fixed-bottom")
@@ -9,11 +9,12 @@ def new(id=None,site_name="Site Name",links=[],inverted=False,fixed="static"):
 					span.sr-only: Toggle navigation
 					for i in range(3):
 						span.icon-bar
-				link.navbar-brand to="#": [[ site_name ]]
+				if site_name:
+					link.navbar-brand to="#": [[ site_name ]]
 		
 			.collapse.navbar-collapse id="[[ id ]]"
 				ul.nav.navbar-nav
 					for link in links:
 						li class="[[ 'active' if link.active ]] [[ 'disabled' if link.disabled ]]"
-							link to="[[ link.url if link.url else (link.name|lower|replace(' ','_')) ]]": [[ link.name ]]			
+							link to="[[ link.url if link.url else (link.text|lower|replace(' ','_')) ]]": [[ link.text ]]
 				return

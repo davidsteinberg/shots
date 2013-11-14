@@ -1,7 +1,0 @@
-def color(name):
-	div css="color: [[ name ]]" | [[ name ]]
-
-colors = ["green","blue","red","yellow","black","gray","orange","purple","pink"]
-for c in colors:
-	color(c)
-

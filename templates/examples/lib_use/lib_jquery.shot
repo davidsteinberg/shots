@@ -1,9 +1,9 @@
-from "boxes" import box_css, box
+from Box import css, new
 
-box_css()
+css()
 
 for i in range(100):
-	box(side=20)
+	new(size=20)
 		: [[ i ]]
 	
 use "jquery"

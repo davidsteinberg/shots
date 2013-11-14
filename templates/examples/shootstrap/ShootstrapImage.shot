@@ -1,0 +1,18 @@
+def new(src=None,alt=None,style=None,height=None,width=None,max=200,holder=None):
+	if src:
+		src = "src='" + src + "'"
+	else:
+		holder = holder if holder else max
+		src = "data-src='holder.js/" + (width if width else holder)|string + "x" + (height if height else holder)|string + "'"
+	
+	if height:
+		height = "height: " + height|string + "px;"
+	else:
+		height = "max-height: " + max|string + "px;"
+	
+	if width:
+		width = "width: " + width|string + "px;"
+	else:
+		width = "max-width: " + max|string + "px;"
+	
+	img [[ src ]] [[ "alt='"+alt+"'" if alt ]] [[ "class='img-"+style+"'" if style ]] style="[[ height ]] [[ width ]]"

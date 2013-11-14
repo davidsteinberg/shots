@@ -1,6 +1,6 @@
 def foo():
-	name = "david"
-	age = 25
+	name = "chuck"
+	age = 23
 	return name, age
 
 foo() => n, a
